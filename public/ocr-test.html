@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+    <h2>OCR Test</h2>
+
+    <input type="file" id="document" />
+
+    <button onclick="uploadFile()">
+        Read Text
+    </button>
+
+    <pre id="result"></pre>
+
+    <script>
+
+        async function uploadFile() {
+
+            const file =
+                document
+                    .getElementById('document')
+                    .files[0];
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                'document',
+                file
+            );
+
+            const response =
+                await fetch(
+                    'http://localhost:3000/ocr/upload',
+                    {
+                        method: 'POST',
+                        body: formData
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            document
+                .getElementById('result')
+                .innerText =
+
+                `
+Mobile: ${data.mobile}
+
+Aadhaar: ${data.aadhaar}
+
+--------------------
+
+${data.text}
+`;
+        }
+
+    </script>
+
+</body>
+
+</html>

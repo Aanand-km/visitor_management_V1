@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Visitor Logs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f7;
+            padding: 28px;
+            color: #212529;
+        }
+
+        h1 {
+            margin-bottom: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        th, td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e9ecef;
+            text-align: left;
+        }
+
+        th {
+            background: #212529;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-approved {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            color: #c82333;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: #fd7e14;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Visitor Logs</h1>
+    <p class="nav-link"><a href="employee-dashboard.html">Back to Dashboard</a></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Meeting With</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody id="visitorBody"></tbody>
+    </table>
+
+    <script>
+        async function loadVisitorLogs() {
+            const response = await fetch('http://localhost:3000/visitor/all');
+            const visitors = await response.json();
+            const body = document.getElementById('visitorBody');
+            body.innerHTML = '';
+
+            visitors.forEach(visitor => {
+                const statusClass = visitor.status === 'approved'
+                    ? 'status-approved'
+                    : visitor.status === 'rejected'
+                        ? 'status-rejected'
+                        : 'status-pending';
+
+                body.innerHTML += `
+                    <tr>
+                        <td>${visitor.name}</td>
+                        <td>${visitor.phone}</td>
+                        <td>${visitor.employee_name || 'N/A'}</td>
+                        <td class="${statusClass}">${visitor.status}</td>
+                        <td>${new Date(visitor.created_at).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        loadVisitorLogs();
+    </script>
+</body>
+</html>

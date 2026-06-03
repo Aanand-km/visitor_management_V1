@@ -1,0 +1,212 @@
+const express = require('express');
+const router = express.Router();
+const fs = require('fs');
+const QRCode = require('qrcode');
+
+const db = require('../db/db');
+
+console.log('Visitor routes loaded with file logging support');
+
+router.post('/register', (req, res) => {
+const {
+    name,
+    phone,
+    email,
+    aadhaar_number,
+    purpose,
+    employee_id
+} = req.body;
+
+    console.log(req.body);
+    console.log("Aadhaar:", aadhaar_number);
+    fs.appendFileSync('./logs.txt', `\n${new Date().toISOString()} - req.body: ${JSON.stringify(req.body)}\nAadhaar: ${aadhaar_number}\n`);
+
+    const sql = `
+        INSERT INTO visitors
+        (name, phone, email, aadhaar_number, purpose, employee_id, status)
+        VALUES (?, ?, ?, ?, ?, ?, 'pending')
+    `;
+
+    db.query(
+        sql,
+        [name, phone, email, aadhaar_number, purpose, employee_id],
+        (err, result) => {
+
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    message: 'Database Error'
+                });
+            }
+
+            res.json({
+                message: 'Visitor Registered Successfully',
+                visitorId: result.insertId
+            });
+        }
+    );
+});
+
+router.get('/pending', (req, res) => {
+
+    const sql = `
+        SELECT
+            visitors.id,
+            visitors.name,
+            visitors.phone,
+            visitors.purpose,
+            employees.name AS employee_name
+        FROM visitors
+        LEFT JOIN employees
+        ON visitors.employee_id = employees.id
+        WHERE visitors.status = 'pending'
+    `;
+
+    db.query(sql, (err, result) => {
+
+        if (err) {
+            return res.status(500).json({
+                message: 'Database Error'
+            });
+        }
+
+        res.json(result);
+    });
+
+});
+
+router.put('/approve/:id', async (req, res) => {
+
+    const visitorId = req.params.id;
+
+    const passId =
+        'PASS-' + Date.now();
+
+    const qrText =
+        `Visitor ID: ${visitorId}
+Pass ID: ${passId}`;
+
+    const qrCode =
+        await QRCode.toDataURL(qrText);
+
+    const sql = `
+        UPDATE visitors
+        SET
+            status = 'approved',
+            pass_id = ?,
+            qr_code = ?
+        WHERE id = ?
+    `;
+
+    db.query(
+        sql,
+        [passId, qrCode, visitorId],
+        (err, result) => {
+
+            if (err) {
+                console.error(err);
+
+                return res.status(500).json({
+                    message: 'Database Error'
+                });
+            }
+
+            res.json({
+                message: 'Visitor Approved',
+                visitorId,
+                passId
+            });
+        }
+    );
+});
+
+router.get('/all', (req, res) => {
+
+    const sql = `
+        SELECT
+            visitors.id,
+            visitors.name,
+            visitors.phone,
+            visitors.status,
+            visitors.created_at,
+            employees.name AS employee_name
+        FROM visitors
+        LEFT JOIN employees
+        ON visitors.employee_id = employees.id
+        ORDER BY visitors.created_at DESC
+    `;
+
+    db.query(sql, (err, result) => {
+
+        if (err) {
+            return res.status(500).json({
+                message: 'Database Error'
+            });
+        }
+
+        res.json(result);
+    });
+});
+
+router.put('/reject/:id', (req, res) => {
+
+    const visitorId = req.params.id;
+
+    const sql = `
+        UPDATE visitors
+        SET status = 'rejected'
+        WHERE id = ?
+    `;
+
+    db.query(sql, [visitorId], (err, result) => {
+
+        if (err) {
+            console.error(err);
+            return res.status(500).json({
+                message: 'Database Error'
+            });
+        }
+
+        res.json({
+            message: 'Visitor Rejected'
+        });
+    });
+});
+
+router.get('/pass/:id', (req, res) => {
+
+    const visitorId = req.params.id;
+
+    const sql = `
+        SELECT
+            visitors.id,
+            visitors.name,
+            visitors.phone,
+            visitors.aadhaar_number,
+            visitors.status,
+            visitors.pass_id,
+            visitors.qr_code,
+            employees.name AS employee_name
+        FROM visitors
+        LEFT JOIN employees
+        ON visitors.employee_id = employees.id
+        WHERE visitors.id = ?
+    `;
+
+    db.query(
+        sql,
+        [visitorId],
+        (err, result) => {
+
+            if (err) {
+                return res.status(500).json({
+                    message: 'Database Error'
+                });
+            }
+
+            res.json(result[0]);
+        }
+    );
+});
+
+module.exports = router;

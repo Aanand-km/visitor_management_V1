@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Visitor Registration</title>
+    <style>
+        :root {
+            --surface: #ffffff;
+            --surface-alt: #f8f9fb;
+            --bg: #eef2f7;
+            --primary: #c62828;
+            --primary-dark: #a91e1e;
+            --border: #d8d8d8;
+            --text: #1f2937;
+            --muted: #6b7280;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--text);
+            background: radial-gradient(circle at top, rgba(198, 40, 40, 0.07), transparent 35%), var(--bg);
+        }
+
+        header {
+            /*background: linear-gradient(135deg, var(--primary), var(--primary-dark));*/
+            background: white;
+             color:black; /* Commented out to allow logo colors to show */
+            padding: 28px 20px;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(23, 23, 23, 0.08);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: clamp(1.75rem, 2.2vw, 2.5rem);
+            letter-spacing: 0.02em;
+        }
+
+        header img.logo {
+            height: 56px;
+            width: auto;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 12px;
+            border-radius: 6px;
+            object-fit: contain;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 32px 16px 48px;
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 24px;
+            box-shadow: 0 16px 50px rgba(15, 23, 42, 0.08);
+            padding: 28px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .panel-title {
+            margin-top: 0;
+            margin-bottom: 1.15rem;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            color: #111827;
+        }
+
+        .section-heading {
+            font-size: 1.15rem;
+            margin-bottom: 0.9rem;
+            color: #111827;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.45rem;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: #fff;
+            color: var(--text);
+            font-size: 0.98rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: rgba(198, 40, 40, 0.55);
+            box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.08);
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .button-row,
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 0.3rem;
+        }
+
+        .btn {
+            appearance: none;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+            padding: 14px 22px;
+            min-width: 160px;
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(198, 40, 40, 0.16);
+        }
+
+        .btn:hover,
+        .btn:focus-visible {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #334155;
+            box-shadow: 0 12px 24px rgba(51, 65, 85, 0.18);
+        }
+
+        .btn-secondary:hover,
+        .btn-secondary:focus-visible {
+            background: #1f2937;
+        }
+
+        .status-box {
+            background: var(--surface-alt);
+            padding: 18px 20px;
+            border-left: 5px solid var(--primary);
+            border-radius: 18px;
+            margin-bottom: 18px;
+            color: #111827;
+            line-height: 1.55;
+        }
+
+        .status-box strong {
+            color: #111827;
+        }
+
+        .progress-step {
+            background: #fff;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+            border-radius: 16px;
+            border-left: 4px solid #cbd5e1;
+            font-weight: 700;
+            color: #1f2937;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+        }
+
+        .aadhaar-card {
+            display: none;
+            background: #fff;
+            padding: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 18px;
+            margin-top: 18px;
+        }
+
+        .aadhaar-preview {
+            width: 100%;
+            border-radius: 16px;
+            margin-bottom: 14px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .message,
+        .hint,
+        .panel-copy {
+            margin: 0;
+            font-size: 0.97rem;
+            color: var(--muted);
+            line-height: 1.75;
+        }
+
+        #message {
+            margin-top: 1.4rem;
+            font-size: 1rem;
+        }
+
+        .highlight {
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 960px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 24px 16px;
+            }
+
+            .card {
+                padding: 22px;
+                border-radius: 20px;
+            }
+
+            .btn,
+            .btn-secondary {
+                width: 100%;
+            }
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .logo {
+            height: 60px;
+            width: auto;
+            padding: 5px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+
+        <div class="header-content">
+
+            <img src="/images/logo.png" alt="GROZ Logo" class="logo">
+
+            <h1>
+                Visitor Management System
+            </h1>
+
+        </div>
+
+    </header>
+
+    <div class="container">
+
+        <div class="card left-panel">
+
+            <h2 class="panel-title">Visitor Registration</h2>
+
+            <form id="visitorForm">
+                <div class="form-group">
+                    <label for="name">Visitor Name</label>
+                    <input type="text" id="name" placeholder="Enter name" required>
+                </div>
+
+                <div class="section-heading">Aadhaar OCR</div>
+
+                <div class="form-group">
+                    <label for="aadhaarImage">Upload Aadhaar Image</label>
+                    <input type="file" id="aadhaarImage" accept="image/*">
+                </div>
+
+                <div class="button-row">
+                    <button class="btn-secondary" type="button" onclick="readAadhaar(event)">Read Aadhaar</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="aadhaar">Aadhaar Number</label>
+                    <input type="text" id="aadhaar" placeholder="Aadhaar number">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="text" id="phone" placeholder="Enter phone number" required>
+                </div>
+
+                <div class="button-row">
+                    <button class="btn-secondary" type="button" onclick="sendOTP()">Send OTP</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="otp">OTP Code</label>
+                    <input type="text" id="otp" placeholder="Enter OTP">
+                </div>
+
+                <div class="button-row">
+                    <button class="btn-secondary" type="button" onclick="verifyOTP()">Verify OTP</button>
+                </div>
+
+                <p class="message hint" id="otpMessage"></p>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="Enter email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="purpose">Purpose of Visit</label>
+                    <textarea id="purpose" placeholder="Purpose of visit" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="employee">Host Employee</label>
+                    <select id="employee">
+                        <option value="">Select Employee</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn" type="submit">Register Visitor</button>
+                </div>
+            </form>
+
+            <p id="message"></p>
+
+        </div>
+
+        <div class="card right-panel">
+
+            <div class="status-box">
+                <p class="panel-copy">👋 Welcome to GROZ Tools. Please complete all verification steps before
+                    registration.</p>
+            </div>
+            <h2 class="panel-title">Verification Status</h2>
+            <h2 class="panel-title">Aadhaar Preview</h2>
+
+            <div id="aadhaarCard" class="aadhaar-card">
+                <img id="aadhaarPreview" class="aadhaar-preview" alt="Aadhaar preview">
+
+                <p>
+                    <strong>Aadhaar:</strong>
+                    <span id="aadhaarDisplay"></span>
+                </p>
+
+                <p>
+                    <strong>Mobile:</strong>
+                    <span id="mobileDisplay"></span>
+                </p>
+            </div>
+
+            <div class="status-box" id="ocrStatus">
+                📄 OCR Status : Pending
+            </div>
+
+            <div class="status-box" id="otpStatus">
+                🔐 OTP Status : Pending
+            </div>
+
+            <div class="status-box">
+                👤 Visitor Type : Guest
+            </div>
+
+            <div class="status-box">
+                🏢 Company : GROZ Tools
+            </div>
+            <h3>Registration Progress</h3>
+
+            <div class="progress-step" id="step1">
+                1️⃣ Aadhaar Verification
+            </div>
+
+            <div class="progress-step" id="step2">
+                2️⃣ OTP Verification
+            </div>
+
+            <div class="progress-step" id="step3">
+                3️⃣ Visitor Registration
+            </div>
+
+            <div class="status-box hidden" id="successCard">
+                ✅ Visitor Registered Successfully
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        let otpVerified = false;
+        async function loadEmployees() {
+
+            const response =
+                await fetch('http://localhost:3000/employees');
+
+            const employees =
+                await response.json();
+
+            const dropdown =
+                document.getElementById('employee');
+
+            employees.forEach(emp => {
+
+                const option =
+                    document.createElement('option');
+
+                option.value = emp.id;
+
+                option.textContent =
+                    `${emp.name} (${emp.department})`;
+
+                dropdown.appendChild(option);
+
+            });
+
+        }
+
+        loadEmployees();
+        document.getElementById('visitorForm').addEventListener('submit', async function (e) {
+
+            e.preventDefault();
+
+            const visitorData = {
+
+                name: document.getElementById('name').value,
+
+                phone: document.getElementById('phone').value,
+
+                email: document.getElementById('email').value,
+
+                aadhaar_number: document.getElementById('aadhaar').value,
+
+                purpose: document.getElementById('purpose').value,
+
+                employee_id: document.getElementById('employee').value,
+            };
+            console.log("OTP Verified:", otpVerified);
+            if (!otpVerified) {
+
+                alert('Please verify OTP first');
+
+                return;
+            }
+
+            const response = await fetch(
+                'http://localhost:3000/visitor/register',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(visitorData)
+                }
+            );
+
+            const data = await response.json();
+
+            document.getElementById('step3')
+                .style.borderLeft = '4px solid green';
+
+            document.getElementById('step3')
+                .innerHTML = '✅ 3️⃣ Visitor Registration';
+
+            document.getElementById('successCard')
+                .style.display = 'block';
+
+            document.getElementById('message')
+                .innerText = data.message;
+        });
+
+        async function sendOTP() {
+
+            const phone =
+                document.getElementById('phone').value;
+
+            if (!phone) {
+
+                alert('Enter phone number first');
+
+                return;
+            }
+
+            const response =
+                await fetch(
+                    'http://localhost:3000/otp/send',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':
+                                'application/json'
+                        },
+                        body: JSON.stringify({
+                            phone
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            alert(data.message);
+        }
+
+        async function verifyOTP() {
+
+            const phone =
+                document.getElementById('phone').value;
+
+            const otp =
+                document.getElementById('otp').value;
+
+            const response =
+                await fetch(
+                    'http://localhost:3000/otp/verify',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':
+                                'application/json'
+                        },
+                        body: JSON.stringify({
+                            phone,
+                            otp
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (data.verified) {
+                otpVerified = true;
+                document.getElementById('otpStatus')
+                    .innerHTML = '✅ OTP Status : Verified';
+
+                document.getElementById('step2')
+                    .style.borderLeft =
+                    '4px solid green';
+                document.getElementById('step2')
+                    .innerHTML = '✅ 2️⃣ OTP Verification';
+                document
+                    .getElementById('otpMessage')
+                    .innerText =
+                    'OTP Verified Successfully';
+
+            } else {
+
+                document
+                    .getElementById('otpMessage')
+                    .innerText =
+                    'Invalid OTP';
+            }
+        }
+
+        async function readAadhaar(event) {
+
+            const btn = event.target;
+            btn.innerText = 'Reading...';
+            btn.disabled = true;
+
+            const statusEl = document.getElementById('ocrStatus');
+            const aadhaarCard = document.getElementById('aadhaarCard');
+            statusEl.innerHTML = '⏳ OCR Processing...';
+            aadhaarCard.style.display = 'none';
+
+            try {
+                const file = document.getElementById('aadhaarImage').files[0];
+                if (!file) {
+                    statusEl.innerHTML = '❌ Please select an Aadhaar image first.';
+                    return;
+                }
+
+                const imageURL = URL.createObjectURL(file);
+                document.getElementById('aadhaarPreview').src = imageURL;
+
+                const formData = new FormData();
+                formData.append('document', file);
+
+                const response = await fetch('http://localhost:3000/ocr/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`OCR service error: ${errorText}`);
+                }
+
+                const data = await response.json();
+                const noDataFound = !data.aadhaar && !data.mobile;
+
+                if (data.mobile) {
+                    document.getElementById('phone').value = data.mobile;
+                }
+                document.getElementById('mobileDisplay').innerText = data.mobile || 'Not found';
+
+                if (data.aadhaar) {
+                    document.getElementById('aadhaar').value = data.aadhaar;
+                }
+                document.getElementById('aadhaarDisplay').innerText = data.aadhaar || 'Not found';
+
+                document.getElementById('step1').style.borderLeft = '4px solid green';
+                document.getElementById('step1').innerHTML = '✅ 1️⃣ Aadhaar Verification';
+                aadhaarCard.style.display = 'block';
+                statusEl.innerHTML = noDataFound
+                    ? '⚠ OCR completed, but Aadhaar/mobile not found.'
+                    : '✅ OCR Completed';
+            } catch (error) {
+                console.error('Error reading Aadhaar:', error);
+                statusEl.innerHTML = '❌ OCR failed. Try again with a clearer image.';
+            } finally {
+                btn.innerText = 'Read Aadhaar';
+                btn.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+
+</html>

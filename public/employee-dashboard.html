@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Employee Dashboard</title>
+</head>
+
+<body>
+
+    <h1>Pending Visitor Requests</h1>
+
+    <p><a href="visitor-logs.html">View Visitor Logs</a></p>
+
+    <div id="visitorList"></div>
+
+    <script>
+
+        async function loadVisitors() {
+
+            const response =
+                await fetch('http://localhost:3000/visitor/pending');
+
+            const visitors =
+                await response.json();
+
+            const container =
+                document.getElementById('visitorList');
+
+            container.innerHTML = '';
+
+            visitors.forEach(visitor => {
+
+                container.innerHTML += `
+            <div style="border:1px solid black;
+                        padding:10px;
+                        margin:10px;">
+
+                <h3>${visitor.name}</h3>
+
+                <p>
+                    Purpose:
+                    ${visitor.purpose}
+                </p>
+
+                <p>
+                    Employee:
+                    ${visitor.employee_name}
+                </p>
+
+               <button onclick="approveVisitor(${visitor.id})">
+    Approve
+</button>
+
+<button onclick="rejectVisitor(${visitor.id})">
+    Reject
+</button>
+
+            </div>
+        `;
+            });
+
+        }
+
+        loadVisitors();
+        async function approveVisitor(id) {
+
+    const response = await fetch(
+        `http://localhost:3000/visitor/approve/${id}`,
+        {
+            method: 'PUT'
+        }
+    );
+
+    const result = await response.json();
+
+    if (result.passId) {
+        window.open(
+            `visitor-pass.html?id=${result.visitorId}`
+        );
+    }
+
+    loadVisitors();
+}
+
+async function rejectVisitor(id) {
+
+    await fetch(
+        `http://localhost:3000/visitor/reject/${id}`,
+        {
+            method: 'PUT'
+        }
+    );
+
+    loadVisitors();
+}
+
+    </script>
+
+</body>
+
+</html>
