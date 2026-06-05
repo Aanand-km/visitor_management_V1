@@ -3,6 +3,7 @@
 
 <head>
     <title>Visitor Registration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
             --surface: #ffffff;
@@ -236,19 +237,34 @@
             }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 640px) {
             header {
-                padding: 24px 16px;
+                padding: 20px 14px;
+            }
+
+            .container {
+                padding: 20px 14px 30px;
+                gap: 20px;
             }
 
             .card {
-                padding: 22px;
-                border-radius: 20px;
+                padding: 20px;
+                border-radius: 18px;
             }
 
             .btn,
             .btn-secondary {
                 width: 100%;
+            }
+
+            .button-row,
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .status-box,
+            .progress-step {
+                padding: 14px 16px;
             }
         }
 
@@ -413,7 +429,7 @@
         async function loadEmployees() {
 
             const response =
-                await fetch('http://localhost:3000/employees');
+                await fetch('/employees');
 
             const employees =
                 await response.json();
@@ -465,7 +481,7 @@
             }
 
             const response = await fetch(
-                'http://localhost:3000/visitor/register',
+                '/visitor/register',
                 {
                     method: 'POST',
                     headers: {
@@ -504,7 +520,7 @@
 
             const response =
                 await fetch(
-                    'http://localhost:3000/otp/send',
+                    '/otp/send',
                     {
                         method: 'POST',
                         headers: {
@@ -533,7 +549,7 @@
 
             const response =
                 await fetch(
-                    'http://localhost:3000/otp/verify',
+                    '/otp/verify',
                     {
                         method: 'POST',
                         headers: {
