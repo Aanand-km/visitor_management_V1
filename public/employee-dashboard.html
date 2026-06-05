@@ -3,96 +3,491 @@
 
 <head>
     <title>Employee Dashboard</title>
+
+    <style>
+        :root {
+            --surface: #ffffff;
+            --surface-alt: #f8f9fb;
+            --bg: #eef2f7;
+            --primary: #c62828;
+            --primary-dark: #a91e1e;
+            --success: #059669;
+            --success-dark: #047857;
+            --border: #d8d8d8;
+            --text: #1f2937;
+            --muted: #6b7280;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            background: radial-gradient(circle at top, rgba(198, 40, 40, 0.07), transparent 35%), var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            /*background: linear-gradient(135deg, var(--primary), var(--primary-dark));*/
+            background-color: black;
+            color: white;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 6px 18px rgba(23, 23, 23, 0.08);
+            border-bottom: 5px solid #db641a;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .logo {
+            height: 56px;
+            width: auto;
+            border-radius: 6px;
+            object-fit: contain;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .employee-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 18px;
+            border-radius: 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .employee-badge:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .badge-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .dashboard-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .dashboard-title {
+            margin: 0 0 2rem 0;
+            font-size: 2rem;
+            color: #111827;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 28px;
+            border-radius: 24px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            box-shadow: 0 16px 50px rgba(15, 23, 42, 0.08);
+            text-align: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 1.2rem 0;
+            font-size: 1rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(15, 23, 42, 0.08);
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #111827;
+        }
+
+        .section-header a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .section-header a:hover {
+            color: var(--primary-dark);
+        }
+
+        #visitorList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 24px;
+        }
+
+        .visitor-card {
+            background: var(--surface);
+            padding: 28px;
+            border-radius: 24px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            box-shadow: 0 16px 50px rgba(15, 23, 42, 0.08);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .visitor-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .visitor-card h3 {
+            margin: 0 0 1.2rem 0;
+            font-size: 1.4rem;
+            color: var(--primary);
+            letter-spacing: -0.02em;
+        }
+
+        .info {
+            margin: 0.8rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.98rem;
+        }
+
+        .info-label {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: var(--text);
+        }
+
+        .btn-row {
+            margin-top: 1.8rem;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .approve-btn,
+        .reject-btn {
+            flex: 1;
+            min-width: 140px;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.98rem;
+            transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .approve-btn {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 12px 24px rgba(5, 150, 105, 0.16);
+        }
+
+        .approve-btn:hover,
+        .approve-btn:focus-visible {
+            background: var(--success-dark);
+            transform: translateY(-1px);
+        }
+
+        .reject-btn {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 12px 24px rgba(198, 40, 40, 0.16);
+        }
+
+        .reject-btn:hover,
+        .reject-btn:focus-visible {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--muted);
+        }
+
+        @media (max-width: 960px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            #visitorList {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header {
+                padding: 20px 16px;
+            }
+
+            header h1 {
+                font-size: 1.4rem;
+            }
+
+            .dashboard-container {
+                padding: 24px 16px;
+            }
+
+            .visitor-card {
+                padding: 20px;
+            }
+
+            .approve-btn,
+            .reject-btn {
+                width: 100%;
+            }
+
+            .btn-row {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <h1>Pending Visitor Requests</h1>
+    <header>
+        <div class="header-left">
+            <img src="images/logo.png" class="logo" alt="GROZ Logo">
+            <h1>Employee Dashboard</h1>
+        </div>
+        <div class="header-right">
+            <div class="employee-badge">
+                <span class="badge-icon">👤</span>
+                <span id="employeeName">Loading...</span>
+            </div>
+        </div>
+    </header>
 
-    <p><a href="visitor-logs.html">View Visitor Logs</a></p>
+    <div class="dashboard-container">
+        <h2 class="dashboard-title">Visitor Requests</h2>
 
-    <div id="visitorList"></div>
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Pending Requests</h3>
+                <div class="stat-number" id="pendingCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Today's Approvals</h3>
+                <div class="stat-number" id="approvalCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>System Status</h3>
+                <div class="stat-number" id="systemStatus">✅</div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>Pending Visitors</h2>
+            <a href="visitor-logs.html">View All Logs →</a>
+        </div>
+
+        <div id="visitorList"></div>
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <p>No pending visitor requests at the moment.</p>
+        </div>
+    </div>
 
     <script>
 
+        // Load employee name on page load
+        async function loadEmployeeName() {
+            try {
+                // First, try to get from localStorage
+                const employeeNameFromStorage = localStorage.getItem('employeeName');
+                if (employeeNameFromStorage) {
+                    document.getElementById('employeeName').innerText = employeeNameFromStorage;
+                    return;
+                }
+
+                // If not in localStorage, try to fetch from backend
+                const response = await fetch('http://localhost:3000/employee/me');
+                if (response.ok) {
+                    const employee = await response.json();
+                    const employeeName = employee.name || 'Employee';
+                    document.getElementById('employeeName').innerText = employeeName;
+                    localStorage.setItem('employeeName', employeeName);
+                } else {
+                    document.getElementById('employeeName').innerText = 'Employee';
+                }
+            } catch (error) {
+                console.error('Error loading employee name:', error);
+                document.getElementById('employeeName').innerText = 'Employee';
+            }
+        }
+
+        // Load employee name when page loads
+        loadEmployeeName();
+
         async function loadVisitors() {
+            try {
+                const response = await fetch('http://localhost:3000/visitor/pending');
+                const visitors = await response.json();
+
+                document.getElementById('pendingCount').innerText = visitors.length;
+
+                const container = document.getElementById('visitorList');
+                const emptyState = document.getElementById('emptyState');
+
+                if (visitors.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                container.innerHTML = '';
+
+                visitors.forEach(visitor => {
+                    const card = document.createElement('div');
+                    card.className = 'visitor-card';
+                    card.innerHTML = `
+                        <h3>${escapeHtml(visitor.name)}</h3>
+                        <div class="info">
+                            <span class="info-label">Purpose</span>
+                            <span class="info-value">${escapeHtml(visitor.purpose)}</span>
+                        </div>
+                        <div class="info">
+                            <span class="info-label">Host Employee</span>
+                            <span class="info-value">${escapeHtml(visitor.employee_name)}</span>
+                        </div>
+                        <div class="info">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">${escapeHtml(visitor.phone)}</span>
+                        </div>
+                        <div class="btn-row">
+                            <button class="approve-btn" onclick="approveVisitor(${visitor.id})">✓ Approve</button>
+                            <button class="reject-btn" onclick="rejectVisitor(${visitor.id})">✕ Reject</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading visitors:', error);
+                document.getElementById('visitorList').innerHTML = '<p style="color: red;">Error loading visitors. Please try again.</p>';
+            }
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+        async function loadApprovalCount() {
 
             const response =
-                await fetch('http://localhost:3000/visitor/pending');
+                await fetch(
+                    'http://localhost:3000/visitor/approved/count'
+                );
 
-            const visitors =
+            const data =
                 await response.json();
 
-            const container =
-                document.getElementById('visitorList');
-
-            container.innerHTML = '';
-
-            visitors.forEach(visitor => {
-
-                container.innerHTML += `
-            <div style="border:1px solid black;
-                        padding:10px;
-                        margin:10px;">
-
-                <h3>${visitor.name}</h3>
-
-                <p>
-                    Purpose:
-                    ${visitor.purpose}
-                </p>
-
-                <p>
-                    Employee:
-                    ${visitor.employee_name}
-                </p>
-
-               <button onclick="approveVisitor(${visitor.id})">
-    Approve
-</button>
-
-<button onclick="rejectVisitor(${visitor.id})">
-    Reject
-</button>
-
-            </div>
-        `;
-            });
-
+            document.getElementById(
+                'approvalCount'
+            ).innerText =
+                data.total;
         }
 
         loadVisitors();
+        loadApprovalCount();
+
         async function approveVisitor(id) {
-
-    const response = await fetch(
-        `http://localhost:3000/visitor/approve/${id}`,
-        {
-            method: 'PUT'
+            try {
+                const response = await fetch(`http://localhost:3000/visitor/approve/${id}`, {
+                    method: 'PUT'
+                });
+                const result = await response.json();
+                if (result.passId) {
+                    window.open(`visitor-pass.html?id=${result.visitorId}`);
+                }
+                loadVisitors();
+            } catch (error) {
+                console.error('Error approving visitor:', error);
+                alert('Error approving visitor. Please try again.');
+            }
         }
-    );
 
-    const result = await response.json();
-
-    if (result.passId) {
-        window.open(
-            `visitor-pass.html?id=${result.visitorId}`
-        );
-    }
-
-    loadVisitors();
-}
-
-async function rejectVisitor(id) {
-
-    await fetch(
-        `http://localhost:3000/visitor/reject/${id}`,
-        {
-            method: 'PUT'
+        async function rejectVisitor(id) {
+            if (confirm('Are you sure you want to reject this visitor?')) {
+                try {
+                    await fetch(`http://localhost:3000/visitor/reject/${id}`, {
+                        method: 'PUT'
+                    });
+                    loadVisitors();
+                } catch (error) {
+                    console.error('Error rejecting visitor:', error);
+                    alert('Error rejecting visitor. Please try again.');
+                }
+            }
         }
-    );
-
-    loadVisitors();
-}
 
     </script>
 

@@ -29,11 +29,13 @@
 
         header {
             /*background: linear-gradient(135deg, var(--primary), var(--primary-dark));*/
-            background: white;
-             color:black; /* Commented out to allow logo colors to show */
+            background: black;
+            color: white;
+            /* Commented out to allow logo colors to show */
             padding: 28px 20px;
             text-align: center;
             box-shadow: 0 6px 18px rgba(23, 23, 23, 0.08);
+            border-bottom:5px solid #db641a;
         }
 
         header h1 {
@@ -142,7 +144,7 @@
             transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
             padding: 14px 22px;
             min-width: 160px;
-            background: var(--primary);
+            background: #db641a;
             color: #fff;
             box-shadow: 0 12px 24px rgba(198, 40, 40, 0.16);
         }
@@ -253,32 +255,24 @@
         .header-content {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
+            gap: 18px;
         }
 
         .logo {
-            height: 60px;
+            height: 56px;
             width: auto;
-            padding: 5px;
-            border-radius: 8px;
+            border-radius: 6px;
+            object-fit: contain;
         }
     </style>
 </head>
 
 <body>
     <header>
-
         <div class="header-content">
-
             <img src="/images/logo.png" alt="GROZ Logo" class="logo">
-
-            <h1>
-                Visitor Management System
-            </h1>
-
+            <h1>Visitor Management System</h1>
         </div>
-
     </header>
 
     <div class="container">
@@ -361,9 +355,7 @@
                 <p class="panel-copy">👋 Welcome to GROZ Tools. Please complete all verification steps before
                     registration.</p>
             </div>
-            <h2 class="panel-title">Verification Status</h2>
             <h2 class="panel-title">Aadhaar Preview</h2>
-
             <div id="aadhaarCard" class="aadhaar-card">
                 <img id="aadhaarPreview" class="aadhaar-preview" alt="Aadhaar preview">
 
@@ -377,7 +369,7 @@
                     <span id="mobileDisplay"></span>
                 </p>
             </div>
-
+            <h2 class="panel-title">Verification Status</h2>
             <div class="status-box" id="ocrStatus">
                 📄 OCR Status : Pending
             </div>
@@ -390,9 +382,9 @@
                 👤 Visitor Type : Guest
             </div>
 
-            <div class="status-box">
+            <!-- <div class="status-box">
                 🏢 Company : GROZ Tools
-            </div>
+            </div> -->
             <h3>Registration Progress</h3>
 
             <div class="progress-step" id="step1">

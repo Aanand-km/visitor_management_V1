@@ -21,7 +21,7 @@ router.post(
                     'eng'
                 );
 
-            console.log(result.data.text);
+           /* console.log(result.data.text);*/
 
             const text = result.data.text;
 
@@ -32,13 +32,13 @@ router.post(
                 text.match(/\b\d{4}\s?\d{4}\s?\d{4}\b/);
 
             res.json({
-                text,
+                /*text,*/
                 mobile:
                     mobileMatch
                         ? mobileMatch[0]
                         : null,
                 aadhaar:
-                    aadhaarMatch    
+                    aadhaarMatch
                         ? aadhaarMatch[0]
                         : null
             });

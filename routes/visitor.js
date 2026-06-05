@@ -8,14 +8,14 @@ const db = require('../db/db');
 console.log('Visitor routes loaded with file logging support');
 
 router.post('/register', (req, res) => {
-const {
-    name,
-    phone,
-    email,
-    aadhaar_number,
-    purpose,
-    employee_id
-} = req.body;
+    const {
+        name,
+        phone,
+        email,
+        aadhaar_number,
+        purpose,
+        employee_id
+    } = req.body;
 
     console.log(req.body);
     console.log("Aadhaar:", aadhaar_number);
@@ -61,7 +61,7 @@ router.get('/pending', (req, res) => {
         ON visitors.employee_id = employees.id
         WHERE visitors.status = 'pending'
     `;
-
+    
     db.query(sql, (err, result) => {
 
         if (err) {
@@ -90,34 +90,35 @@ Pass ID: ${passId}`;
         await QRCode.toDataURL(qrText);
 
     const sql = `
-        UPDATE visitors
-        SET
-            status = 'approved',
-            pass_id = ?,
-            qr_code = ?
-        WHERE id = ?
-    `;
-
-    db.query(
-        sql,
-        [passId, qrCode, visitorId],
-        (err, result) => {
-
-            if (err) {
-                console.error(err);
-
-                return res.status(500).json({
-                    message: 'Database Error'
-                });
-            }
-
-            res.json({
-                message: 'Visitor Approved',
-                visitorId,
-                passId
+    UPDATE visitors
+    SET
+        status = 'approved',
+        pass_id = ?,
+        qr_code = ?,
+        approved_at = NOW()
+    WHERE id = ?
+`;
+console.log("Approving Visitor:", visitorId);
+console.log("Generated Pass:", passId);
+db.query(
+    sql,
+    [passId, qrCode, visitorId],
+    (err, result) => {
+        console.log("DB Result:", result);
+        if (err) {
+            console.error(err);
+            return res.status(500).json({
+                message: 'Database Error'
             });
         }
-    );
+
+        res.json({
+            message: 'Visitor Approved',
+            visitorId,
+            passId
+        });
+    }
+);
 });
 
 router.get('/all', (req, res) => {
@@ -207,6 +208,27 @@ router.get('/pass/:id', (req, res) => {
             res.json(result[0]);
         }
     );
+});
+
+router.get('/approved/count', (req, res) => {
+
+    const sql = `
+    SELECT COUNT(*) AS total
+    FROM visitors
+    WHERE DATE(approved_at) = CURDATE()
+`;
+
+    db.query(sql, (err, result) => {
+
+        if (err) {
+            return res.status(500).json({
+                message: 'Database Error'
+            });
+        }
+
+        res.json(result[0]);
+    });
+
 });
 
 module.exports = router;
