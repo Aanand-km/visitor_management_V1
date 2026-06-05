@@ -32,15 +32,15 @@
         }
 
         header {
-            /*background: linear-gradient(135deg, var(--primary), var(--primary-dark));*/
             background-color: black;
             color: white;
-            padding: 24px 32px;
+            padding: 18px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 6px 18px rgba(23, 23, 23, 0.08);
             border-bottom: 5px solid #db641a;
+            width: 100%;
         }
 
         header h1 {
@@ -52,14 +52,43 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 12px;
+            flex: 1 1 auto;
+            min-width: 0;
         }
 
         .logo {
-            height: 56px;
+            height: 48px;
             width: auto;
             border-radius: 6px;
             object-fit: contain;
+            flex: 0 0 auto;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+            flex: 1 1 200px;
+            min-width: 0;
+            word-break: break-word;
+        }
+
+        @media (max-width: 640px) {
+            header {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                padding: 14px 12px;
+            }
+
+            .header-left {
+                justify-content: center;
+            }
+
+            header h1 {
+                text-align: center;
+                font-size: 1.2rem;
+            }
         }
 
         .header-right {

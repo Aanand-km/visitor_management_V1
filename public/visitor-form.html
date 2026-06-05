@@ -20,23 +20,27 @@
             box-sizing: border-box;
         }
 
+        html,
         body {
             margin: 0;
             min-height: 100vh;
+            width: 100%;
+        }
+
+        body {
             font-family: Inter, Arial, sans-serif;
             color: var(--text);
             background: radial-gradient(circle at top, rgba(198, 40, 40, 0.07), transparent 35%), var(--bg);
         }
 
         header {
-            /*background: linear-gradient(135deg, var(--primary), var(--primary-dark));*/
+            width: 100%;
             background: black;
             color: white;
-            /* Commented out to allow logo colors to show */
             padding: 28px 20px;
             text-align: center;
             box-shadow: 0 6px 18px rgba(23, 23, 23, 0.08);
-            border-bottom:5px solid #db641a;
+            border-bottom: 5px solid #db641a;
         }
 
         header h1 {
@@ -271,14 +275,48 @@
         .header-content {
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 12px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            max-width: 1180px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 12px;
         }
 
         .logo {
-            height: 56px;
+            height: 48px;
             width: auto;
             border-radius: 6px;
             object-fit: contain;
+            flex: 0 0 auto;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: clamp(1.25rem, 4vw, 1.9rem);
+            letter-spacing: 0.02em;
+            flex: 1 1 220px;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                justify-content: center;
+            }
+
+            .logo {
+                height: 42px;
+            }
+
+            header h1 {
+                flex-basis: 100%;
+                flex-grow: 0;
+                text-align: center;
+                font-size: 1.4rem;
+                margin-top: 6px;
+            }
         }
     </style>
 </head>
