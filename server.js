@@ -19,6 +19,11 @@ app.use('/ocr', ocrRoutes);
 app.use('/employees', employeeRoutes);
 app.use(express.static('public'));
 
+app.use(
+    '/uploads',
+    express.static('uploads')
+);
+
 app.get('/', (req, res) => {
     res.send('Visitor Management API Running');
 });

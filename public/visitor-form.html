@@ -324,7 +324,6 @@
 <body>
     <header>
         <div class="header-content">
-            <img src="/images/logo.png" alt="GROZ Logo" class="logo">
             <h1>Visitor Management System</h1>
         </div>
     </header>
@@ -346,56 +345,81 @@
                 <div class="form-group">
                     <label for="aadhaarImage">Upload Aadhaar Image</label>
                     <input type="file" id="aadhaarImage" accept="image/*">
+
+
+                    <!-- <div class="button-row" style="margin-top:8px">
+                        <button id="takePhotoBtn" class="btn-secondary" type="button" onclick="openAadhaarInput(true)"
+                            disabled>Take Photo</button>
+                        <button id="galleryBtn" class="btn-secondary" type="button" onclick="openAadhaarInput(false)"
+                            disabled>Choose from Gallery</button>
+                    </div> -->
+
+                    <!-- <div style="margin-top:8px">
+                        <small id="selectedFileName" class="panel-copy">No file selected</small>
+                    </div> -->
                 </div>
 
                 <div class="button-row">
-                    <button class="btn-secondary" type="button" onclick="readAadhaar(event)">Read Aadhaar</button>
+                    <button id="readAadhaarBtn" class="btn-secondary" type="button" onclick="readAadhaar(event)">Read
+                        Aadhaar</button>
                 </div>
 
                 <div class="form-group">
                     <label for="aadhaar">Aadhaar Number</label>
-                    <input type="text" id="aadhaar" placeholder="Aadhaar number">
+                    <input type="text" id="aadhaar" placeholder="Aadhaar number" disabled>
                 </div>
 
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
-                    <input type="text" id="phone" placeholder="Enter phone number" required>
+                    <input type="text" id="phone" placeholder="Enter phone number" disabled>
+                </div>
+
+                <div class="form-group">
+
+                    <label for="visitorPhoto">
+                        Visitor Photo
+                    </label>
+
+                    <input type="file" id="visitorPhoto" name="photo" accept="image/*">
+
                 </div>
 
                 <div class="button-row">
-                    <button class="btn-secondary" type="button" onclick="sendOTP()">Send OTP</button>
+                    <button id="sendOtpBtn" class="btn-secondary" type="button" onclick="sendOTP()" disabled>Send
+                        OTP</button>
                 </div>
 
                 <div class="form-group">
                     <label for="otp">OTP Code</label>
-                    <input type="text" id="otp" placeholder="Enter OTP">
+                    <input type="text" id="otp" placeholder="Enter OTP" disabled>
                 </div>
 
                 <div class="button-row">
-                    <button class="btn-secondary" type="button" onclick="verifyOTP()">Verify OTP</button>
+                    <button id="verifyOtpBtn" class="btn-secondary" type="button" onclick="verifyOTP()" disabled>Verify
+                        OTP</button>
                 </div>
 
                 <p class="message hint" id="otpMessage"></p>
 
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" placeholder="Enter email" required>
+                    <input type="email" id="email" placeholder="Enter email" disabled>
                 </div>
 
                 <div class="form-group">
                     <label for="purpose">Purpose of Visit</label>
-                    <textarea id="purpose" placeholder="Purpose of visit" required></textarea>
+                    <textarea id="purpose" placeholder="Purpose of visit" disabled></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="employee">Host Employee</label>
-                    <select id="employee">
+                    <select id="employee" disabled>
                         <option value="">Select Employee</option>
                     </select>
                 </div>
 
                 <div class="form-actions">
-                    <button class="btn" type="submit">Register Visitor</button>
+                    <button id="submitBtn" class="btn" type="submit" disabled>Register Visitor</button>
                 </div>
             </form>
 
@@ -406,8 +430,7 @@
         <div class="card right-panel">
 
             <div class="status-box">
-                <p class="panel-copy">👋 Welcome to GROZ Tools. Please complete all verification steps before
-                    registration.</p>
+                <p class="panel-copy">👋 Welcome. Please complete all verification steps before registration.</p>
             </div>
             <h2 class="panel-title">Aadhaar Preview</h2>
             <div id="aadhaarCard" class="aadhaar-card">
@@ -435,10 +458,6 @@
             <div class="status-box">
                 👤 Visitor Type : Guest
             </div>
-
-            <!-- <div class="status-box">
-                🏢 Company : GROZ Tools
-            </div> -->
             <h3>Registration Progress</h3>
 
             <div class="progress-step" id="step1">
@@ -464,6 +483,68 @@
     <script>
 
         let otpVerified = false;
+        let otpSent = false;
+        let ocrCompleted = false;
+
+        function setDisabled(id, disabled) {
+            const el = document.getElementById(id);
+            if (el) el.disabled = disabled;
+        }
+
+        function updateFieldAvailability() {
+            const nameFilled = document.getElementById('name').value.trim().length > 0;
+            const fileSelected = document.getElementById('aadhaarImage').files.length > 0;
+            const aadhaarFilled = document.getElementById('aadhaar').value.trim().length > 0;
+            const phoneFilled = document.getElementById('phone').value.trim().length >= 10;
+
+            // Keep Aadhaar/Phone enabled once OCR completes, even if name input changes.
+            setDisabled('takePhotoBtn', !nameFilled);
+            setDisabled('galleryBtn', !nameFilled);
+            setDisabled('aadhaar', !(nameFilled || ocrCompleted));
+            setDisabled('phone', !(nameFilled || ocrCompleted));
+            setDisabled('readAadhaarBtn', !(nameFilled && fileSelected));
+
+            // Allow sending OTP when phone has a valid length OR OCR completed and some phone value exists.
+            const allowSendOtp = phoneFilled || (ocrCompleted && document.getElementById('phone').value.trim().length > 0);
+            setDisabled('sendOtpBtn', !allowSendOtp);
+            setDisabled('otp', !otpSent);
+            setDisabled('verifyOtpBtn', !otpSent);
+            setDisabled('employee', !otpVerified);
+            setDisabled('email', !otpVerified);
+            setDisabled('purpose', !otpVerified);
+            const photoPresent = document.getElementById('visitorPhoto').files.length > 0;
+            setDisabled('submitBtn', !(otpVerified && nameFilled && photoPresent));
+
+            if (!otpSent) {
+                setDisabled('otp', true);
+                setDisabled('verifyOtpBtn', true);
+            }
+        }
+
+        function initializeFormState() {
+            updateFieldAvailability();
+            document.getElementById('name').addEventListener('input', updateFieldAvailability);
+            document.getElementById('aadhaar').addEventListener('input', updateFieldAvailability);
+            document.getElementById('phone').addEventListener('input', () => {
+                otpSent = false;
+                document.getElementById('otp').value = '';
+                document.getElementById('otpMessage').innerText = '';
+                updateFieldAvailability();
+            });
+            document.getElementById('aadhaarImage').addEventListener('change', () => {
+                const file = document.getElementById('aadhaarImage').files[0];
+                const selectedFileNameEl = document.getElementById('selectedFileName');
+                if (selectedFileNameEl) {
+                    selectedFileNameEl.innerText = file ? file.name : 'No file selected';
+                }
+                updateFieldAvailability();
+            });
+            document.getElementById('visitorPhoto')
+                .addEventListener('change', updateFieldAvailability);
+        }
+
+        initializeFormState();
+
         async function loadEmployees() {
 
             const response =
@@ -492,56 +573,85 @@
         }
 
         loadEmployees();
+        console.log("SCRIPT LOADED");
         document.getElementById('visitorForm').addEventListener('submit', async function (e) {
+            try {
+                console.log("STEP 1");
+                e.preventDefault();
+                console.log("STEP 2");
 
-            e.preventDefault();
+                const formData = new FormData();
+                console.log("STEP 3");
 
-            const visitorData = {
+                formData.append(
+                    'name',
+                    document.getElementById('name').value
+                );
 
-                name: document.getElementById('name').value,
+                formData.append(
+                    'phone',
+                    document.getElementById('phone').value
+                );
 
-                phone: document.getElementById('phone').value,
+                formData.append(
+                    'email',
+                    document.getElementById('email').value
+                );
 
-                email: document.getElementById('email').value,
+                formData.append(
+                    'aadhaar_number',
+                    document.getElementById('aadhaar').value
+                );
 
-                aadhaar_number: document.getElementById('aadhaar').value,
+                formData.append(
+                    'purpose',
+                    document.getElementById('purpose').value
+                );
 
-                purpose: document.getElementById('purpose').value,
+                formData.append(
+                    'employee_id',
+                    document.getElementById('employee').value
+                );
+                const photo =
+                    document.getElementById('visitorPhoto').files[0];
 
-                employee_id: document.getElementById('employee').value,
-            };
-            console.log("OTP Verified:", otpVerified);
-            if (!otpVerified) {
-
-                alert('Please verify OTP first');
-
-                return;
-            }
-
-            const response = await fetch(
-                '/visitor/register',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(visitorData)
+                if (!photo) {
+                    alert('Please upload visitor photo');
+                    return;
                 }
-            );
 
-            const data = await response.json();
+                formData.append('photo', photo);
+                console.log("STEP 4 - ABOUT TO CALL REGISTER API");
+                console.log("OTP Verified:", otpVerified);
+                if (!otpVerified) {
+                    alert('Please verify OTP first');
+                    return;
+                }
 
-            document.getElementById('step3')
-                .style.borderLeft = '4px solid green';
+                const response = await fetch(
+                    '/visitor/register',
+                    {
+                        method: 'POST',
+                        body: formData
+                    }
+                );
 
-            document.getElementById('step3')
-                .innerHTML = '✅ 3️⃣ Visitor Registration';
+                const data = await response.json();
 
-            document.getElementById('successCard')
-                .style.display = 'block';
+                document.getElementById('step3')
+                    .style.borderLeft = '4px solid green';
 
-            document.getElementById('message')
-                .innerText = data.message;
+                document.getElementById('step3')
+                    .innerHTML = '✅ 3️⃣ Visitor Registration';
+
+                document.getElementById('successCard')
+                    .style.display = 'block';
+
+                document.getElementById('message')
+                    .innerText = data.message;
+            } catch (error) {
+                console.error('REGISTER ERROR:', error);
+            }
         });
 
         async function sendOTP() {
@@ -574,6 +684,15 @@
             const data =
                 await response.json();
 
+            if (response.ok && data.message === 'OTP Sent') {
+                otpSent = true;
+                document.getElementById('otp').disabled = false;
+                document.getElementById('verifyOtpBtn').disabled = false;
+                document.getElementById('otpStatus').innerHTML = '⏳ OTP Sent – enter the code to verify';
+                document.getElementById('step2').style.borderLeft = '4px solid #f59e0b';
+                document.getElementById('step2').innerHTML = '⏳ 2️⃣ OTP Sent';
+                updateFieldAvailability();
+            }
             alert(data.message);
         }
 
@@ -606,6 +725,11 @@
 
             if (data.verified) {
                 otpVerified = true;
+                document.getElementById('email').disabled = false;
+                document.getElementById('purpose').disabled = false;
+                document.getElementById('employee').disabled = false;
+                document.getElementById('submitBtn').disabled = false;
+                updateFieldAvailability();
                 document.getElementById('otpStatus')
                     .innerHTML = '✅ OTP Status : Verified';
 
@@ -626,6 +750,16 @@
                     .innerText =
                     'Invalid OTP';
             }
+        }
+
+        function openAadhaarInput(useCamera) {
+            const input = document.getElementById('aadhaarImage');
+            if (useCamera) {
+                input.setAttribute('capture', 'environment');
+            } else {
+                input.removeAttribute('capture');
+            }
+            input.click();
         }
 
         async function readAadhaar(event) {
@@ -652,7 +786,7 @@
                 const formData = new FormData();
                 formData.append('document', file);
 
-                const response = await fetch('http://localhost:3000/ocr/upload', {
+                const response = await fetch('/ocr/upload', {
                     method: 'POST',
                     body: formData
                 });
@@ -668,6 +802,12 @@
                 if (data.mobile) {
                     document.getElementById('phone').value = data.mobile;
                 }
+                // Mark OCR completed so fields stay enabled even if name changes later
+                ocrCompleted = true;
+                document.getElementById('phone').disabled = false;
+                document.getElementById('aadhaar').disabled = false;
+                document.getElementById('sendOtpBtn').disabled = false;
+                updateFieldAvailability();
                 document.getElementById('mobileDisplay').innerText = data.mobile || 'Not found';
 
                 if (data.aadhaar) {

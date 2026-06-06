@@ -2,12 +2,34 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const QRCode = require('qrcode');
-
+const multer = require('multer');
 const db = require('../db/db');
+
+const storage = multer.diskStorage({
+
+    destination: function (req, file, cb) {
+
+        cb(null, './uploads/photos');
+    },
+
+    filename: function (req, file, cb) {
+
+        cb(
+            null,
+            Date.now() +
+            '-' +
+            file.originalname
+        );
+    }
+});
+
+const upload = multer({
+    storage: storage
+});
 
 console.log('Visitor routes loaded with file logging support');
 
-router.post('/register', (req, res) => {
+router.post('/register', upload.single('photo'), (req, res) => {
     const {
         name,
         phone,
@@ -16,20 +38,23 @@ router.post('/register', (req, res) => {
         purpose,
         employee_id
     } = req.body;
-
+    const photo_path =
+        req.file
+            ? req.file.path
+            : null;
     console.log(req.body);
     console.log("Aadhaar:", aadhaar_number);
     fs.appendFileSync('./logs.txt', `\n${new Date().toISOString()} - req.body: ${JSON.stringify(req.body)}\nAadhaar: ${aadhaar_number}\n`);
 
     const sql = `
         INSERT INTO visitors
-        (name, phone, email, aadhaar_number, purpose, employee_id, status)
-        VALUES (?, ?, ?, ?, ?, ?, 'pending')
+        (name, phone, email, aadhaar_number, purpose, employee_id, photo_path, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
     `;
 
     db.query(
         sql,
-        [name, phone, email, aadhaar_number, purpose, employee_id],
+        [name, phone, email, aadhaar_number, purpose, employee_id, photo_path],
         (err, result) => {
 
             if (err) {
@@ -61,7 +86,7 @@ router.get('/pending', (req, res) => {
         ON visitors.employee_id = employees.id
         WHERE visitors.status = 'pending'
     `;
-    
+
     db.query(sql, (err, result) => {
 
         if (err) {
@@ -98,27 +123,27 @@ Pass ID: ${passId}`;
         approved_at = NOW()
     WHERE id = ?
 `;
-console.log("Approving Visitor:", visitorId);
-console.log("Generated Pass:", passId);
-db.query(
-    sql,
-    [passId, qrCode, visitorId],
-    (err, result) => {
-        console.log("DB Result:", result);
-        if (err) {
-            console.error(err);
-            return res.status(500).json({
-                message: 'Database Error'
+    console.log("Approving Visitor:", visitorId);
+    console.log("Generated Pass:", passId);
+    db.query(
+        sql,
+        [passId, qrCode, visitorId],
+        (err, result) => {
+            console.log("DB Result:", result);
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    message: 'Database Error'
+                });
+            }
+
+            res.json({
+                message: 'Visitor Approved',
+                visitorId,
+                passId
             });
         }
-
-        res.json({
-            message: 'Visitor Approved',
-            visitorId,
-            passId
-        });
-    }
-);
+    );
 });
 
 router.get('/all', (req, res) => {
@@ -187,6 +212,7 @@ router.get('/pass/:id', (req, res) => {
             visitors.status,
             visitors.pass_id,
             visitors.qr_code,
+            visitors.photo_path,
             employees.name AS employee_name
         FROM visitors
         LEFT JOIN employees
