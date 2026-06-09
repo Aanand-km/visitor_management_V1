@@ -71,7 +71,7 @@
         .card {
             background: var(--surface);
             border: 1px solid rgba(15, 23, 42, 0.06);
-           /* border-radius: 24px;*/
+            /* border-radius: 24px;*/
             box-shadow: 0 16px 50px rgba(15, 23, 42, 0.08);
             padding: 28px;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -365,6 +365,15 @@
                 <div class="form-group">
                     <label for="aadhaarImage">Upload Aadhaar Image</label>
                     <input type="file" id="aadhaarImage" accept="image/*">
+                    <div class="button-row">
+
+                        <button type="button" class="btn-secondary" onclick="openAadhaarCamera()">
+
+                            📷 Take Aadhaar Photo
+
+                        </button>
+
+                    </div>
 
 
                     <!-- <div class="button-row" style="margin-top:8px">
@@ -401,6 +410,15 @@
                     </label>
 
                     <input type="file" id="visitorPhoto" name="photo" accept="image/*">
+                    <div class="button-row">
+
+                        <button type="button" class="btn-secondary" onclick="openVisitorCamera()">
+
+                            📷 Take Visitor Photo
+
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -441,6 +459,9 @@
                 <div class="form-actions">
                     <button id="submitBtn" class="btn" type="submit" disabled>Register Visitor</button>
                 </div>
+                <input type="file" id="aadhaarCameraInput" accept="image/*" capture="environment" style="display:none">
+
+                <input type="file" id="visitorCameraInput" accept="image/*" capture="user" style="display:none">
             </form>
 
             <p id="message"></p>
@@ -509,9 +530,10 @@
                     </div>
 
                 </div>
-                 <div class="preview-label">
-                        Please verify the extracted Aadhaar number and mobile number . If incorrect, input manually in the form fields.
-                    </div>
+                <div class="preview-label">
+                    Please verify the extracted Aadhaar number and mobile number . If incorrect, input manually in the
+                    form fields.
+                </div>
                 <div class="preview-info">
 
                     <div class="preview-label">
@@ -539,9 +561,9 @@
                     </a>
 
                 </div>
-                 <div class="preview-label">
-                       
-                    </div>
+                <div class="preview-label">
+                    Please verify the uploaded Aadhaar image and visitor photo are clear and correct. If not, please re-upload using the form.
+                </div>
 
                 <div class="preview-info">
 
@@ -986,6 +1008,90 @@
                 btn.disabled = false;
             }
         }
+        function openAadhaarCamera() {
+
+            document
+                .getElementById(
+                    'aadhaarCameraInput'
+                )
+                .click();
+        }
+
+        function openVisitorCamera() {
+
+            document
+                .getElementById(
+                    'visitorCameraInput'
+                )
+                .click();
+        }
+        document
+    .getElementById(
+        'aadhaarCameraInput'
+    )
+    .addEventListener(
+        'change',
+        function () {
+
+            const file =
+                this.files[0];
+
+            if (!file) return;
+
+            const dataTransfer =
+                new DataTransfer();
+
+            dataTransfer.items.add(file);
+
+            document
+                .getElementById(
+                    'aadhaarImage'
+                )
+                .files =
+                dataTransfer.files;
+
+            document.getElementById(
+                'aadhaarStatus'
+            ).innerText =
+                '✅ Uploaded';
+
+            updateFieldAvailability();
+        }
+    );
+
+        document
+            .getElementById(
+                'visitorCameraInput'
+            )
+            .addEventListener(
+                'change',
+                function () {
+
+                    const file =
+                        this.files[0];
+
+                    if (!file) return;
+
+                    const dataTransfer =
+                        new DataTransfer();
+
+                    dataTransfer.items.add(file);
+
+                    document
+                        .getElementById(
+                            'visitorPhoto'
+                        )
+                        .files =
+                        dataTransfer.files;
+
+                    document.getElementById(
+                        'visitorPhotoStatus'
+                    ).innerText =
+                        '✅ Uploaded';
+
+                    updateFieldAvailability();
+                }
+            );
     </script>
 
 </body>
