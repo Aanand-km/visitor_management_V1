@@ -60,18 +60,18 @@
         }
 
         .container {
-            max-width: 1180px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 32px 16px 48px;
             display: grid;
-            grid-template-columns: 1.8fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr;
             gap: 24px;
         }
 
         .card {
             background: var(--surface);
             border: 1px solid rgba(15, 23, 42, 0.06);
-            border-radius: 24px;
+           /* border-radius: 24px;*/
             box-shadow: 0 16px 50px rgba(15, 23, 42, 0.08);
             padding: 28px;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -301,6 +301,26 @@
             word-break: break-word;
         }
 
+        .preview-info {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .preview-label {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .preview-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
         @media (max-width: 480px) {
             .header-content {
                 justify-content: center;
@@ -427,25 +447,7 @@
 
         </div>
 
-        <div class="card right-panel">
-
-            <div class="status-box">
-                <p class="panel-copy">👋 Welcome. Please complete all verification steps before registration.</p>
-            </div>
-            <h2 class="panel-title">Aadhaar Preview</h2>
-            <div id="aadhaarCard" class="aadhaar-card">
-                <img id="aadhaarPreview" class="aadhaar-preview" alt="Aadhaar preview">
-
-                <p>
-                    <strong>Aadhaar:</strong>
-                    <span id="aadhaarDisplay"></span>
-                </p>
-
-                <p>
-                    <strong>Mobile:</strong>
-                    <span id="mobileDisplay"></span>
-                </p>
-            </div>
+        <div class="card">
             <h2 class="panel-title">Verification Status</h2>
             <div class="status-box" id="ocrStatus">
                 📄 OCR Status : Pending
@@ -475,6 +477,98 @@
             <div class="status-box hidden" id="successCard">
                 ✅ Visitor Registered Successfully
             </div>
+
+        </div>
+        <div class="card">
+
+            <h2 class="panel-title">
+                Verification Preview
+            </h2>
+
+            <div id="aadhaarCard" class="aadhaar-card">
+
+
+                <div class="preview-info">
+
+                    <div class="preview-label">
+                        Aadhaar Number
+                    </div>
+
+                    <div class="preview-value" id="aadhaarDisplay">
+                    </div>
+
+                </div>
+
+                <div class="preview-info">
+
+                    <div class="preview-label">
+                        Mobile Number
+                    </div>
+
+                    <div class="preview-value" id="mobileDisplay">
+                    </div>
+
+                </div>
+                <div class="preview-info">
+
+                    <div class="preview-label">
+                        Aadhaar Image
+                    </div>
+
+                    <a id="aadhaarFileLink" href="#" target="_blank" style="display:none">
+
+                        View Aadhaar Image
+
+                    </a>
+
+                </div>
+
+                <div class="preview-info">
+
+                    <div class="preview-label">
+                        Visitor Photo
+                    </div>
+
+                    <a id="visitorFileLink" href="#" target="_blank" style="display:none">
+
+                        View Visitor Photo
+
+                    </a>
+
+                </div>
+
+                <div class="preview-info">
+
+                    <div class="preview-label">
+                        Aadhaar Status
+                    </div>
+
+                    <div class="preview-value" id="aadhaarStatus">
+
+                        Not Uploaded
+
+                    </div>
+
+                </div>
+                <div class="preview-info">
+
+                    <div class="preview-label">
+                        Visitor Photo Status
+                    </div>
+
+                    <div class="preview-value" id="visitorPhotoStatus">
+
+                        Not Uploaded
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+
 
         </div>
 
@@ -532,15 +626,59 @@
                 updateFieldAvailability();
             });
             document.getElementById('aadhaarImage').addEventListener('change', () => {
-                const file = document.getElementById('aadhaarImage').files[0];
-                const selectedFileNameEl = document.getElementById('selectedFileName');
+
+                const file =
+                    document.getElementById('aadhaarImage').files[0];
+
+                const selectedFileNameEl =
+                    document.getElementById('selectedFileName');
+
                 if (selectedFileNameEl) {
-                    selectedFileNameEl.innerText = file ? file.name : 'No file selected';
+                    selectedFileNameEl.innerText =
+                        file ? file.name : 'No file selected';
                 }
+
+                if (file) {
+
+                    const aadhaarURL =
+                        URL.createObjectURL(file);
+
+                    const aadhaarLink =
+                        document.getElementById('aadhaarFileLink');
+
+                    aadhaarLink.href = aadhaarURL;
+
+                    aadhaarLink.style.display =
+                        'inline-block';
+
+                    document.getElementById('aadhaarStatus').innerText =
+                        '✅ Uploaded';
+                }
+
                 updateFieldAvailability();
             });
             document.getElementById('visitorPhoto')
                 .addEventListener('change', updateFieldAvailability);
+            document.getElementById('visitorPhoto')
+                .addEventListener('change', function () {
+
+                    const file = this.files[0];
+
+                    if (!file) return;
+
+                    const visitorURL =
+                        URL.createObjectURL(file);
+
+                    const visitorLink =
+                        document.getElementById('visitorFileLink');
+
+                    visitorLink.href = visitorURL;
+
+                    visitorLink.style.display = 'inline-block';
+
+                    document.getElementById('visitorPhotoStatus').innerText =
+                        '✅ Uploaded';
+                });
         }
 
         initializeFormState();
@@ -781,7 +919,18 @@
                 }
 
                 const imageURL = URL.createObjectURL(file);
-                document.getElementById('aadhaarPreview').src = imageURL;
+
+
+                const aadhaarLink =
+                    document.getElementById('aadhaarFileLink');
+
+                if (aadhaarLink) {
+
+                    aadhaarLink.href = imageURL;
+
+                    aadhaarLink.style.display =
+                        'inline-block';
+                }
 
                 const formData = new FormData();
                 formData.append('document', file);
@@ -804,6 +953,8 @@
                 }
                 // Mark OCR completed so fields stay enabled even if name changes later
                 ocrCompleted = true;
+                document.getElementById('aadhaarStatus').innerText =
+                    '✅ Uploaded';
                 document.getElementById('phone').disabled = false;
                 document.getElementById('aadhaar').disabled = false;
                 document.getElementById('sendOtpBtn').disabled = false;
