@@ -52,27 +52,31 @@ router.post(
                         },
 
                         {
-                            text: `
-This image contains an Indian Aadhaar card.
+                            text: `This image contains an Indian Aadhaar card.
 
 Extract:
 
 1. Full Name
 2. Aadhaar Number
-3. Mobile Number
+3. Mobile Number (if visible)
+
+If mobile number is not visible, return:
+
+{
+  "mobile": null
+}
 
 Return ONLY valid JSON.
 
 {
   "name": "",
   "aadhaar": "",
-  "mobile": ""
+  "mobile": null
 }
 
-Do not return markdown.
-Do not return explanation.
-Only return JSON.
-`
+Do not guess.
+Do not hallucinate.
+Only extract information visible in the image.`
                         }
                     ]
                 });

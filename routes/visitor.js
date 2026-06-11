@@ -4,6 +4,9 @@ const fs = require('fs');
 const QRCode = require('qrcode');
 const multer = require('multer');
 const db = require('../db/db');
+const {
+    sendEmployeeNotification
+} = require('../services/emailService');
 
 const storage = multer.diskStorage({
 
@@ -63,7 +66,50 @@ router.post('/register', upload.single('photo'), (req, res) => {
                     message: 'Database Error'
                 });
             }
+            const employeeSql = `
+SELECT email
+FROM employees
+WHERE id = ?
+`;
 
+            db.query(
+                employeeSql,
+                [employee_id],
+                async (err, employeeResult) => {
+
+                    if (
+                        !err &&
+                        employeeResult.length > 0
+                    ) {
+
+                        try {
+
+                            await sendEmployeeNotification(
+
+                                employeeResult[0].email,
+
+                                {
+                                    name,
+                                    phone,
+                                    email,
+                                    purpose
+                                }
+                            );
+
+                            console.log(
+                                'Employee email sent'
+                            );
+
+                        } catch (mailError) {
+
+                            console.error(
+                                'Email Error:',
+                                mailError
+                            );
+                        }
+                    }
+                }
+            );
             res.json({
                 message: 'Visitor Registered Successfully',
                 visitorId: result.insertId

@@ -543,7 +543,7 @@
                     </div>
 
                 </div>
-               
+
 
                 <div class="preview-label">
                     Please verify the extracted Aadhaar number and mobile number . If incorrect, input manually in the
@@ -1019,12 +1019,30 @@
 
                     document.getElementById('phone').value =
                         data.mobile;
-                }
-                const noDataFound = !data.aadhaar && !data.mobile;
 
-                if (data.mobile) {
-                    document.getElementById('phone').value = data.mobile;
+                    document.getElementById('mobileDisplay')
+                        .innerText =
+                        data.mobile;
+
+                } else {
+
+                    document.getElementById('phone').disabled =
+                        false;
+
+                    document.getElementById('phone')
+                        .placeholder =
+                        'Mobile not found. Enter manually';
+
+                    document.getElementById('mobileDisplay')
+                        .innerText =
+                        'Not Found';
+
+                    alert(
+                        'Mobile number not found on Aadhaar. Please enter it manually.'
+                    );
                 }
+                const noDataFound = !data.aadhaar && !data.mobile && !data.mobile;
+
                 // Mark OCR completed so fields stay enabled even if name changes later
                 ocrCompleted = true;
                 document.getElementById('aadhaarStatus').innerText =
