@@ -44,7 +44,56 @@ async function sendEmployeeNotification(
         `
     });
 }
+async function sendVisitorPassEmail(
+    visitorEmail,
+    visitorName,
+    visitorId,
+    passId
+) {
+
+    const passLink =
+        `http://ducktail-five-prideful.ngrok-free.dev/visitor-pass.html?id=${visitorId}`;
+
+    await transporter.sendMail({
+
+        from: process.env.EMAIL_USER,
+
+        to: visitorEmail,
+
+        subject: 'Visitor Pass Approved',
+
+        html: `
+
+            <h2>Visitor Pass Approved</h2>
+
+            <p>Hello ${visitorName},</p>
+
+            <p>Your visitor request has been approved.</p>
+
+            <p>
+                <b>Pass ID:</b>
+                ${passId}
+            </p>
+
+            <p>
+                View your pass:
+            </p>
+
+            <a href="${passLink}">
+                Open Visitor Pass
+            </a>
+
+            <br><br>
+
+            <p>
+                Please carry this pass during your visit.
+            </p>
+
+        `
+    });
+}
 
 module.exports = {
-    sendEmployeeNotification
+    sendEmployeeNotification,
+    sendVisitorPassEmail
 };

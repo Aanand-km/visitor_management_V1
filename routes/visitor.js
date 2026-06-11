@@ -5,7 +5,8 @@ const QRCode = require('qrcode');
 const multer = require('multer');
 const db = require('../db/db');
 const {
-    sendEmployeeNotification
+    sendEmployeeNotification,
+    sendVisitorPassEmail
 } = require('../services/emailService');
 
 const storage = multer.diskStorage({
@@ -56,6 +57,7 @@ router.post('/register', upload.single('photo'), (req, res) => {
     `;
 
     db.query(
+
         sql,
         [name, phone, email, aadhaar_number, purpose, employee_id, photo_path],
         (err, result) => {
@@ -182,7 +184,37 @@ Pass ID: ${passId}`;
                     message: 'Database Error'
                 });
             }
+            const visitorSql = `
+SELECT
+    name,
+    email
+FROM visitors
+WHERE id = ?
+`;
 
+            db.query(
+                visitorSql,
+                [visitorId],
+                async (err, visitorResult) => {
+
+                    if (
+                        !err &&
+                        visitorResult.length > 0
+                    ) {
+
+                        try {
+
+                            await sendVisitorPassEmail(visitorResult[0].email,visitorResult[0].name,visitorId,passId);
+
+                            console.log('Visitor pass email sent');
+
+                        } catch (emailErr) {
+
+                            console.error(emailErr);
+                        }
+                    }
+                }
+            );
             res.json({
                 message: 'Visitor Approved',
                 visitorId,
