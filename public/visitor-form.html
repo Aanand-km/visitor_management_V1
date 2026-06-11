@@ -71,7 +71,7 @@
         .card {
             background: var(--surface);
             border: 1px solid rgba(15, 23, 42, 0.06);
-            /* border-radius: 24px;*/
+            border-radius: 24px;
             box-shadow: 0 16px 50px rgba(15, 23, 42, 0.08);
             padding: 28px;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -161,6 +161,7 @@
         }
 
         .btn-secondary {
+            color: #fff;
             background: #334155;
             box-shadow: 0 12px 24px rgba(51, 65, 85, 0.18);
         }
@@ -355,10 +356,7 @@
             <h2 class="panel-title">Visitor Registration</h2>
 
             <form id="visitorForm">
-                <div class="form-group">
-                    <label for="name">Visitor Name</label>
-                    <input type="text" id="name" placeholder="Enter name" required>
-                </div>
+
 
                 <div class="section-heading">Aadhaar OCR</div>
 
@@ -392,15 +390,18 @@
                     <button id="readAadhaarBtn" class="btn-secondary" type="button" onclick="readAadhaar(event)">Read
                         Aadhaar</button>
                 </div>
-
+                <div class="form-group">
+                    <label for="name">Visitor Name</label>
+                    <input type="text" id="name" placeholder="will be filled by OCR" required>
+                </div>
                 <div class="form-group">
                     <label for="aadhaar">Aadhaar Number</label>
-                    <input type="text" id="aadhaar" placeholder="Aadhaar number" disabled>
+                    <input type="text" id="aadhaar" placeholder="will be filled by OCR" disabled>
                 </div>
 
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
-                    <input type="text" id="phone" placeholder="Enter phone number" disabled>
+                    <input type="text" id="phone" placeholder="will be filled by OCR" disabled>
                 </div>
 
                 <div class="form-group">
@@ -508,7 +509,19 @@
 
             <div id="aadhaarCard" class="aadhaar-card">
 
+                <div class="preview-info">
 
+                    <div class="preview-label">
+                        Name
+                    </div>
+
+                    <div class="preview-value" id="nameDisplay">
+
+                        Not found
+
+                    </div>
+
+                </div>
                 <div class="preview-info">
 
                     <div class="preview-label">
@@ -530,6 +543,8 @@
                     </div>
 
                 </div>
+               
+
                 <div class="preview-label">
                     Please verify the extracted Aadhaar number and mobile number . If incorrect, input manually in the
                     form fields.
@@ -562,7 +577,8 @@
 
                 </div>
                 <div class="preview-label">
-                    Please verify the uploaded Aadhaar image and visitor photo are clear and correct. If not, please re-upload using the form.
+                    Please verify the uploaded Aadhaar image and visitor photo are clear and correct. If not, please
+                    re-upload using the form.
                 </div>
 
                 <div class="preview-info">
@@ -620,11 +636,12 @@
             const phoneFilled = document.getElementById('phone').value.trim().length >= 10;
 
             // Keep Aadhaar/Phone enabled once OCR completes, even if name input changes.
-            setDisabled('takePhotoBtn', !nameFilled);
+            setDisabled('readAadhaarBtn', !(fileSelected));
+            setDisabled('name', !ocrCompleted);
             setDisabled('galleryBtn', !nameFilled);
-            setDisabled('aadhaar', !(nameFilled || ocrCompleted));
-            setDisabled('phone', !(nameFilled || ocrCompleted));
-            setDisabled('readAadhaarBtn', !(nameFilled && fileSelected));
+            setDisabled('aadhaar', !ocrCompleted);
+            setDisabled('phone', !ocrCompleted);
+            setDisabled('takePhotoBtn', !nameFilled);
 
             // Allow sending OTP when phone has a valid length OR OCR completed and some phone value exists.
             const allowSendOtp = phoneFilled || (ocrCompleted && document.getElementById('phone').value.trim().length > 0);
@@ -706,6 +723,14 @@
 
                     document.getElementById('visitorPhotoStatus').innerText =
                         '✅ Uploaded';
+                });
+            document.getElementById('name')
+                .addEventListener('input', function () {
+
+                    document.getElementById(
+                        'nameDisplay'
+                    ).innerText =
+                        this.value;
                 });
         }
 
@@ -974,6 +999,27 @@
                 }
 
                 const data = await response.json();
+
+                if (data.name) {
+
+                    document.getElementById('name').value =
+                        data.name;
+                } document.getElementById(
+                    'nameDisplay'
+                ).innerText =
+                    data.name || 'Not found';
+
+                if (data.aadhaar) {
+
+                    document.getElementById('aadhaar').value =
+                        data.aadhaar;
+                }
+
+                if (data.mobile) {
+
+                    document.getElementById('phone').value =
+                        data.mobile;
+                }
                 const noDataFound = !data.aadhaar && !data.mobile;
 
                 if (data.mobile) {
@@ -1026,38 +1072,38 @@
                 .click();
         }
         document
-    .getElementById(
-        'aadhaarCameraInput'
-    )
-    .addEventListener(
-        'change',
-        function () {
+            .getElementById(
+                'aadhaarCameraInput'
+            )
+            .addEventListener(
+                'change',
+                function () {
 
-            const file =
-                this.files[0];
+                    const file =
+                        this.files[0];
 
-            if (!file) return;
+                    if (!file) return;
 
-            const dataTransfer =
-                new DataTransfer();
+                    const dataTransfer =
+                        new DataTransfer();
 
-            dataTransfer.items.add(file);
+                    dataTransfer.items.add(file);
 
-            document
-                .getElementById(
-                    'aadhaarImage'
-                )
-                .files =
-                dataTransfer.files;
+                    document
+                        .getElementById(
+                            'aadhaarImage'
+                        )
+                        .files =
+                        dataTransfer.files;
 
-            document.getElementById(
-                'aadhaarStatus'
-            ).innerText =
-                '✅ Uploaded';
+                    document.getElementById(
+                        'aadhaarStatus'
+                    ).innerText =
+                        '✅ Uploaded';
 
-            updateFieldAvailability();
-        }
-    );
+                    updateFieldAvailability();
+                }
+            );
 
         document
             .getElementById(

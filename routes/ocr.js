@@ -2,7 +2,16 @@ const express = require('express');
 const router = express.Router();
 
 const multer = require('multer');
-const Tesseract = require('tesseract.js');
+const fs = require('fs');
+
+const { GoogleGenAI } =
+    require('@google/genai');
+
+const ai =
+    new GoogleGenAI({
+        apiKey:
+            process.env.GEMINI_API_KEY
+    });
 
 const upload = multer({
     dest: 'uploads/'
@@ -14,34 +23,84 @@ router.post(
     async (req, res) => {
 
         try {
-
-            const result =
-                await Tesseract.recognize(
-                    req.file.path,
-                    'eng'
+            const imageBuffer =
+                fs.readFileSync(
+                    req.file.path
                 );
 
-           /* console.log(result.data.text);*/
+            const base64Image =
+                imageBuffer.toString(
+                    'base64'
+                );
 
-            const text = result.data.text;
+            const response =
+                await ai.models.generateContent({
 
-            const mobileMatch =
-                text.match(/\b\d{10}\b/);
+                    model: 'gemini-2.5-flash',
 
-            const aadhaarMatch =
-                text.match(/\b\d{4}\s?\d{4}\s?\d{4}\b/);
+                    contents: [
 
-            res.json({
-                /*text,*/
-                mobile:
-                    mobileMatch
-                        ? mobileMatch[0]
-                        : null,
-                aadhaar:
-                    aadhaarMatch
-                        ? aadhaarMatch[0]
-                        : null
-            });
+                        {
+                            inlineData: {
+
+                                mimeType:
+                                    req.file.mimetype,
+
+                                data:
+                                    base64Image
+                            }
+                        },
+
+                        {
+                            text: `
+This image contains an Indian Aadhaar card.
+
+Extract:
+
+1. Full Name
+2. Aadhaar Number
+3. Mobile Number
+
+Return ONLY valid JSON.
+
+{
+  "name": "",
+  "aadhaar": "",
+  "mobile": ""
+}
+
+Do not return markdown.
+Do not return explanation.
+Only return JSON.
+`
+                        }
+                    ]
+                });
+
+            let text =
+                response.text;
+
+            text =
+                text.replace(
+                    /```json/g,
+                    ''
+                );
+
+            text =
+                text.replace(
+                    /```/g,
+                    ''
+                );
+
+            console.log(
+                "Gemini Raw Response:",
+                text
+            );
+
+            const data =
+                JSON.parse(text);
+
+            res.json(data);
 
         } catch (error) {
 
@@ -53,5 +112,35 @@ router.post(
         }
     }
 );
+
+router.get('/gemini-test', async (req, res) => {
+
+    try {
+
+        const response =
+            await ai.models.generateContent({
+
+                model: 'gemini-2.5-flash',
+
+                contents:
+                    'Reply with: Gemini Connected Successfully'
+
+            });
+
+        res.json({
+            message:
+                response.text
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error:
+                error.message
+        });
+    }
+});
 
 module.exports = router;
