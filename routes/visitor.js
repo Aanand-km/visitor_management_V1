@@ -156,8 +156,7 @@ router.put('/approve/:id', async (req, res) => {
         'PASS-' + Date.now();
 
     const qrText =
-        `Visitor ID: ${visitorId}
-Pass ID: ${passId}`;
+        `http://ducktail-five-prideful.ngrok-free.dev/visitor/scan/${visitorId}`;
 
     const qrCode =
         await QRCode.toDataURL(qrText);
@@ -204,7 +203,7 @@ WHERE id = ?
 
                         try {
 
-                            await sendVisitorPassEmail(visitorResult[0].email,visitorResult[0].name,visitorId,passId);
+                            await sendVisitorPassEmail(visitorResult[0].email, visitorResult[0].name, visitorId, passId);
 
                             console.log('Visitor pass email sent');
 
@@ -333,6 +332,75 @@ router.get('/approved/count', (req, res) => {
         res.json(result[0]);
     });
 
+});
+
+
+
+router.get('/scan/:id', (req, res) => {
+
+    const visitorId = req.params.id;
+
+    db.query(
+        `
+        SELECT
+            name,
+            status
+        FROM visitors
+        WHERE id = ?
+        `,
+        [visitorId],
+        (err, result) => {
+
+            if (err || result.length === 0) {
+                return res.status(404).send('Visitor not found');
+            }
+
+            const visitor = result[0];
+
+            if (visitor.status === 'approved') {
+
+                db.query(
+                    `
+                    UPDATE visitors
+                    SET
+                        status = 'checked_in',
+                        check_in_time = NOW()
+                    WHERE id = ?
+                    `,
+                    [visitorId]
+                );
+
+                return res.send(`
+                    <h1>✅ Check-In Successful</h1>
+                    <h2>${visitor.name}</h2>
+                `);
+            }
+
+            if (visitor.status === 'checked_in') {
+
+                db.query(
+                    `
+                    UPDATE visitors
+                    SET
+                        status = 'checked_out',
+                        check_out_time = NOW()
+                    WHERE id = ?
+                    `,
+                    [visitorId]
+                );
+
+                return res.send(`
+                    <h1>✅ Check-Out Successful</h1>
+                    <h2>${visitor.name}</h2>
+                `);
+            }
+
+            return res.send(`
+                <h1>Visit Already Completed</h1>
+                <h2>${visitor.name}</h2>
+            `);
+        }
+    );
 });
 
 module.exports = router;

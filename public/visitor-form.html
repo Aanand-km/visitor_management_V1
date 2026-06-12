@@ -164,6 +164,7 @@
             color: #fff;
             background: #334155;
             box-shadow: 0 12px 24px rgba(51, 65, 85, 0.18);
+            border-radius: 8px;
         }
 
         .btn-secondary:hover,
@@ -1040,7 +1041,7 @@
                     alert(
                         'Mobile number not found on Aadhaar. Please enter it manually.'
                     );
-                }
+                } 
                 const noDataFound = !data.aadhaar && !data.mobile && !data.mobile;
 
                 // Mark OCR completed so fields stay enabled even if name changes later
