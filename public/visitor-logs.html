@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Visitor Logs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,12 +33,12 @@
         }
 
         header {
-           /* background: linear-gradient(135deg, var(--primary), var(--primary-dark));*/
-           background-color: black; 
-           color: white;
+            /* background: linear-gradient(135deg, var(--primary), var(--primary-dark));*/
+            background-color: black;
+            color: white;
             padding: 24px 32px;
             box-shadow: 0 6px 18px rgba(23, 23, 23, 0.08);
-            border-bottom:5px solid #db641a;
+            border-bottom: 5px solid #db641a;
         }
 
         .header-content {
@@ -139,7 +140,8 @@
             border-collapse: collapse;
         }
 
-        th, td {
+        th,
+        td {
             padding: 16px 18px;
             text-align: left;
             border-bottom: 1px solid rgba(15, 23, 42, 0.08);
@@ -193,6 +195,27 @@
             color: var(--muted);
         }
 
+        .search-section {
+            margin-bottom: 20px;
+        }
+
+        #searchInput {
+            width: 100%;
+            max-width: 450px;
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            font-size: 15px;
+            background: white;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        #searchInput:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.08);
+        }
+
         @media (max-width: 960px) {
             .header-content {
                 flex-direction: column;
@@ -209,7 +232,8 @@
                 font-size: 0.9rem;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 12px;
             }
         }
@@ -236,7 +260,8 @@
                 font-size: 0.85rem;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 10px 8px;
             }
 
@@ -247,6 +272,7 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <div class="header-content">
@@ -259,7 +285,9 @@
             <h2>Visitor Logs</h2>
             <a href="employee-dashboard.html" class="nav-link">← Back to Dashboard</a>
         </div>
-
+        <div class="search-section">
+            <input type="text" id="searchInput" placeholder=" Search visitor, phone or employee...">
+        </div>
         <div class="table-wrapper">
             <table>
                 <thead>
@@ -304,6 +332,7 @@
                             : 'status-pending';
 
                     const row = document.createElement('tr');
+                    row.classList.add('visitor-row');
                     row.innerHTML = `
                         <td><strong>${escapeHtml(visitor.name)}</strong></td>
                         <td>${escapeHtml(visitor.phone)}</td>
@@ -327,8 +356,35 @@
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
         }
+        function setupSearch() {
+
+            const searchInput =
+                document.getElementById('searchInput');
+
+            searchInput.addEventListener('input', () => {
+
+                const value =
+                    searchInput.value.toLowerCase();
+
+                const rows =
+                    document.querySelectorAll('.visitor-row');
+
+                rows.forEach(row => {
+
+                    const text =
+                        row.innerText.toLowerCase();
+
+                    row.style.display =
+                        text.includes(value)
+                            ? ''
+                            : 'none';
+                });
+            });
+        }
 
         loadVisitorLogs();
+        setupSearch();F
     </script>
 </body>
+
 </html>
