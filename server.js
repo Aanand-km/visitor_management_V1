@@ -13,14 +13,17 @@ const app = express();
 const ocrRoutes =
     require('./routes/ocr');
 
+const authRoutes =
+require('./routes/auth');
+
 app.use(cors());
 app.use(express.json());
 app.use('/visitor', visitorRoutes);
 app.use('/otp', otpRoutes);
 app.use('/ocr', ocrRoutes);
 app.use('/employees', employeeRoutes);
+app.use('/auth', authRoutes);
 app.use(express.static('public'));
-
 app.use(
     '/uploads',
     express.static('uploads')

@@ -120,7 +120,10 @@ WHERE id = ?
     );
 });
 
-router.get('/pending', (req, res) => {
+
+router.get('/pending/:employeeId', (req, res) => {
+
+    const employeeId = req.params.employeeId;
 
     const sql = `
         SELECT
@@ -133,19 +136,23 @@ router.get('/pending', (req, res) => {
         LEFT JOIN employees
         ON visitors.employee_id = employees.id
         WHERE visitors.status = 'pending'
+        AND visitors.employee_id = ?
     `;
 
-    db.query(sql, (err, result) => {
+    db.query(
+        sql,
+        [employeeId],
+        (err, result) => {
 
-        if (err) {
-            return res.status(500).json({
-                message: 'Database Error'
-            });
+            if (err) {
+                return res.status(500).json({
+                    message: 'Database Error'
+                });
+            }
+
+            res.json(result);
         }
-
-        res.json(result);
-    });
-
+    );
 });
 
 router.put('/approve/:id', async (req, res) => {

@@ -293,6 +293,20 @@
             color: var(--muted);
         }
 
+        #logoutBtn {
+            background: #c62828;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        #logoutBtn:hover {
+            background: #a91e1e;
+        }
+
         @media (max-width: 960px) {
             .header {
                 flex-direction: column;
@@ -349,6 +363,7 @@
                 <span class="badge-icon">👤</span>
                 <span id="employeeName">Loading...</span>
             </div>
+            <button id="logoutBtn">Logout</button>
         </div>
     </header>
 
@@ -382,7 +397,17 @@
     </div>
 
     <script>
+        const token =
+            localStorage.getItem('token');
 
+        if (!token) {
+
+            window.location.href =
+                'employee-login.html';
+
+        }
+
+        document.getElementById('employeeName').innerText = localStorage.getItem('employeeName');
         // Load employee name on page load
         async function loadEmployeeName() {
             try {
@@ -394,7 +419,7 @@
                 }
 
                 // If not in localStorage, try to fetch from backend
-                const response = await fetch('http://localhost:3000/employee/me');
+                const response = await fetch('/employee/me');
                 if (response.ok) {
                     const employee = await response.json();
                     const employeeName = employee.name || 'Employee';
@@ -414,7 +439,13 @@
 
         async function loadVisitors() {
             try {
-                const response = await fetch('http://localhost:3000/visitor/pending');
+                const employeeId =
+                    localStorage.getItem('employeeId');
+
+                const response =
+                    await fetch(
+                        `/visitor/pending/${employeeId}`
+                    );
                 const visitors = await response.json();
 
                 document.getElementById('pendingCount').innerText = visitors.length;
@@ -473,7 +504,7 @@
 
             const response =
                 await fetch(
-                    'http://localhost:3000/visitor/approved/count'
+                    '/visitor/approved/count'
                 );
 
             const data =
@@ -490,7 +521,7 @@
 
         async function approveVisitor(id) {
             try {
-                const response = await fetch(`http://localhost:3000/visitor/approve/${id}`, {
+                const response = await fetch(`/visitor/approve/${id}`, {
                     method: 'PUT'
                 });
                 const result = await response.json();
@@ -507,7 +538,7 @@
         async function rejectVisitor(id) {
             if (confirm('Are you sure you want to reject this visitor?')) {
                 try {
-                    await fetch(`http://localhost:3000/visitor/reject/${id}`, {
+                    await fetch(`/visitor/reject/${id}`, {
                         method: 'PUT'
                     });
                     loadVisitors();
@@ -517,6 +548,11 @@
                 }
             }
         }
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('employeeName');
+            window.location.href = 'employee-login.html';
+        });
 
     </script>
 

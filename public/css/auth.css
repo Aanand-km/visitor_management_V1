@@ -1,0 +1,115 @@
+:root {
+    --primary: #c62828;
+    --accent: #db641a;
+    --bg: #eef2f7;
+    --surface: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, Arial, sans-serif;
+    background: radial-gradient(circle at top,
+            rgba(198, 40, 40, 0.07),
+            transparent 35%),
+        var(--bg);
+    min-height: 100vh;
+}
+
+header {
+    background: black;
+    color: white;
+    padding: 18px 24px;
+    border-bottom: 5px solid var(--accent);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+header h1 {
+    font-size: 1.8rem;
+}
+
+.auth-container {
+    max-width: 450px;
+    margin: 60px auto;
+    background: var(--surface);
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 16px 50px rgba(15,23,42,0.08);
+    border: 1px solid rgba(15,23,42,0.06);
+}
+
+.auth-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--text);
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #d8d8d8;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(219,100,26,0.15);
+}
+
+.auth-btn {
+    width: 100%;
+    border: none;
+    background: var(--primary);
+    color: white;
+    padding: 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    transition: 0.2s;
+}
+
+.auth-btn:hover {
+    background: #a91e1e;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.auth-footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.message {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: 600;
+}
