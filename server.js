@@ -33,6 +33,23 @@ app.get('/', (req, res) => {
     res.send('Visitor Management API Running');
 });
 
+const db = require('./db/db');
+
+app.get('/create-otp-table', (req, res) => {
+  db.query(`
+    CREATE TABLE IF NOT EXISTS otp_verifications (
+      id INT NOT NULL AUTO_INCREMENT,
+      phone VARCHAR(15) DEFAULT NULL,
+      otp VARCHAR(10) DEFAULT NULL,
+      expires_at DATETIME DEFAULT NULL,
+      PRIMARY KEY (id)
+    )
+  `, (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json({ success: true });
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

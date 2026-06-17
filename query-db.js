@@ -1,11 +1,10 @@
 const db = require('./db/db');
 
-db.query('SELECT * FROM visitors ORDER BY id DESC LIMIT 1', (err, result) => {
+db.query('SHOW TABLES', (err, result) => {
     if (err) {
-        console.error('Error:', err);
+        console.error(err);
     } else {
-        console.log('Latest Visitor:');
-        console.log(JSON.stringify(result, null, 2));
+        console.log(result);
     }
     process.exit();
 });
