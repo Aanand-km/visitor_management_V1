@@ -112,6 +112,16 @@ app.get('/delete-employee/:id', (req, res) => {
     );
 });
 
+app.get('/list-employees', (req, res) => {
+    db.query(
+        'SELECT id, name, email FROM employees',
+        (err, result) => {
+            if (err) return res.status(500).json(err);
+            res.json(result);
+        }
+    );
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
