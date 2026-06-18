@@ -125,7 +125,7 @@ app.get('/list-employees', (req, res) => {
 app.get('/reset-password', async (req, res) => {
     const bcrypt = require('bcrypt');
 
-    const hash = await bcrypt.hash('NEWPASSWORD', 10);
+    const hash = await bcrypt.hash(process.env.EMP_PASS, 10);
 
     db.query(
         'UPDATE employees SET password = ?',
