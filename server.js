@@ -122,6 +122,24 @@ app.get('/list-employees', (req, res) => {
     );
 });
 
+app.get('/reset-password', async (req, res) => {
+    const bcrypt = require('bcrypt');
+
+    const hash = await bcrypt.hash('NEWPASSWORD', 10);
+
+    db.query(
+        'UPDATE employees SET password = ?',
+        [hash],
+        (err, result) => {
+            if (err) return res.status(500).json(err);
+
+            res.json({
+                success: true
+            });
+        }
+    );
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
