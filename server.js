@@ -34,37 +34,37 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/create-otp-table', (req, res) => {
-  db.query(`
-    CREATE TABLE IF NOT EXISTS otp_verifications (
-      id INT NOT NULL AUTO_INCREMENT,
-      phone VARCHAR(15) DEFAULT NULL,
-      otp VARCHAR(10) DEFAULT NULL,
-      expires_at DATETIME DEFAULT NULL,
-      PRIMARY KEY (id)
-    )
-  `, (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json({ success: true });
-  });
-});
+// app.get('/create-otp-table', (req, res) => {
+//   db.query(`
+//     CREATE TABLE IF NOT EXISTS otp_verifications (
+//       id INT NOT NULL AUTO_INCREMENT,
+//       phone VARCHAR(15) DEFAULT NULL,
+//       otp VARCHAR(10) DEFAULT NULL,
+//       expires_at DATETIME DEFAULT NULL,
+//       PRIMARY KEY (id)
+//     )
+//   `, (err, result) => {
+//     if (err) return res.status(500).json(err);
+//     res.json({ success: true });
+//   });
+// });
 
-app.get('/create-employees-table', (req, res) => {
-  db.query(`
-    CREATE TABLE IF NOT EXISTS employees (
-      id INT NOT NULL AUTO_INCREMENT,
-      name VARCHAR(100) DEFAULT NULL,
-      department VARCHAR(100) DEFAULT NULL,
-      email VARCHAR(100) DEFAULT NULL,
-      password VARCHAR(255) DEFAULT NULL,
-      PRIMARY KEY (id),
-      UNIQUE KEY unique_email (email)
-    )
-  `, (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json({ success: true });
-  });
-});
+// app.get('/create-employees-table', (req, res) => {
+//   db.query(`
+//     CREATE TABLE IF NOT EXISTS employees (
+//       id INT NOT NULL AUTO_INCREMENT,
+//       name VARCHAR(100) DEFAULT NULL,
+//       department VARCHAR(100) DEFAULT NULL,
+//       email VARCHAR(100) DEFAULT NULL,
+//       password VARCHAR(255) DEFAULT NULL,
+//       PRIMARY KEY (id),
+//       UNIQUE KEY unique_email (email)
+//     )
+//   `, (err, result) => {
+//     if (err) return res.status(500).json(err);
+//     res.json({ success: true });
+//   });
+// });
 
 app.get('/employees-count', (req, res) => {
   db.query(
@@ -76,69 +76,69 @@ app.get('/employees-count', (req, res) => {
   );
 });
 
-app.get('/insert-employees', (req, res) => {
-  const sql = `
-    INSERT INTO employees (id, name, department, email, password)
-    VALUES
-    (3, 'Manish Gaur', 'IT', 'anandkm539@gmail.com', '$2b$10$qoHigHQHVIIikvVVRtEN7O3CNiGHtJQ/BWdiHCR757qvIEEDZTWPO'),
-    (5, 'Anand', '', 'anand@groz.com', '$2b$10$3FqWhLCV4JaULrv6ROZtR.NTv9ScfZrl9rZd0NU2kk45c3UE8oz0G'),
-    (7, 'Rahul Sharma', 'IT', 'rahul@groz.com', '$2b$10$aQcz3So8HhiKOiJw0D9gf.m774w8qcLI0mm8Kb6xLpj0/cv6DcwPi')
-  `;
+// app.get('/insert-employees', (req, res) => {
+//   const sql = `
+//     INSERT INTO employees (id, name, department, email, password)
+//     VALUES
+//     (3, 'Manish Gaur', 'IT', 'anandkm539@gmail.com', '$2b$10$qoHigHQHVIIikvVVRtEN7O3CNiGHtJQ/BWdiHCR757qvIEEDZTWPO'),
+//     (5, 'Anand', '', 'anand@groz.com', '$2b$10$3FqWhLCV4JaULrv6ROZtR.NTv9ScfZrl9rZd0NU2kk45c3UE8oz0G'),
+//     (7, 'Rahul Sharma', 'IT', 'rahul@groz.com', '$2b$10$aQcz3So8HhiKOiJw0D9gf.m774w8qcLI0mm8Kb6xLpj0/cv6DcwPi')
+//   `;
 
-  db.query(sql, (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json({ success: true, inserted: result.affectedRows });
-  });
-});
+//   db.query(sql, (err, result) => {
+//     if (err) return res.status(500).json(err);
+//     res.json({ success: true, inserted: result.affectedRows });
+//   });
+// });
 
-app.get('/delete-employee/:id', (req, res) => {
+// app.get('/delete-employee/:id', (req, res) => {
 
-    const id = req.params.id;
+//     const id = req.params.id;
 
-    db.query(
-        'DELETE FROM employees WHERE id = ?',
-        [id],
-        (err, result) => {
+//     db.query(
+//         'DELETE FROM employees WHERE id = ?',
+//         [id],
+//         (err, result) => {
 
-            if (err) {
-                return res.status(500).json(err);
-            }
+//             if (err) {
+//                 return res.status(500).json(err);
+//             }
 
-            res.json({
-                success: true,
-                deleted: result.affectedRows
-            });
-        }
-    );
-});
+//             res.json({
+//                 success: true,
+//                 deleted: result.affectedRows
+//             });
+//         }
+//     );
+// });
 
-app.get('/list-employees', (req, res) => {
-    db.query(
-        'SELECT id, name, email FROM employees',
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json(result);
-        }
-    );
-});
+// app.get('/list-employees', (req, res) => {
+//     db.query(
+//         'SELECT id, name, email FROM employees',
+//         (err, result) => {
+//             if (err) return res.status(500).json(err);
+//             res.json(result);
+//         }
+//     );
+// });
 
-app.get('/reset-password', async (req, res) => {
-    const bcrypt = require('bcryptjs');
+// app.get('/reset-password', async (req, res) => {
+//     const bcrypt = require('bcryptjs');
 
-    const hash = await bcrypt.hash('Manish@Groz', 10);
+//     const hash = await bcrypt.hash('Manish@Groz', 10);
 
-    db.query(
-        'UPDATE employees SET password = ?',
-        [hash],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
+//     db.query(
+//         'UPDATE employees SET password = ?',
+//         [hash],
+//         (err, result) => {
+//             if (err) return res.status(500).json(err);
 
-            res.json({
-                success: true
-            });
-        }
-    );
-});
+//             res.json({
+//                 success: true
+//             });
+//         }
+//     );
+// });
 
 const PORT = process.env.PORT || 3000;
 
