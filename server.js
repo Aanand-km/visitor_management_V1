@@ -91,30 +91,25 @@ app.get('/insert-employees', (req, res) => {
   });
 });
 
-app.get('/create-visitors-table', (req, res) => {
-  db.query(`
-    CREATE TABLE IF NOT EXISTS visitors (
-      id INT NOT NULL AUTO_INCREMENT,
-      name VARCHAR(100),
-      phone VARCHAR(15),
-      email VARCHAR(100),
-      aadhaar_number VARCHAR(50),
-      purpose TEXT,
-      employee_id INT,
-      photo_path VARCHAR(255),
-      status VARCHAR(50) DEFAULT 'pending',
-      pass_id VARCHAR(100),
-      qr_code LONGTEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      approved_at DATETIME NULL,
-      check_in_time DATETIME NULL,
-      check_out_time DATETIME NULL,
-      PRIMARY KEY (id)
-    )
-  `, (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json({ success: true });
-  });
+app.get('/delete-employee/:id', (req, res) => {
+
+    const id = req.params.id;
+
+    db.query(
+        'DELETE FROM employees WHERE id = ?',
+        [id],
+        (err, result) => {
+
+            if (err) {
+                return res.status(500).json(err);
+            }
+
+            res.json({
+                success: true,
+                deleted: result.affectedRows
+            });
+        }
+    );
 });
 
 const PORT = process.env.PORT || 3000;
