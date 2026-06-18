@@ -49,6 +49,23 @@ app.get('/create-otp-table', (req, res) => {
   });
 });
 
+app.get('/create-employees-table', (req, res) => {
+  db.query(`
+    CREATE TABLE IF NOT EXISTS employees (
+      id INT NOT NULL AUTO_INCREMENT,
+      name VARCHAR(100) DEFAULT NULL,
+      department VARCHAR(100) DEFAULT NULL,
+      email VARCHAR(100) DEFAULT NULL,
+      password VARCHAR(255) DEFAULT NULL,
+      PRIMARY KEY (id),
+      UNIQUE KEY unique_email (email)
+    )
+  `, (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json({ success: true });
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
