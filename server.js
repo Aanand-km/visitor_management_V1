@@ -33,7 +33,6 @@ app.get('/', (req, res) => {
     res.send('Visitor Management API Running');
 });
 
-const db = require('./db/db');
 
 app.get('/create-otp-table', (req, res) => {
   db.query(`
