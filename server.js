@@ -66,6 +66,16 @@ app.get('/create-employees-table', (req, res) => {
   });
 });
 
+app.get('/employees-count', (req, res) => {
+  db.query(
+    'SELECT COUNT(*) AS count FROM employees',
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json(result);
+    }
+  );
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
