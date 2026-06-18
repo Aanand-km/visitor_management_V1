@@ -76,6 +76,21 @@ app.get('/employees-count', (req, res) => {
   );
 });
 
+app.get('/insert-employees', (req, res) => {
+  const sql = `
+    INSERT INTO employees (id, name, department, email, password)
+    VALUES
+    (3, 'Manish Gaur', 'IT', 'anandkm539@gmail.com', '$2b$10$qoHigHQHVIIikvVVRtEN7O3CNiGHtJQ/BWdiHCR757qvIEEDZTWPO'),
+    (5, 'Anand', '', 'anand@groz.com', '$2b$10$3FqWhLCV4JaULrv6ROZtR.NTv9ScfZrl9rZd0NU2kk45c3UE8oz0G'),
+    (7, 'Rahul Sharma', 'IT', 'rahul@groz.com', '$2b$10$aQcz3So8HhiKOiJw0D9gf.m774w8qcLI0mm8Kb6xLpj0/cv6DcwPi')
+  `;
+
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json({ success: true, inserted: result.affectedRows });
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
