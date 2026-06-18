@@ -123,7 +123,7 @@ app.get('/list-employees', (req, res) => {
 });
 
 app.get('/reset-password', async (req, res) => {
-    const bcrypt = require('bcrypt');
+    const bcrypt = require('bcryptjs');
 
     const hash = await bcrypt.hash(process.env.EMP_PASS, 10);
 
