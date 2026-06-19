@@ -52,7 +52,7 @@ async function sendVisitorPassEmail(
 ) {
 
     const passLink =
-        `http://ducktail-five-prideful.ngrok-free.dev/visitor-pass.html?id=${visitorId}`;
+        `/visitor-pass.html?id=${visitorId}`;
 
     await transporter.sendMail({
 

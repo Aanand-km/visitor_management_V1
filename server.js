@@ -140,6 +140,16 @@ app.get('/employees-count', (req, res) => {
 //     );
 // });
 
+app.get('/test-upload', (req, res) => {
+    res.sendFile(
+        require('path').join(
+            __dirname,
+            'uploads',
+            'photos',
+            '1781764625655-My-Pic.jpeg'
+        )
+    );
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
