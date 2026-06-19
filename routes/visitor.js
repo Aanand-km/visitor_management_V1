@@ -48,24 +48,26 @@ router.post('/register', upload.single('photo'), (req, res) => {
         purpose,
         employee_id
     } = req.body;
-    const photo_path =
-        req.file
-            ? req.file.path
-            : null;
+    const photo_data =
+    req.file
+        ? fs.readFileSync(req.file.path, {
+            encoding: 'base64'
+        })
+        : null;
     console.log(req.body);
     console.log("Aadhaar:", aadhaar_number);
     fs.appendFileSync('./logs.txt', `\n${new Date().toISOString()} - req.body: ${JSON.stringify(req.body)}\nAadhaar: ${aadhaar_number}\n`);
 
     const sql = `
         INSERT INTO visitors
-        (name, phone, email, aadhaar_number, purpose, employee_id, photo_path, status)
+        (name, phone, email, aadhaar_number, purpose, employee_id, photo_data, status)
         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
     `;
 
     db.query(
 
         sql,
-        [name, phone, email, aadhaar_number, purpose, employee_id, photo_path],
+        [name, phone, email, aadhaar_number, purpose, employee_id, photo_data],
         (err, result) => {
 
             if (err) {
