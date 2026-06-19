@@ -150,6 +150,24 @@ app.get('/test-upload', (req, res) => {
         )
     );
 });
+
+app.get('/add-photo-column', (req, res) => {
+
+    db.query(
+        `ALTER TABLE visitors
+         ADD COLUMN photo_data LONGTEXT`,
+        (err, result) => {
+
+            if (err) {
+                return res.status(500).json(err);
+            }
+
+            res.json({
+                success: true
+            });
+        }
+    );
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
