@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+console.log("EMAIL SERVICE LOADED");
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -10,6 +11,13 @@ const transporter = nodemailer.createTransport({
     },
     tls: {
         rejectUnauthorized: false
+    }
+});
+ transporter.verify(function(error, success) {
+    if (error) {
+        console.log("SMTP ERROR:", error);
+    } else {
+        console.log("SMTP READY");
     }
 });
 
@@ -92,13 +100,7 @@ async function sendVisitorPassEmail(
 
         `
     });
-    transporter.verify(function(error, success) {
-    if (error) {
-        console.log("SMTP ERROR:", error);
-    } else {
-        console.log("SMTP READY");
-    }
-});
+   
 }
 
 module.exports = {
