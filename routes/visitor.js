@@ -304,7 +304,7 @@ router.get('/pass/:id', (req, res) => {
             visitors.status,
             visitors.pass_id,
             visitors.qr_code,
-            visitors.photo_path,
+            visitors.photo_data,
             employees.name AS employee_name
         FROM visitors
         LEFT JOIN employees
