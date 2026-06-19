@@ -92,6 +92,13 @@ async function sendVisitorPassEmail(
 
         `
     });
+    transporter.verify(function(error, success) {
+    if (error) {
+        console.log("SMTP ERROR:", error);
+    } else {
+        console.log("SMTP READY");
+    }
+});
 }
 
 module.exports = {
