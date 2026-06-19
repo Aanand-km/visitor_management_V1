@@ -3,13 +3,12 @@ const nodemailer = require('nodemailer');
 console.log("EMAIL SERVICE LOADED");
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: 'smtp-relay.brevo.com',
     port: 587,
     secure: false,
-    family: 4,
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.BREVO_USER,
+        pass: process.env.BREVO_PASS
     }
 });
 
@@ -28,7 +27,7 @@ async function sendEmployeeNotification(
 
     await transporter.sendMail({
 
-        from: process.env.EMAIL_USER,
+        from: 'anandkm539@gmail.com',
 
         to: employeeEmail,
 
@@ -65,7 +64,7 @@ async function sendVisitorPassEmail(
 
     await transporter.sendMail({
 
-        from: process.env.EMAIL_USER,
+        from:'anandkm539@gmail.com',
 
         to: visitorEmail,
 
