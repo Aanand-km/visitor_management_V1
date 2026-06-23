@@ -1,44 +1,29 @@
-const nodemailer = require('nodemailer');
+const SibApiV3Sdk = require('@getbrevo/brevo');
 
-console.log("EMAIL SERVICE LOADED");
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-console.log("BREVO USER =", process.env.BREVO_USER);
-console.log("BREVO PASS EXISTS =", !!process.env.BREVO_PASS);
+apiInstance.setApiKey(
+    SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey,
+    process.env.BREVO_API_KEY
+);
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.BREVO_USER,
-        pass: process.env.BREVO_PASS
-    }
-});
+async function sendEmployeeNotification(employeeEmail, visitor) {
 
-transporter.verify(function(error, success) {
-    if (error) {
-        console.log("SMTP ERROR:", error);
-    } else {
-        console.log("SMTP READY");
-    }
-});
+    await apiInstance.sendTransacEmail({
+        sender: {
+            email: 'anandkm539@gmail.com',
+            name: 'Visitor Management System'
+        },
 
-async function sendEmployeeNotification(
-    employeeEmail,
-    visitor
-) {
+        to: [
+            {
+                email: employeeEmail
+            }
+        ],
 
-    await transporter.sendMail({
+        subject: 'New Visitor Registration',
 
-        from: 'anandkm539@gmail.com',
-
-        to: employeeEmail,
-
-        subject:
-            'New Visitor Registration',
-
-        html: `
-
+        htmlContent: `
             <h2>New Visitor Request</h2>
 
             <p><b>Name:</b> ${visitor.name}</p>
@@ -52,10 +37,12 @@ async function sendEmployeeNotification(
             <hr>
 
             <p>Please login to approve this visitor.</p>
-
         `
     });
+
+    console.log("Employee email sent");
 }
+
 async function sendVisitorPassEmail(
     visitorEmail,
     visitorName,
@@ -63,46 +50,41 @@ async function sendVisitorPassEmail(
     passId
 ) {
 
-    const passLink =`https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}`;
+    const passLink =
+        `https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}`;
 
-    await transporter.sendMail({
+    await apiInstance.sendTransacEmail({
+        sender: {
+            email: 'anandkm539@gmail.com',
+            name: 'Visitor Management System'
+        },
 
-        from:'anandkm539@gmail.com',
-
-        to: visitorEmail,
+        to: [
+            {
+                email: visitorEmail
+            }
+        ],
 
         subject: 'Visitor Pass Approved',
 
-        html: `
-
+        htmlContent: `
             <h2>Visitor Pass Approved</h2>
 
             <p>Hello ${visitorName},</p>
 
             <p>Your visitor request has been approved.</p>
 
-            <p>
-                <b>Pass ID:</b>
-                ${passId}
-            </p>
+            <p><b>Pass ID:</b> ${passId}</p>
 
             <p>
-                View your pass:
+                <a href="${passLink}">
+                    Open Visitor Pass
+                </a>
             </p>
-
-            <a href="${passLink}">
-                Open Visitor Pass
-            </a>
-
-            <br><br>
-
-            <p>
-                Please carry this pass during your visit.
-            </p>
-
         `
     });
-   
+
+    console.log("Visitor pass email sent");
 }
 
 module.exports = {
