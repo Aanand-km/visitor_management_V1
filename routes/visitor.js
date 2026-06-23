@@ -50,22 +50,22 @@ router.post('/register', upload.single('photo'), (req, res) => {
         employee_id
     } = req.body;
     const photo_data =
-    req.file
-        ? fs.readFileSync(req.file.path, {
-            encoding: 'base64'
-        })
-        : null;
+        req.file
+            ? fs.readFileSync(req.file.path, {
+                encoding: 'base64'
+            })
+            : null;
     console.log(req.body);
     console.log("Aadhaar:", aadhaar_number);
     fs.appendFileSync('./logs.txt', `\n${new Date().toISOString()} - req.body: ${JSON.stringify(req.body)}\nAadhaar: ${aadhaar_number}\n`);
-        const approvalToken =
-    crypto.randomBytes(32).toString('hex');
+    const approvalToken =
+        crypto.randomBytes(32).toString('hex');
     const sql = `
         INSERT INTO visitors
-        (name, phone, email, aadhaar_number, purpose, employee_id, photo_data,  approval_token,status,)
+        (name, phone, email, aadhaar_number, purpose, employee_id, photo_data,  approval_token,status)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?,'pending')
     `;
-        
+
     db.query(
 
         sql,
@@ -80,10 +80,10 @@ router.post('/register', upload.single('photo'), (req, res) => {
             }
             const visitorId = result.insertId;
             const employeeSql = `
-SELECT email
-FROM employees
-WHERE id = ?
-`;
+                                    SELECT email
+                                    FROM employees
+                                    WHERE id = ?
+                                `;
 
             db.query(
                 employeeSql,
@@ -102,6 +102,8 @@ WHERE id = ?
                                 employeeResult[0].email,
 
                                 {
+                                    id: visitorId,
+                                    token: approvalToken,
                                     name,
                                     phone,
                                     email,
@@ -237,6 +239,120 @@ WHERE id = ?
                 visitorId,
                 passId
             });
+        }
+    );
+});
+
+router.get('/approve-mail/:id', async (req, res) => {
+
+    const visitorId = req.params.id;
+    const token = req.query.token;
+
+    db.query(
+        `
+        SELECT *
+        FROM visitors
+        WHERE id = ?
+        AND approval_token = ?
+        `,
+        [visitorId, token],
+        async (err, rows) => {
+
+            if (err || rows.length === 0) {
+                return res
+                    .status(403)
+                    .send('<h1>❌ Invalid Approval Link</h1>');
+            }
+
+            const passId =
+                'PASS-' + Date.now();
+
+            const qrText =
+                `https://visitor-management-jp03.onrender.com/visitor/scan/${visitorId}`;
+
+            const qrCode =
+                await QRCode.toDataURL(qrText);
+
+            db.query(
+                `
+                UPDATE visitors
+                SET
+                    status = 'approved',
+                    pass_id = ?,
+                    qr_code = ?,
+                    approved_at = NOW()
+                WHERE id = ?
+                `,
+                [passId, qrCode, visitorId],
+                async (err) => {
+
+                    if (err) {
+                        console.error(err);
+                        return res
+                            .status(500)
+                            .send('<h1>Database Error</h1>');
+                    }
+
+                    try {
+
+                        await sendVisitorPassEmail(
+                            rows[0].email,
+                            rows[0].name,
+                            visitorId,
+                            passId
+                        );
+
+                    } catch (e) {
+
+                        console.error(e);
+                    }
+
+                    res.send(`
+                        <h1>✅ Visitor Approved</h1>
+                        <h2>${rows[0].name}</h2>
+                        <p>You may close this tab.</p>
+                    `);
+                }
+            );
+        }
+    );
+});
+
+router.get('/reject-mail/:id', (req, res) => {
+
+    const visitorId = req.params.id;
+    const token = req.query.token;
+
+    db.query(
+        `
+        SELECT *
+        FROM visitors
+        WHERE id = ?
+        AND approval_token = ?
+        `,
+        [visitorId, token],
+        (err, rows) => {
+
+            if (err || rows.length === 0) {
+                return res
+                    .status(403)
+                    .send('<h1>❌ Invalid Rejection Link</h1>');
+            }
+
+            db.query(
+                `
+                UPDATE visitors
+                SET status = 'rejected'
+                WHERE id = ?
+                `,
+                [visitorId]
+            );
+
+            res.send(`
+                <h1>❌ Visitor Rejected</h1>
+                <h2>${rows[0].name}</h2>
+                <p>You may close this tab.</p>
+            `);
         }
     );
 });
