@@ -424,37 +424,20 @@
                     </div>
 
                 </div>
-
-                <div class="button-row">
-                    <button id="sendOtpBtn" class="btn-secondary" type="button" onclick="sendOTP()" disabled>Send
-                        OTP</button>
-                </div>
-
-                <div class="form-group">
-                    <label for="otp">OTP Code</label>
-                    <input type="text" id="otp" placeholder="Enter OTP" disabled>
-                </div>
-
-                <div class="button-row">
-                    <button id="verifyOtpBtn" class="btn-secondary" type="button" onclick="verifyOTP()" disabled>Verify
-                        OTP</button>
-                </div>
-
-                <p class="message hint" id="otpMessage"></p>
-
+                <!-- otp module has been deleted -->
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" placeholder="Enter email" disabled>
+                    <input type="email" id="email" placeholder="Enter email">
                 </div>
 
                 <div class="form-group">
                     <label for="purpose">Purpose of Visit</label>
-                    <textarea id="purpose" placeholder="Purpose of visit" disabled></textarea>
+                    <textarea id="purpose" placeholder="Purpose of visit"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="employee">Host Employee</label>
-                    <select id="employee" disabled>
+                    <select id="employee">
                         <option value="">Select Employee</option>
                     </select>
                 </div>
@@ -477,9 +460,7 @@
                 📄 OCR Status : Pending
             </div>
 
-            <div class="status-box" id="otpStatus">
-                🔐 OTP Status : Pending
-            </div>
+            <!--otp status removed-->
 
             <div class="status-box">
                 👤 Visitor Type : Guest
@@ -490,12 +471,10 @@
                 1️⃣ Aadhaar Verification
             </div>
 
-            <div class="progress-step" id="step2">
-                2️⃣ OTP Verification
-            </div>
+            <!--otp progress removed-->
 
             <div class="progress-step" id="step3">
-                3️⃣ Visitor Registration
+                2️⃣ Visitor Registration
             </div>
 
             <div class="status-box hidden" id="successCard">
@@ -622,8 +601,7 @@
 
     <script>
 
-        let otpVerified = false;
-        let otpSent = false;
+
         let ocrCompleted = false;
 
         function setDisabled(id, disabled) {
@@ -635,18 +613,9 @@
             const nameFilled = document.getElementById('name').value.trim().length > 0;
             const fileSelected = document.getElementById('aadhaarImage').files.length > 0;
             const aadhaarFilled = document.getElementById('aadhaar').value.trim().length > 0;
-            const phoneFilled = document.getElementById('phone').value.trim().length >= 10;
-
-            // Keep Aadhaar/Phone enabled once OCR completes, even if name input changes.
-            setDisabled('readAadhaarBtn', !(fileSelected));
-            setDisabled('name', !ocrCompleted);
-            setDisabled('galleryBtn', !nameFilled);
-            setDisabled('aadhaar', !ocrCompleted);
-            setDisabled('phone', !ocrCompleted);
-            setDisabled('takePhotoBtn', !nameFilled);
-
-            // Allow sending OTP when phone has a valid length OR OCR completed and some phone value exists.
-            const allowSendOtp = phoneFilled || (ocrCompleted && document.getElementById('phone').value.trim().length > 0);
+            setDisabled('employee', false);
+            setDisabled('email', false);
+            setDisabled('purpose', false);
             setDisabled('sendOtpBtn', !allowSendOtp);
             setDisabled('otp', !otpSent);
             setDisabled('verifyOtpBtn', !otpSent);
@@ -654,24 +623,16 @@
             setDisabled('email', !otpVerified);
             setDisabled('purpose', !otpVerified);
             const photoPresent = document.getElementById('visitorPhoto').files.length > 0;
-            setDisabled('submitBtn', !(otpVerified && nameFilled && photoPresent));
+            setDisabled('submitBtn', !(nameFilled && photoPresent));
 
-            if (!otpSent) {
-                setDisabled('otp', true);
-                setDisabled('verifyOtpBtn', true);
-            }
+           
         }
 
         function initializeFormState() {
             updateFieldAvailability();
             document.getElementById('name').addEventListener('input', updateFieldAvailability);
             document.getElementById('aadhaar').addEventListener('input', updateFieldAvailability);
-            document.getElementById('phone').addEventListener('input', () => {
-                otpSent = false;
-                document.getElementById('otp').value = '';
-                document.getElementById('otpMessage').innerText = '';
-                updateFieldAvailability();
-            });
+           document.getElementById('phone').addEventListener('input', updateFieldAvailability);
             document.getElementById('aadhaarImage').addEventListener('change', () => {
 
                 const file =
@@ -847,103 +808,9 @@
             }
         });
 
-        async function sendOTP() {
+       
 
-            const phone =
-                document.getElementById('phone').value;
-
-            if (!phone) {
-
-                alert('Enter phone number first');
-
-                return;
-            }
-
-            const response =
-                await fetch(
-                    '/otp/send',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type':
-                                'application/json'
-                        },
-                        body: JSON.stringify({
-                            phone
-                        })
-                    }
-                );
-
-            const data =
-                await response.json();
-
-            if (response.ok && data.message === 'OTP Sent') {
-                otpSent = true;
-                document.getElementById('otp').disabled = false;
-                document.getElementById('verifyOtpBtn').disabled = false;
-                document.getElementById('otpStatus').innerHTML = '⏳ OTP Sent – enter the code to verify';
-                document.getElementById('step2').style.borderLeft = '4px solid #f59e0b';
-                document.getElementById('step2').innerHTML = '⏳ 2️⃣ OTP Sent';
-                updateFieldAvailability();
-            }
-            alert(data.message);
-        }
-
-        async function verifyOTP() {
-
-            const phone =
-                document.getElementById('phone').value;
-
-            const otp =
-                document.getElementById('otp').value;
-
-            const response =
-                await fetch(
-                    '/otp/verify',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type':
-                                'application/json'
-                        },
-                        body: JSON.stringify({
-                            phone,
-                            otp
-                        })
-                    }
-                );
-
-            const data =
-                await response.json();
-
-            if (data.verified) {
-                otpVerified = true;
-                document.getElementById('email').disabled = false;
-                document.getElementById('purpose').disabled = false;
-                document.getElementById('employee').disabled = false;
-                document.getElementById('submitBtn').disabled = false;
-                updateFieldAvailability();
-                document.getElementById('otpStatus')
-                    .innerHTML = '✅ OTP Status : Verified';
-
-                document.getElementById('step2')
-                    .style.borderLeft =
-                    '4px solid green';
-                document.getElementById('step2')
-                    .innerHTML = '✅ 2️⃣ OTP Verification';
-                document
-                    .getElementById('otpMessage')
-                    .innerText =
-                    'OTP Verified Successfully';
-
-            } else {
-
-                document
-                    .getElementById('otpMessage')
-                    .innerText =
-                    'Invalid OTP';
-            }
-        }
+        
 
         function openAadhaarInput(useCamera) {
             const input = document.getElementById('aadhaarImage');
@@ -1042,7 +909,7 @@
                     alert(
                         'Mobile number not found on Aadhaar. Please enter it manually.'
                     );
-                } 
+                }
                 const noDataFound = !data.aadhaar && !data.mobile && !data.mobile;
 
                 // Mark OCR completed so fields stay enabled even if name changes later
@@ -1051,7 +918,6 @@
                     '✅ Uploaded';
                 document.getElementById('phone').disabled = false;
                 document.getElementById('aadhaar').disabled = false;
-                document.getElementById('sendOtpBtn').disabled = false;
                 updateFieldAvailability();
                 document.getElementById('mobileDisplay').innerText = data.mobile || 'Not found';
 
