@@ -616,12 +616,6 @@
             setDisabled('employee', false);
             setDisabled('email', false);
             setDisabled('purpose', false);
-            setDisabled('sendOtpBtn', !allowSendOtp);
-            setDisabled('otp', !otpSent);
-            setDisabled('verifyOtpBtn', !otpSent);
-            setDisabled('employee', !otpVerified);
-            setDisabled('email', !otpVerified);
-            setDisabled('purpose', !otpVerified);
             const photoPresent = document.getElementById('visitorPhoto').files.length > 0;
             setDisabled('submitBtn', !(nameFilled && photoPresent));
 
