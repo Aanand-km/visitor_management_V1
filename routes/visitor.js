@@ -535,27 +535,12 @@ router.get('/scan/:id', (req, res) => {
     );
 });
 
-router.get('/add-token-column', (req, res) => {
 
-    db.query(
-        `ALTER TABLE visitors ADD COLUMN approval_token VARCHAR(255)`,
-        (err, result) => {
-
-            if (err) {
-                console.log(err);
-                return res.send(err.message);
-            }
-
-            res.send('approval_token column added');
-        }
-    );
-
-});
 
 router.get('/change-email', (req, res) => {
 
     const employeeId = 3; // change employee ID
-    const newEmail = 'Manish.gaur@groz-tools.com';
+    const newEmail = 'anandkm539@gmail.com';
 
     db.query(
         `
