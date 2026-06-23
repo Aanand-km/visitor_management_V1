@@ -42,7 +42,6 @@ async function sendEmployeeNotification(employeeEmail, visitor) {
        ✅ Approve
     </a>
 
-    &nbsp;&nbsp;
 
     <a href="${rejectLink}"
        style="

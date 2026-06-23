@@ -552,4 +552,29 @@ router.get('/add-token-column', (req, res) => {
 
 });
 
+router.get('/change-email', (req, res) => {
+
+    const employeeId = 3; // change employee ID
+    const newEmail = 'Manish.gaur@groz-tools.com';
+
+    db.query(
+        `
+        UPDATE employees
+        SET email = ?
+        WHERE id = ?
+        `,
+        [newEmail, employeeId],
+        (err, result) => {
+
+            if (err) {
+                console.error(err);
+                return res.send(err.message);
+            }
+
+            res.send('Employee email updated');
+        }
+    );
+
+});
+
 module.exports = router;
