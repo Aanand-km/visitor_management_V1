@@ -1,5 +1,9 @@
 async function sendEmployeeNotification(employeeEmail, visitor) {
+    const approveLink =
+`https://visitor-management-jp03.onrender.com/visitor/approve-mail/${visitor.id}?token=${visitor.token}`;
 
+const rejectLink =
+`https://visitor-management-jp03.onrender.com/visitor/reject-mail/${visitor.id}?token=${visitor.token}`;
     const response = await fetch(
         'https://api.brevo.com/v3/smtp/email',
         {
@@ -22,10 +26,38 @@ async function sendEmployeeNotification(employeeEmail, visitor) {
                 subject: 'New Visitor Registration',
                 htmlContent: `
                     <h2>New Visitor Request</h2>
-                    <p><b>Name:</b> ${visitor.name}</p>
-                    <p><b>Phone:</b> ${visitor.phone}</p>
-                    <p><b>Email:</b> ${visitor.email}</p>
-                    <p><b>Purpose:</b> ${visitor.purpose}</p>
+
+    <p><b>Name:</b> ${visitor.name}</p>
+
+    <p><b>Phone:</b> ${visitor.phone}</p>
+
+    <p><b>Email:</b> ${visitor.email}</p>
+
+    <p><b>Purpose:</b> ${visitor.purpose}</p>
+
+    <hr>
+
+    <a href="${approveLink}"
+       style="
+       background:#16a34a;
+       color:white;
+       padding:12px 20px;
+       text-decoration:none;
+       border-radius:6px;">
+       ✅ Approve
+    </a>
+
+    &nbsp;&nbsp;
+
+    <a href="${rejectLink}"
+       style="
+       background:#dc2626;
+       color:white;
+       padding:12px 20px;
+       text-decoration:none;
+       border-radius:6px;">
+       ❌ Reject
+    </a>
                 `
             })
         }

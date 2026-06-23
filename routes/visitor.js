@@ -10,6 +10,7 @@ const {
 } = require('../services/emailService');
 
 const path = require('path');
+const crypto = require('crypto');
 
 const storage = multer.diskStorage({
 
@@ -57,17 +58,18 @@ router.post('/register', upload.single('photo'), (req, res) => {
     console.log(req.body);
     console.log("Aadhaar:", aadhaar_number);
     fs.appendFileSync('./logs.txt', `\n${new Date().toISOString()} - req.body: ${JSON.stringify(req.body)}\nAadhaar: ${aadhaar_number}\n`);
-
+        const approvalToken =
+    crypto.randomBytes(32).toString('hex');
     const sql = `
         INSERT INTO visitors
-        (name, phone, email, aadhaar_number, purpose, employee_id, photo_data, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
+        (name, phone, email, aadhaar_number, purpose, employee_id, photo_data,  approval_token,status,)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?,'pending')
     `;
-
+        
     db.query(
 
         sql,
-        [name, phone, email, aadhaar_number, purpose, employee_id, photo_data],
+        [name, phone, email, aadhaar_number, purpose, employee_id, photo_data, approvalToken],
         (err, result) => {
 
             if (err) {
@@ -76,6 +78,7 @@ router.post('/register', upload.single('photo'), (req, res) => {
                     message: 'Database Error'
                 });
             }
+            const visitorId = result.insertId;
             const employeeSql = `
 SELECT email
 FROM employees
@@ -122,7 +125,7 @@ WHERE id = ?
             );
             res.json({
                 message: 'Visitor Registered Successfully',
-                visitorId: result.insertId
+                visitorId: result.insertId,
             });
         }
     );
