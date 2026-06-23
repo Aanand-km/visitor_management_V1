@@ -307,11 +307,9 @@ router.get('/approve-mail/:id', async (req, res) => {
                         console.error(e);
                     }
 
-                    res.send(`
-                        <h1>✅ Visitor Approved</h1>
-                        <h2>${rows[0].name}</h2>
-                        <p>You may close this tab.</p>
-                    `);
+                    res.redirect(
+    `https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}`
+);
                 }
             );
         }
