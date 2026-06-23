@@ -537,4 +537,21 @@ router.get('/scan/:id', (req, res) => {
     );
 });
 
+router.get('/add-token-column', (req, res) => {
+
+    db.query(
+        `ALTER TABLE visitors ADD COLUMN approval_token VARCHAR(255)`,
+        (err, result) => {
+
+            if (err) {
+                console.log(err);
+                return res.send(err.message);
+            }
+
+            res.send('approval_token column added');
+        }
+    );
+
+});
+
 module.exports = router;
