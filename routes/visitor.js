@@ -540,7 +540,7 @@ router.get('/scan/:id', (req, res) => {
 router.get('/change-email', (req, res) => {
 
     const employeeId = 3; // change employee ID
-    const newEmail = 'anandkm539@gmail.com';
+    const newEmail = 'Manish.gaur@groz-tools.com';
 
     db.query(
         `
