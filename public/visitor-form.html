@@ -613,7 +613,7 @@
             const nameFilled = document.getElementById('name').value.trim().length > 0;
             const fileSelected = document.getElementById('aadhaarImage').files.length > 0;
             const aadhaarFilled = document.getElementById('aadhaar').value.trim().length > 0;
-            setDisabled('employee', false);
+            setDisabled('employee', false); 
             setDisabled('email', false);
             setDisabled('purpose', false);
             const photoPresent = document.getElementById('visitorPhoto').files.length > 0;
@@ -771,10 +771,7 @@
                 formData.append('photo', photo);
                 console.log("STEP 4 - ABOUT TO CALL REGISTER API");
                 console.log("OTP Verified:", otpVerified);
-                if (!otpVerified) {
-                    alert('Please verify OTP first');
-                    return;
-                }
+               
 
                 const response = await fetch(
                     '/visitor/register',
