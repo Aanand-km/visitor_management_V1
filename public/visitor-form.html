@@ -770,7 +770,7 @@
 
                 formData.append('photo', photo);
                 console.log("STEP 4 - ABOUT TO CALL REGISTER API");
-                console.log("OTP Verified:", otpVerified);
+                
                
 
                 const response = await fetch(
@@ -798,11 +798,6 @@
                 console.error('REGISTER ERROR:', error);
             }
         });
-
-       
-
-        
-
         function openAadhaarInput(useCamera) {
             const input = document.getElementById('aadhaarImage');
             if (useCamera) {
