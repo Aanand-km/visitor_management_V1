@@ -27,7 +27,7 @@ router.post(
                 fs.readFileSync(
                     req.file.path
                 );
-
+            const documentType = req.body.documentType;
             const base64Image =
                 imageBuffer.toString(
                     'base64'
@@ -52,57 +52,67 @@ router.post(
                         },
 
                         {
-                            text: `This image contains an Indian Aadhaar card.
+                            text: `
+You are an OCR engine.
 
-Extract:
+The uploaded identity document is a ${documentType}.
 
-1. Full Name
-2. Aadhaar Number
-3. Mobile Number (if visible)
+Extract ONLY the following information visible in the image.
 
-If mobile number is not visible, return:
+1. Name
+2. Document Number
 
-{
-  "mobile": null
-}
+Rules:
+
+- The document number must belong to the selected document type.
+- Do NOT return phone number.
+- Do NOT return address.
+- Do NOT return father's name.
+- Do NOT return DOB.
+- Do NOT return issue date.
+- Do NOT return expiry date.
+- Do NOT return gender.
+- Do NOT return any explanation.
+- If any value is missing, return an empty string.
 
 Return ONLY valid JSON.
 
 {
-  "name": "",
-  "aadhaar": "",
-  "mobile": null
+    "name": "",
+    "documentNumber": ""
 }
-
-Do not guess.
-Do not hallucinate.
-Only extract information visible in the image.`
+`
                         }
                     ]
                 });
 
-            let text =
-                response.text;
+            let text = response.text;
 
-            text =
-                text.replace(
-                    /```json/g,
-                    ''
-                );
-
-            text =
-                text.replace(
-                    /```/g,
-                    ''
-                );
-
-            console.log(
-                "Gemini Raw Response:",
-                text
+            text = text.replace(
+                /```json/g,
+                ''
             );
 
-            const data =
-                JSON.parse(text);
+            text = text.replace(
+                /```/g,
+                ''
+            );
+
+            console.log("Gemini Raw Response:", text);
+
+            let data;
+
+            try {
+
+                data = JSON.parse(text);
+
+            } catch {
+
+                return res.status(500).json({
+                    message: "Invalid OCR Response"
+                });
+
+            }
 
             res.json(data);
 

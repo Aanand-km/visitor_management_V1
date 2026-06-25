@@ -448,6 +448,7 @@
                         `/visitor/pending/${employeeId}`
                     );
                 const visitors = await response.json();
+                console.log(visitors);
 
                 document.getElementById('pendingCount').innerText = visitors.length;
 
@@ -494,13 +495,18 @@
         }
 
         function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
+
+    if (unsafe === null || unsafe === undefined) {
+        return '';
+    }
+
+    return String(unsafe)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
         async function loadApprovalCount() {
 
             const response =

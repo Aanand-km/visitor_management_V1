@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const bcrypt = require('bcryptjs');
 
 console.log(process.env.GEMINI_API_KEY);
 
@@ -31,6 +32,8 @@ app.use(
 app.get('/', (req, res) => {
     res.send('Visitor Management API Running');
 });
+
+
 
 const PORT = process.env.PORT || 3000;
 

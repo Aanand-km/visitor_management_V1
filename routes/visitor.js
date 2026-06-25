@@ -45,6 +45,9 @@ router.post('/register', upload.single('photo'), (req, res) => {
         name,
         phone,
         email,
+        document_type,
+        document_number,
+        document_data,
         aadhaar_number,
         purpose,
         employee_id
@@ -62,14 +65,14 @@ router.post('/register', upload.single('photo'), (req, res) => {
         crypto.randomBytes(32).toString('hex');
     const sql = `
         INSERT INTO visitors
-        (name, phone, email, aadhaar_number, purpose, employee_id, photo_data,  approval_token,status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?,'pending')
+        (name, phone, email, aadhaar_number, purpose, employee_id, photo_data, document_type, document_number, document_data, approval_token,status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,'pending')
     `;
 
     db.query(
 
         sql,
-        [name, phone, email, aadhaar_number, purpose, employee_id, photo_data, approvalToken],
+        [name, phone, email, aadhaar_number, purpose, employee_id, photo_data, document_type, document_number, document_data, approvalToken],
         (err, result) => {
 
             if (err) {
@@ -162,7 +165,8 @@ router.get('/pending/:employeeId', (req, res) => {
                     message: 'Database Error'
                 });
             }
-
+            console.log(result);
+            res.json(result);
             res.json(result);
         }
     );
@@ -308,8 +312,8 @@ router.get('/approve-mail/:id', async (req, res) => {
                     }
 
                     res.redirect(
-    `https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}`
-);
+                        `https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}`
+                    );
                 }
             );
         }
@@ -537,29 +541,6 @@ router.get('/scan/:id', (req, res) => {
 
 
 
-router.get('/change-email', (req, res) => {
 
-    const employeeId = 3; // change employee ID
-    const newEmail = 'Manish.gaur@groz-tools.com';
-
-    db.query(
-        `
-        UPDATE employees
-        SET email = ?
-        WHERE id = ?
-        `,
-        [newEmail, employeeId],
-        (err, result) => {
-
-            if (err) {
-                console.error(err);
-                return res.send(err.message);
-            }
-
-            res.send('Employee email updated');
-        }
-    );
-
-});
 
 module.exports = router;
