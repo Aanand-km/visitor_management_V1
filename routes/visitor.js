@@ -28,15 +28,12 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
 
         cb(
-            null,
-            Date.now() + '-' + file.originalname
+            null, Date.now() + '-' + file.originalname
         );
     }
 });
 
-const upload = multer({
-    storage: storage
-});
+const upload = multer({ storage: storage });
 
 console.log('Visitor routes loaded with file logging support');
 
@@ -48,38 +45,31 @@ router.post('/register', upload.single('photo'), (req, res) => {
         document_type,
         document_number,
         document_data,
-        aadhaar_number,
         purpose,
         employee_id
     } = req.body;
-    const photo_data =
-        req.file
-            ? fs.readFileSync(req.file.path, {
-                encoding: 'base64'
-            })
-            : null;
+    const photo_data = req.file ? fs.readFileSync(req.file.path, { encoding: 'base64' }) : null;
+
     console.log(req.body);
-    console.log("Aadhaar:", aadhaar_number);
-    fs.appendFileSync('./logs.txt', `\n${new Date().toISOString()} - req.body: ${JSON.stringify(req.body)}\nAadhaar: ${aadhaar_number}\n`);
-    const approvalToken =
-        crypto.randomBytes(32).toString('hex');
+    console.log("Document Number:", document_number);
+
+    fs.appendFileSync('./logs.txt', `\n${new Date().toISOString()} - req.body: ${JSON.stringify(req.body)}\nDocument Number: ${document_number}\n`);
+    const approvalToken = crypto.randomBytes(32).toString('hex');
     const sql = `
         INSERT INTO visitors
-        (name, phone, email, aadhaar_number, purpose, employee_id, photo_data, document_type, document_number, document_data, approval_token,status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,'pending')
+        (name, phone, email,purpose, employee_id, photo_data, document_type, document_number, document_data, approval_token,status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,'pending')
     `;
 
     db.query(
 
         sql,
-        [name, phone, email, aadhaar_number, purpose, employee_id, photo_data, document_type, document_number, document_data, approvalToken],
+        [name, phone, email, purpose, employee_id, photo_data, document_type, document_number, document_data, approvalToken],
         (err, result) => {
 
             if (err) {
                 console.error(err);
-                return res.status(500).json({
-                    message: 'Database Error'
-                });
+                return res.status(500).json({ message: 'Database Error' });
             }
             const visitorId = result.insertId;
             const employeeSql = `
@@ -114,16 +104,11 @@ router.post('/register', upload.single('photo'), (req, res) => {
                                 }
                             );
 
-                            console.log(
-                                'Employee email sent'
-                            );
+                            console.log('Employee email sent');
 
                         } catch (mailError) {
 
-                            console.error(
-                                'Email Error:',
-                                mailError
-                            );
+                            console.error('Email Error:', mailError);
                         }
                     }
                 }
@@ -167,7 +152,7 @@ router.get('/pending/:employeeId', (req, res) => {
             }
             console.log(result);
             res.json(result);
-            res.json(result);
+
         }
     );
 });
@@ -176,14 +161,11 @@ router.put('/approve/:id', async (req, res) => {
 
     const visitorId = req.params.id;
 
-    const passId =
-        'PASS-' + Date.now();
+    const passId = 'PASS-' + Date.now();
 
-    const qrText =
-        `http://ducktail-five-prideful.ngrok-free.dev/visitor/scan/${visitorId}`;
+    const qrText = `http://ducktail-five-prideful.ngrok-free.dev/visitor/scan/${visitorId}`;
 
-    const qrCode =
-        await QRCode.toDataURL(qrText);
+    const qrCode = await QRCode.toDataURL(qrText);
 
     const sql = `
     UPDATE visitors
@@ -203,9 +185,7 @@ router.put('/approve/:id', async (req, res) => {
             console.log("DB Result:", result);
             if (err) {
                 console.error(err);
-                return res.status(500).json({
-                    message: 'Database Error'
-                });
+                return res.status(500).json({ message: 'Database Error' });
             }
             const visitorSql = `
 SELECT
@@ -263,19 +243,14 @@ router.get('/approve-mail/:id', async (req, res) => {
         async (err, rows) => {
 
             if (err || rows.length === 0) {
-                return res
-                    .status(403)
-                    .send('<h1>❌ Invalid Approval Link</h1>');
+                return res.status(403).send('<h1>❌ Invalid Approval Link</h1>');
             }
 
-            const passId =
-                'PASS-' + Date.now();
+            const passId = 'PASS-' + Date.now();
 
-            const qrText =
-                `https://visitor-management-jp03.onrender.com/visitor/scan/${visitorId}`;
+            const qrText = `https://visitor-management-jp03.onrender.com/visitor/scan/${visitorId}`;
 
-            const qrCode =
-                await QRCode.toDataURL(qrText);
+            const qrCode = await QRCode.toDataURL(qrText);
 
             db.query(
                 `
@@ -292,9 +267,7 @@ router.get('/approve-mail/:id', async (req, res) => {
 
                     if (err) {
                         console.error(err);
-                        return res
-                            .status(500)
-                            .send('<h1>Database Error</h1>');
+                        return res.status(500).send('<h1>Database Error</h1>');
                     }
 
                     try {
@@ -311,8 +284,7 @@ router.get('/approve-mail/:id', async (req, res) => {
                         console.error(e);
                     }
 
-                    res.redirect(
-                        `https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}`
+                    res.redirect(`https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}`
                     );
                 }
             );
@@ -336,9 +308,7 @@ router.get('/reject-mail/:id', (req, res) => {
         (err, rows) => {
 
             if (err || rows.length === 0) {
-                return res
-                    .status(403)
-                    .send('<h1>❌ Invalid Rejection Link</h1>');
+                return res.status(403).send('<h1>❌ Invalid Rejection Link</h1>');
             }
 
             db.query(
@@ -421,7 +391,7 @@ router.get('/pass/:id', (req, res) => {
             visitors.id,
             visitors.name,
             visitors.phone,
-            visitors.aadhaar_number,
+           visitors.document_number,
             visitors.status,
             visitors.pass_id,
             visitors.qr_code,
