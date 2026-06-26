@@ -198,7 +198,7 @@
             box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
         }
 
-        .aadhaar-card {
+        .document-card {
             display: none;
             background: #fff;
             padding: 18px;
@@ -207,7 +207,7 @@
             margin-top: 18px;
         }
 
-        .aadhaar-preview {
+        .document-preview {
             width: 100%;
             border-radius: 16px;
             margin-bottom: 14px;
@@ -393,11 +393,11 @@
 
                 </div>
                 <div class="form-group">
-                    <label for="aadhaarImage">Upload Identity Document</label>
-                    <input type="file" id="aadhaarImage" accept="image/*">
+                    <label for="documentImage">Upload Identity Document</label>
+                    <input type="file" id="documentImage" accept="image/*">
                     <div class="button-row">
 
-                        <button type="button" class="btn-secondary" onclick="openAadhaarCamera()">
+                        <button type="button" class="btn-secondary" onclick="openDocumentCamera()">
 
                             📷 Capture Identity Document
 
@@ -419,7 +419,7 @@
                 </div>
 
                 <div class="button-row">
-                    <button id="readAadhaarBtn" class="btn-secondary" type="button" onclick="readAadhaar(event)">
+                    <button id="scanDocumentBtn" class="btn-secondary" type="button" onclick="scanDocument(event)">
                         Scan Document</button>
                 </div>
                 <div class="form-group">
@@ -427,8 +427,8 @@
                     <input type="text" id="name" placeholder="will be filled by OCR" required>
                 </div>
                 <div class="form-group">
-                    <label for="aadhaar">Document Number</label>
-                    <input type="text" id="aadhaar" placeholder="will be filled by OCR" disabled>
+                    <label for="documentNumber">Document Number</label>
+                    <input type="text" id="documentNumber" placeholder="will be filled by OCR" disabled>
                 </div>
 
                 <div class="form-group">
@@ -488,7 +488,7 @@
                 <div class="form-actions">
                     <button id="submitBtn" class="btn" type="submit" disabled>Register Visitor</button>
                 </div>
-                <input type="file" id="aadhaarCameraInput" accept="image/*" capture="environment" style="display:none">
+                <input type="file" id="documentCameraInput" accept="image/*" capture="environment" style="display:none">
 
                 <input type="file" id="visitorCameraInput" accept="image/*" capture="user" style="display:none">
             </form>
@@ -531,7 +531,7 @@
                 Verification Preview
             </h2>
 
-            <div id="aadhaarCard" class="aadhaar-card">
+            <div id="documentCard" class="document-card">
 
                 <div class="preview-info">
 
@@ -567,21 +567,12 @@
                         Document Number
                     </div>
 
-                    <div class="preview-value" id="aadhaarDisplay">
+                    <div class="preview-value" id="documentNumberDisplay">
                     </div>
 
                 </div>
 
-                <div class="preview-info">
 
-                    <div class="preview-label">
-                        Mobile Number
-                    </div>
-
-                    <div class="preview-value" id="mobileDisplay">
-                    </div>
-
-                </div>
 
 
                 <div class="preview-label">
@@ -594,7 +585,7 @@
                         Identity Document
                     </div>
 
-                    <a id="aadhaarFileLink" href="#" target="_blank" style="display:none">
+                    <a id="documentFileLink" href="#" target="_blank" style="display:none">
 
                         View Identity Document
 
@@ -616,8 +607,7 @@
 
                 </div>
                 <div class="preview-label">
-                    Please verify the uploaded Aadhaar image and visitor photo are clear and correct. If not, please
-                    re-upload using the form.
+                    Please verify the uploaded identity document and visitor photo are clear and correct.
                 </div>
 
                 <div class="preview-info">
@@ -626,7 +616,7 @@
                         Document Status
                     </div>
 
-                    <div class="preview-value" id="aadhaarStatus">
+                    <div class="preview-value" id="documentStatus">
 
                         Not Uploaded
 
@@ -668,8 +658,8 @@
 
         function updateFieldAvailability() {
             const nameFilled = document.getElementById('name').value.trim().length > 0;
-            const fileSelected = document.getElementById('aadhaarImage').files.length > 0;
-            const aadhaarFilled = document.getElementById('aadhaar').value.trim().length > 0;
+            const documentSelected = document.getElementById('documentImage').files.length > 0;
+            const documentFilled = document.getElementById('documentNumber').value.trim().length > 0;
             setDisabled('employee', false);
             setDisabled('email', false);
             setDisabled('purpose', false);
@@ -682,94 +672,72 @@
         function initializeFormState() {
             updateFieldAvailability();
             document.getElementById('name').addEventListener('input', updateFieldAvailability);
-            document.getElementById('aadhaar').addEventListener('input', updateFieldAvailability);
+            document.getElementById('documentNumber').addEventListener('input', updateFieldAvailability);
             document.getElementById('phone').addEventListener('input', updateFieldAvailability);
-            document.getElementById('aadhaarImage').addEventListener('change', () => {
+            document.getElementById('documentImage').addEventListener('change', () => {
 
-                const file =
-                    document.getElementById('aadhaarImage').files[0];
+                const file = document.getElementById('documentImage').files[0];
 
-                const selectedFileNameEl =
-                    document.getElementById('selectedFileName');
+                const selectedFileNameEl = document.getElementById('selectedFileName');
 
                 if (selectedFileNameEl) {
-                    selectedFileNameEl.innerText =
-                        file ? file.name : 'No file selected';
+                    selectedFileNameEl.innerText = file ? file.name : 'No file selected';
                 }
 
                 if (file) {
 
-                    const aadhaarURL =
-                        URL.createObjectURL(file);
+                    const documentURL = URL.createObjectURL(file);
 
-                    const aadhaarLink =
-                        document.getElementById('aadhaarFileLink');
+                    const documentLink = document.getElementById('documentFileLink');
 
-                    aadhaarLink.href = aadhaarURL;
+                    documentLink.href = documentURL;
 
-                    aadhaarLink.style.display =
-                        'inline-block';
+                    documentLink.style.display = 'inline-block';
 
-                    document.getElementById('aadhaarStatus').innerText =
-                        '✅ Uploaded';
+                    document.getElementById('documentStatus').innerText = '✅ Uploaded';
                 }
 
                 updateFieldAvailability();
             });
-            document.getElementById('visitorPhoto')
-                .addEventListener('change', updateFieldAvailability);
-            document.getElementById('visitorPhoto')
-                .addEventListener('change', function () {
+            document.getElementById('visitorPhoto').addEventListener('change', updateFieldAvailability);
+            document.getElementById('visitorPhoto').addEventListener('change', function () {
 
-                    const file = this.files[0];
+                const file = this.files[0];
 
-                    if (!file) return;
+                if (!file) return;
 
-                    const visitorURL =
-                        URL.createObjectURL(file);
+                const visitorURL = URL.createObjectURL(file);
 
-                    const visitorLink =
-                        document.getElementById('visitorFileLink');
+                const visitorLink = document.getElementById('visitorFileLink');
 
-                    visitorLink.href = visitorURL;
+                visitorLink.href = visitorURL;
 
-                    visitorLink.style.display = 'inline-block';
+                visitorLink.style.display = 'inline-block';
 
-                    document.getElementById('visitorPhotoStatus').innerText =
-                        '✅ Uploaded';
-                });
-            document.getElementById('name')
-                .addEventListener('input', function () {
-
-                    document.getElementById(
-                        'nameDisplay'
-                    ).innerText =
-                        this.value;
-                });
+                document.getElementById('visitorPhotoStatus').innerText = '✅ Uploaded';
+            });
+            document.getElementById('name').addEventListener('input', function () {
+                document.getElementById('nameDisplay').innerText = this.value;
+            });
         }
 
         initializeFormState();
 
         async function loadEmployees() {
 
-            const response =
-                await fetch('/employees');
+            const response = await fetch('/employees');
 
-            const employees =
-                await response.json();
+            const employees = await response.json();
 
-            const dropdown =
-                document.getElementById('employee');
+            const dropdown = document.getElementById('employee');
 
             employees.forEach(emp => {
 
-                const option =
-                    document.createElement('option');
+                const option = document.createElement('option');
 
                 option.value = emp.id;
 
-                option.textContent =
-                    `${emp.name} (${emp.department})`;
+                option.textContent = `${emp.name} (${emp.department})`;
 
                 dropdown.appendChild(option);
 
@@ -781,53 +749,27 @@
         console.log("SCRIPT LOADED");
         document.getElementById('visitorForm').addEventListener('submit', async function (e) {
             try {
+
                 console.log("STEP 1");
+
                 e.preventDefault();
+
                 console.log("STEP 2");
 
                 const formData = new FormData();
+
                 console.log("STEP 3");
 
-                formData.append(
-                    'name',
-                    document.getElementById('name').value
-                );
+                formData.append('name', document.getElementById('name').value);
+                formData.append('phone', document.getElementById('phone').value);
+                formData.append('email', document.getElementById('email').value);
+                formData.append('document_type', document.getElementById('documentType').value);
+                formData.append('document_number', document.getElementById('documentNumber').value);
+                formData.append('document_data', documentBase64);
+                formData.append('purpose', document.getElementById('purpose').value);
 
-                formData.append(
-                    'phone',
-                    document.getElementById('phone').value
-                );
-
-                formData.append(
-                    'email',
-                    document.getElementById('email').value
-                );
-
-                formData.append(
-                    'document_type',
-                    document.getElementById('documentType').value
-                );
-
-                formData.append(
-                    'document_number',
-                    document.getElementById('aadhaar').value
-                );
-                formData.append(
-                    'document_data',
-                    documentBase64
-                );
-
-                formData.append(
-                    'purpose',
-                    document.getElementById('purpose').value
-                );
-
-                formData.append(
-                    'employee_id',
-                    document.getElementById('employee').value
-                );
-                const photo =
-                    document.getElementById('visitorPhoto').files[0];
+                formData.append('employee_id', document.getElementById('employee').value);
+                const photo = document.getElementById('visitorPhoto').files[0];
 
                 if (!photo) {
                     alert('Please upload visitor photo');
@@ -857,23 +799,19 @@
 
                 const data = await response.json();
 
-                document.getElementById('step3')
-                    .style.borderLeft = '4px solid green';
+                document.getElementById('step3').style.borderLeft = '4px solid green';
 
-                document.getElementById('step3')
-                    .innerHTML = '✅ 3️⃣ Visitor Registration';
+                document.getElementById('step3').innerHTML = '✅ 3️⃣ Visitor Registration';
 
-                document.getElementById('successCard')
-                    .style.display = 'block';
+                document.getElementById('successCard').style.display = 'block';
 
-                document.getElementById('message')
-                    .innerText = data.message;
+                document.getElementById('message').innerText = data.message;
             } catch (error) {
                 console.error('REGISTER ERROR:', error);
             }
         });
-        function openAadhaarInput(useCamera) {
-            const input = document.getElementById('aadhaarImage');
+        function openDocumentInput(useCamera) {
+            const input = document.getElementById('documentImage');
             if (useCamera) {
                 input.setAttribute('capture', 'environment');
             } else {
@@ -882,9 +820,8 @@
             input.click();
         }
 
-        async function readAadhaar(event) {
-            const documentType =
-                document.getElementById('documentType').value;
+        async function scanDocument(event) {
+            const documentType = document.getElementById('documentType').value;
 
             if (!documentType) {
 
@@ -894,16 +831,16 @@
 
             }
             const btn = event.target;
-            btn.innerText = 'Reading...';
+            btn.innerText = 'Scanning...';
             btn.disabled = true;
 
             const statusEl = document.getElementById('ocrStatus');
-            const aadhaarCard = document.getElementById('aadhaarCard');
+            const documentCard = document.getElementById('documentCard');
             statusEl.innerHTML = '⏳ OCR Processing...';
-            aadhaarCard.style.display = 'none';
+            documentCard.style.display = 'none';
 
             try {
-                const file = document.getElementById('aadhaarImage').files[0];
+                const file = document.getElementById('documentImage').files[0];
                 const reader = new FileReader();
                 reader.onload = function () {
                     documentBase64 = reader.result;
@@ -911,29 +848,24 @@
 
                 reader.readAsDataURL(file);
                 if (!file) {
-                    statusEl.innerHTML = '❌ Please select an Aadhaar image first.';
+                    statusEl.innerHTML = '❌ Please select an identity document first';
                     return;
                 }
 
                 const imageURL = URL.createObjectURL(file);
-                const aadhaarLink =
-                    document.getElementById('aadhaarFileLink');
+                const documentLink = document.getElementById('documentFileLink');
 
-                if (aadhaarLink) {
+                if (documentLink) {
 
-                    aadhaarLink.href = imageURL;
+                    documentLink.href = imageURL;
 
-                    aadhaarLink.style.display =
-                        'inline-block';
+                    documentLink.style.display = 'inline-block';
                 }
 
                 const formData = new FormData();
                 formData.append('document', file);
 
-                formData.append(
-                    'documentType',
-                    document.getElementById('documentType').value
-                );
+                formData.append('documentType', document.getElementById('documentType').value);
                 const response = await fetch('/ocr/upload', {
                     method: 'POST',
                     body: formData
@@ -948,15 +880,13 @@
 
                 if (data.name) {
 
-                    document.getElementById('name').value =
-                        data.name;
-                } document.getElementById(
-                    'nameDisplay'
-                ).innerText =
-                    data.name || 'Not found';
+                    document.getElementById('name').value = data.name;
+                } document.getElementById('nameDisplay').innerText = data.name || 'Not found';
 
+                document.getElementById('documentTypePreview').innerText =document.getElementById('documentType').value;
+                
                 if (data.documentNumber) {
-                    document.getElementById('aadhaar').value = data.documentNumber;
+                    document.getElementById('documentNumber').value = data.documentNumber;
                 }
 
 
@@ -964,118 +894,78 @@
 
                 // Mark OCR completed so fields stay enabled even if name changes later
                 ocrCompleted = true;
-                document.getElementById('aadhaarStatus').innerText =
-                    '✅ Uploaded';
+                document.getElementById('documentStatus').innerText = '✅ Uploaded';
                 document.getElementById('phone').disabled = false;
                 document.getElementById('phone').focus();
-                document.getElementById('aadhaar').disabled = false;
+                document.getElementById('documentNumber').disabled = false;
                 updateFieldAvailability();
 
 
                 if (data.documentNumber) {
-                    document.getElementById('aadhaar').value = data.documentNumber;
+                    document.getElementById('documentNumber').value = data.documentNumber;
 
                 }
-                document.getElementById('aadhaarDisplay').innerText = data.documentNumber || 'Not found';
+                document.getElementById('documentNumberDisplay').innerText = data.documentNumber || 'Not found';
 
                 document.getElementById('step1').style.borderLeft = '4px solid green';
-                document.getElementById('step1').innerHTML = '✅ 1️⃣ Aadhaar Verification';
-                aadhaarCard.style.display = 'block';
+                document.getElementById('step1').innerHTML = '✅ 1️⃣ Identity Verification';
+                documentCard.style.display = 'block';
                 statusEl.innerHTML = noDataFound
-                    ? '⚠ OCR completed, but Aadhaar/mobile not found.'
+                    ? '⚠ OCR completed, but document number could not be extracted.'
                     : '✅ OCR Completed';
             } catch (error) {
                 console.error('Error reading Aadhaar:', error);
                 statusEl.innerHTML = '❌ OCR failed. Try again with a clearer image.';
             } finally {
-                btn.innerText = 'Read Aadhaar';
+                btn.innerText = 'Scan Document';
                 btn.disabled = false;
             }
         }
-        function openAadhaarCamera() {
+        function openDocumentCamera() {
 
-            document
-                .getElementById(
-                    'aadhaarCameraInput'
-                )
-                .click();
+            document.getElementById('documentCameraInput').click();
         }
 
         function openVisitorCamera() {
 
-            document
-                .getElementById(
-                    'visitorCameraInput'
-                )
-                .click();
+            document.getElementById('visitorCameraInput').click();
         }
-        document
-            .getElementById(
-                'aadhaarCameraInput'
-            )
-            .addEventListener(
-                'change',
-                function () {
 
-                    const file =
-                        this.files[0];
+        document.getElementById('documentCameraInput').addEventListener('change', function () {
 
-                    if (!file) return;
+            const file = this.files[0];
 
-                    const dataTransfer =
-                        new DataTransfer();
+            if (!file) return;
 
-                    dataTransfer.items.add(file);
+            const dataTransfer = new DataTransfer();
 
-                    document
-                        .getElementById(
-                            'aadhaarImage'
-                        )
-                        .files =
-                        dataTransfer.files;
+            dataTransfer.items.add(file);
 
-                    document.getElementById(
-                        'aadhaarStatus'
-                    ).innerText =
-                        '✅ Uploaded';
+            document.getElementById('documentImage').files = dataTransfer.files;
 
-                    updateFieldAvailability();
-                }
-            );
+            document.getElementById('documentStatus').innerText = '✅ Uploaded';
 
-        document
-            .getElementById(
-                'visitorCameraInput'
-            )
-            .addEventListener(
-                'change',
-                function () {
+            updateFieldAvailability();
+        }
+        );
 
-                    const file =
-                        this.files[0];
+        document.getElementById('visitorCameraInput').addEventListener('change', function () {
 
-                    if (!file) return;
+            const file = this.files[0];
 
-                    const dataTransfer =
-                        new DataTransfer();
+            if (!file) return;
 
-                    dataTransfer.items.add(file);
+            const dataTransfer = new DataTransfer();
 
-                    document
-                        .getElementById(
-                            'visitorPhoto'
-                        )
-                        .files =
-                        dataTransfer.files;
+            dataTransfer.items.add(file);
 
-                    document.getElementById(
-                        'visitorPhotoStatus'
-                    ).innerText =
-                        '✅ Uploaded';
+            document.getElementById('visitorPhoto').files = dataTransfer.files;
 
-                    updateFieldAvailability();
-                }
-            );
+            document.getElementById('visitorPhotoStatus').innerText = '✅ Uploaded';
+
+            updateFieldAvailability();
+        }
+        );
     </script>
 
 </body>
