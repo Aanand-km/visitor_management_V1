@@ -750,7 +750,7 @@
         console.log("SCRIPT LOADED");
         document.getElementById('visitorForm').addEventListener('submit', async function (e) {
             try {
-
+                
                 console.log("STEP 1");
 
                 e.preventDefault();
@@ -851,6 +851,8 @@
             statusEl.innerHTML = '⏳ Scanning Identity Document...';
             documentCard.style.display = 'none';
             try {
+
+                const file = document.getElementById('documentImage').files[0];
 
                 if (!file) {
                     statusEl.innerHTML = '❌ Please select an identity document first';

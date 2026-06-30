@@ -50,18 +50,16 @@ const upload = multer({ storage });
 console.log('Visitor routes loaded with file logging support');
 
 router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 'document', maxCount: 1 }]), (req, res) => {
-    const {
-        name,
-        phone,
-        email,
-        document_type,
-        document_number,
-        purpose,
-        employee_id,
-        consent_given
-    } = req.body;
-
-    const consent = Number(consent_given);
+   const {
+    name,
+    phone,
+    email,
+    document_type,
+    document_number,
+    purpose,
+    employee_id,
+    consent_given
+} = req.body;
 
     const photoPath =
         req.files?.photo
@@ -74,6 +72,7 @@ router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 
             : null;
 
     console.log(req.body);
+    console.log(req.files);
     console.log("Document Number:", document_number);
 
     fs.appendFileSync(
@@ -116,7 +115,7 @@ VALUES
             document_type,
             document_number,
             approvalToken,
-            consent
+            consent_given
         ], (err, result) => {
 
             if (err) {
