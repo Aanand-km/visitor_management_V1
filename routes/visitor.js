@@ -3,7 +3,6 @@ const router = express.Router();
 const fs = require('fs');
 const QRCode = require('qrcode');
 const multer = require('multer');
-const path = require('path');
 const db = require('../db/db');
 const {
     sendEmployeeNotification,
