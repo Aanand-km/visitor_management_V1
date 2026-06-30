@@ -57,18 +57,29 @@ router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 
         document_type,
         document_number,
         purpose,
-        employee_id
+        employee_id,
+        consent_given
     } = req.body;
-    const photoPath = req.files.photo ? req.files.photo[0].path : null;
-    const documentPath = req.files.document ? req.files.document[0].path : null;
+
+    const consent = Number(consent_given);
+
+    const photoPath =
+        req.files?.photo
+            ? req.files.photo[0].path
+            : null;
+
+    const documentPath =
+        req.files?.document
+            ? req.files.document[0].path
+            : null;
 
     console.log(req.body);
     console.log("Document Number:", document_number);
 
-   fs.appendFileSync(
-    './logs.txt',
-    `\n${new Date().toISOString()} - ${JSON.stringify(req.body)}\n`
-);    const approvalToken = crypto.randomBytes(32).toString('hex');
+    fs.appendFileSync(
+        './logs.txt',
+        `\n${new Date().toISOString()} - ${JSON.stringify(req.body)}\n`
+    ); const approvalToken = crypto.randomBytes(32).toString('hex');
     const sql = `
 INSERT INTO visitors
 (
@@ -105,7 +116,7 @@ VALUES
             document_type,
             document_number,
             approvalToken,
-            req.body.consent
+            consent
         ], (err, result) => {
 
             if (err) {
