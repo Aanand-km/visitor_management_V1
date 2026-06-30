@@ -206,9 +206,9 @@
                     <div class="value" id="documentNumber">&nbsp;</div>
                 </div>
                 <div class="detail">
-    <div class="label">Document Type</div>
-    <div class="value" id="documentType">&nbsp;</div>
-</div>
+                    <div class="label">Document Type</div>
+                    <div class="value" id="documentType">&nbsp;</div>
+                </div>
                 <div class="detail">
                     <div class="label">Meeting With</div>
                     <div class="value" id="employee">&nbsp;</div>
@@ -252,7 +252,8 @@
 
                 document.getElementById('name').innerText = visitor.name || '';
                 document.getElementById('phone').innerText = visitor.phone || '';
-                document.getElementById('documentNumber').innerText = visitor.aadhaar_number || '';
+                document.getElementById('documentNumber').innerText = visitor.document_number || '';
+                document.getElementById('documentType').innerText = visitor.document_type || '';
                 document.getElementById('employee').innerText = visitor.employee_name || 'Not assigned';
                 document.getElementById('passid').innerText = visitor.pass_id || '';
 
@@ -270,9 +271,11 @@
 
                 // photo path normalization
                 // photo from database (Base64)
-                if (visitor.photo_data) {
+                if (visitor.photo_path) {
+
                     document.getElementById('visitorPhoto').src =
-                        `data:image/jpeg;base64,${visitor.photo_data}`;
+                        "/" + visitor.photo_path.replace(/\\/g, "/");
+
                 }
             } catch (err) {
                 console.error('Error loading pass', err);
