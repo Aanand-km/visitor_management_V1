@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const QRCode = require('qrcode');
 const multer = require('multer');
+const path = require('path');
 const db = require('../db/db');
 const {
     sendEmployeeNotification,
@@ -16,7 +17,15 @@ const storage = multer.diskStorage({
 
     destination: function (req, file, cb) {
 
-        const uploadPath = path.join(__dirname, '../uploads/photos');
+        let uploadPath;
+
+        if (file.fieldname === 'photo') {
+            uploadPath = path.join(__dirname, '../uploads/photos');
+        }
+
+        else if (file.fieldname === 'document') {
+            uploadPath = path.join(__dirname, '../uploads/documents');
+        }
 
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
@@ -28,44 +37,77 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
 
         cb(
-            null, Date.now() + '-' + file.originalname
+            null,
+            Date.now() + '-' + file.originalname
         );
+
     }
+
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
+
 
 console.log('Visitor routes loaded with file logging support');
 
-router.post('/register', upload.single('photo'), (req, res) => {
+router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 'document', maxCount: 1 }]), (req, res) => {
     const {
         name,
         phone,
         email,
         document_type,
         document_number,
-        document_data,
         purpose,
         employee_id
     } = req.body;
-    const photo_data = req.file ? fs.readFileSync(req.file.path, { encoding: 'base64' }) : null;
+    const photoPath = req.files.photo ? req.files.photo[0].path : null;
+    const documentPath = req.files.document ? req.files.document[0].path : null;
 
     console.log(req.body);
     console.log("Document Number:", document_number);
 
-    fs.appendFileSync('./logs.txt', `\n${new Date().toISOString()} - req.body: ${JSON.stringify(req.body)}\nDocument Number: ${document_number}\n`);
-    const approvalToken = crypto.randomBytes(32).toString('hex');
+   fs.appendFileSync(
+    './logs.txt',
+    `\n${new Date().toISOString()} - ${JSON.stringify(req.body)}\n`
+);    const approvalToken = crypto.randomBytes(32).toString('hex');
     const sql = `
-        INSERT INTO visitors
-        (name, phone, email,purpose, employee_id, photo_data, document_type, document_number, document_data, approval_token,status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,'pending')
-    `;
+INSERT INTO visitors
+(
+    name,
+    phone,
+    email,
+    purpose,
+    employee_id,
+    photo_path,
+    document_path,
+    document_type,
+    document_number,
+    approval_token,
+    status,
+    consent_given
+)
+VALUES
+(
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?
+)
+`;
+
 
     db.query(
-
         sql,
-        [name, phone, email, purpose, employee_id, photo_data, document_type, document_number, document_data, approvalToken],
-        (err, result) => {
+        [
+            name,
+            phone,
+            email,
+            purpose,
+            employee_id,
+            photoPath,
+            documentPath,
+            document_type,
+            document_number,
+            approvalToken,
+            req.body.consent
+        ], (err, result) => {
 
             if (err) {
                 console.error(err);
@@ -78,40 +120,37 @@ router.post('/register', upload.single('photo'), (req, res) => {
                                     WHERE id = ?
                                 `;
 
-            db.query(
-                employeeSql,
-                [employee_id],
-                async (err, employeeResult) => {
+            db.query(employeeSql, [employee_id], async (err, employeeResult) => {
 
-                    if (
-                        !err &&
-                        employeeResult.length > 0
-                    ) {
+                if (
+                    !err &&
+                    employeeResult.length > 0
+                ) {
 
-                        try {
+                    try {
 
-                            await sendEmployeeNotification(
+                        await sendEmployeeNotification(
 
-                                employeeResult[0].email,
+                            employeeResult[0].email,
 
-                                {
-                                    id: visitorId,
-                                    token: approvalToken,
-                                    name,
-                                    phone,
-                                    email,
-                                    purpose
-                                }
-                            );
+                            {
+                                id: visitorId,
+                                token: approvalToken,
+                                name,
+                                phone,
+                                email,
+                                purpose
+                            }
+                        );
 
-                            console.log('Employee email sent');
+                        console.log('Employee email sent');
 
-                        } catch (mailError) {
+                    } catch (mailError) {
 
-                            console.error('Email Error:', mailError);
-                        }
+                        console.error('Email Error:', mailError);
                     }
                 }
+            }
             );
             res.json({
                 message: 'Visitor Registered Successfully',
@@ -386,22 +425,22 @@ router.get('/pass/:id', (req, res) => {
 
     const visitorId = req.params.id;
 
-    const sql = `
-        SELECT
-            visitors.id,
-            visitors.name,
-            visitors.phone,
-           visitors.document_number,
-            visitors.status,
-            visitors.pass_id,
-            visitors.qr_code,
-            visitors.photo_data,
-            employees.name AS employee_name
-        FROM visitors
-        LEFT JOIN employees
-        ON visitors.employee_id = employees.id
-        WHERE visitors.id = ?
-    `;
+    const sql = `SELECT
+    visitors.id,
+    visitors.name,
+    visitors.phone,
+    visitors.document_type,
+    visitors.document_number,
+    visitors.status,
+    visitors.pass_id,
+    visitors.qr_code,
+    visitors.photo_path,
+    visitors.document_path,
+    employees.name AS employee_name
+FROM visitors
+LEFT JOIN employees
+ON visitors.employee_id = employees.id
+WHERE visitors.id = ?`;
 
     db.query(
         sql,

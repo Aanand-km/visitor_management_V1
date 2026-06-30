@@ -649,7 +649,7 @@
 
     <script>
         let ocrCompleted = false;
-        let documentBase64 = "";
+
 
         function setDisabled(id, disabled) {
             const el = document.getElementById(id);
@@ -664,7 +664,8 @@
             setDisabled('email', false);
             setDisabled('purpose', false);
             const photoPresent = document.getElementById('visitorPhoto').files.length > 0;
-            setDisabled('submitBtn', !(nameFilled && photoPresent));
+            setDisabled('submitBtn', !(nameFilled && photoPresent &&  documentFilled && documentSelected)
+            );
 
 
         }
@@ -764,8 +765,19 @@
                 formData.append('phone', document.getElementById('phone').value);
                 formData.append('email', document.getElementById('email').value);
                 formData.append('document_type', document.getElementById('documentType').value);
+
                 formData.append('document_number', document.getElementById('documentNumber').value);
-                formData.append('document_data', documentBase64);
+
+                const documentFile = document.getElementById('documentImage').files[0];
+
+                if (!documentFile) {
+
+                    alert("Please upload an identity document.");
+
+                    return;
+                }
+
+                formData.append('document', documentFile);
                 formData.append('purpose', document.getElementById('purpose').value);
 
                 formData.append('employee_id', document.getElementById('employee').value);
@@ -785,8 +797,8 @@
                 console.log("STEP 4 - ABOUT TO CALL REGISTER API");
 
                 formData.append(
-                    'consent',
-                    document.getElementById('consent').checked
+                    'consent_given',
+                    document.getElementById('consent').checked ? 1 : 0
                 );
 
                 const response = await fetch(
@@ -836,17 +848,10 @@
 
             const statusEl = document.getElementById('ocrStatus');
             const documentCard = document.getElementById('documentCard');
-            statusEl.innerHTML = '⏳ OCR Processing...';
+            statusEl.innerHTML = '⏳ Scanning Identity Document...';
             documentCard.style.display = 'none';
-
             try {
-                const file = document.getElementById('documentImage').files[0];
-                const reader = new FileReader();
-                reader.onload = function () {
-                    documentBase64 = reader.result;
-                };
 
-                reader.readAsDataURL(file);
                 if (!file) {
                     statusEl.innerHTML = '❌ Please select an identity document first';
                     return;
@@ -883,8 +888,8 @@
                     document.getElementById('name').value = data.name;
                 } document.getElementById('nameDisplay').innerText = data.name || 'Not found';
 
-                document.getElementById('documentTypePreview').innerText =document.getElementById('documentType').value;
-                
+                document.getElementById('documentTypePreview').innerText = document.getElementById('documentType').value;
+
                 if (data.documentNumber) {
                     document.getElementById('documentNumber').value = data.documentNumber;
                 }
@@ -914,7 +919,7 @@
                     ? '⚠ OCR completed, but document number could not be extracted.'
                     : '✅ OCR Completed';
             } catch (error) {
-                console.error('Error reading Aadhaar:', error);
+                console.error("Document OCR Error:", error);
                 statusEl.innerHTML = '❌ OCR failed. Try again with a clearer image.';
             } finally {
                 btn.innerText = 'Scan Document';
