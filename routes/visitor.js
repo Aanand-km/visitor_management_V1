@@ -163,7 +163,7 @@ VALUES
 });
 
 
-router.get('/pending_security/:employeeId', (req, res) => {
+/*router.get('/pending_security', (req, res) => {
 
     const employeeId = req.params.employeeId;
 
@@ -173,12 +173,17 @@ router.get('/pending_security/:employeeId', (req, res) => {
             visitors.name,
             visitors.phone,
             visitors.purpose,
+            visitors.document_type,
+            visitors.document_number,
+            visitors.photo_path,
+            visitors.document_path,
+            visitors.created_at,
             employees.name AS employee_name
         FROM visitors
         LEFT JOIN employees
         ON visitors.employee_id = employees.id
         WHERE visitors.status = 'pending_security'
-        AND visitors.employee_id = ?
+        ORDER BY visitors.created_at DESC
     `;
 
     db.query(
@@ -196,7 +201,7 @@ router.get('/pending_security/:employeeId', (req, res) => {
 
         }
     );
-});
+});*/
 
 router.put('/approve/:id', async (req, res) => {
 
