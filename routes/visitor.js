@@ -279,12 +279,28 @@ router.get('/approve-mail/:id', async (req, res) => {
         FROM visitors
         WHERE id = ?
         AND approval_token = ?
+        AND status = 'pending'
         `,
         [visitorId, token],
         async (err, rows) => {
 
-            if (err || rows.length === 0) {
-                return res.status(403).send('<h1>❌ Invalid Approval Link</h1>');
+            if (err) {
+                return res.status(500).send(`
+                <h1>Server Error</h1>
+                `);
+            }
+
+            if (rows.length === 0) {
+
+                return res.send(`
+                <div style="font-family:Arial;text-align:center;margin-top:80px;">
+                <h1>⚠ This approval link is no longer valid.</h1>
+
+                <p>
+                    The visitor has already been approved or rejected.
+                </p>
+                </div>
+                `);
             }
 
             const passId = 'PASS-' + Date.now();
@@ -297,7 +313,8 @@ router.get('/approve-mail/:id', async (req, res) => {
                 `
                 UPDATE visitors
                 SET
-                    status = 'approved',
+                    status='approved',
+                    approval_token=NULL,
                     pass_id = ?,
                     qr_code = ?,
                     approved_at = NOW()
@@ -344,18 +361,40 @@ router.get('/reject-mail/:id', (req, res) => {
         FROM visitors
         WHERE id = ?
         AND approval_token = ?
+        AND status = 'pending'
         `,
         [visitorId, token],
         (err, rows) => {
 
-            if (err || rows.length === 0) {
-                return res.status(403).send('<h1>❌ Invalid Rejection Link</h1>');
+            if (err) {
+
+                return res.status(500).send(`
+        <h1>Server Error</h1>
+    `);
+
+            }
+
+            if (rows.length === 0) {
+
+                return res.send(`
+        <div style="font-family:Arial;text-align:center;margin-top:80px;">
+
+            <h1>⚠ This rejection link is no longer valid.</h1>
+
+            <p>
+                The visitor has already been approved or rejected.
+            </p>
+
+        </div>
+    `);
+
             }
 
             db.query(
                 `
                 UPDATE visitors
-                SET status = 'rejected'
+                SET status = 'rejected',
+                approval_token=NULL
                 WHERE id = ?
                 `,
                 [visitorId]
