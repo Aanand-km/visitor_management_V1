@@ -273,8 +273,7 @@
                 // photo from database (Base64)
                 if (visitor.photo_path) {
 
-                    document.getElementById('visitorPhoto').src =
-                        "/" + visitor.photo_path.replace(/\\/g, "/");
+                    document.getElementById('visitorPhoto').src = visitor.photo_path.replace(/\\/g, "/");
 
                 }
             } catch (err) {
