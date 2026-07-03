@@ -50,26 +50,19 @@ const upload = multer({ storage });
 console.log('Visitor routes loaded with file logging support');
 
 router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 'document', maxCount: 1 }]), (req, res) => {
-   const {
-    name,
-    phone,
-    email,
-    document_type,
-    document_number,
-    purpose,
-    employee_id,
-    consent_given
-} = req.body;
+    const {
+        name,
+        phone,
+        email,
+        document_type,
+        document_number,
+        purpose,
+        employee_id,
+        consent_given
+    } = req.body;
 
-    const photoPath =
-        req.files?.photo
-            ? req.files.photo[0].path
-            : null;
-
-    const documentPath =
-        req.files?.document
-            ? req.files.document[0].path
-            : null;
+    const photoPath = req.files?.photo ? `/uploads/photos/${req.files.photo[0].filename}` : null;
+    const documentPath = req.files?.document ? `/uploads/documents/${req.files.document[0].filename}` : null;;
 
     console.log(req.body);
     console.log(req.files);
