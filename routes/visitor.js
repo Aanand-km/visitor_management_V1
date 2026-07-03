@@ -90,7 +90,7 @@ INSERT INTO visitors
 )
 VALUES
 (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_security', ?
 )
 `;
 
@@ -116,54 +116,54 @@ VALUES
                 return res.status(500).json({ message: 'Database Error' });
             }
             const visitorId = result.insertId;
-            const employeeSql = `
-                                    SELECT email
-                                    FROM employees
-                                    WHERE id = ?
-                                `;
-
-            db.query(employeeSql, [employee_id], async (err, employeeResult) => {
-
-                if (
-                    !err &&
-                    employeeResult.length > 0
-                ) {
-
-                    try {
-
-                        await sendEmployeeNotification(
-
-                            employeeResult[0].email,
-
-                            {
-                                id: visitorId,
-                                token: approvalToken,
-                                name,
-                                phone,
-                                email,
-                                purpose
-                            }
-                        );
-
-                        console.log('Employee email sent');
-
-                    } catch (mailError) {
-
-                        console.error('Email Error:', mailError);
-                    }
-                }
-            }
-            );
+            /* const employeeSql = `
+                                     SELECT email
+                                     FROM employees
+                                     WHERE id = ?
+                                 `;
+ 
+             db.query(employeeSql, [employee_id], async (err, employeeResult) => {
+ 
+                 if (
+                     !err &&
+                     employeeResult.length > 0
+                 ) {
+ 
+                     try {
+ 
+                         await sendEmployeeNotification(
+ 
+                             employeeResult[0].email,
+ 
+                             {
+                                 id: visitorId,
+                                 token: approvalToken,
+                                 name,
+                                 phone,
+                                 email,
+                                 purpose
+                             }
+                         );
+ 
+                         console.log('Employee email sent');
+ 
+                     } catch (mailError) {
+ 
+                         console.error('Email Error:', mailError);
+                     }
+                 }
+             }
+             );*/
             res.json({
-                message: 'Visitor Registered Successfully',
-                visitorId: result.insertId,
+                message: 'Registration submitted successfully. Waiting for Security verification.',
+                visitorId
             });
         }
     );
 });
 
 
-router.get('/pending/:employeeId', (req, res) => {
+router.get('/pending_security/:employeeId', (req, res) => {
 
     const employeeId = req.params.employeeId;
 
@@ -177,7 +177,7 @@ router.get('/pending/:employeeId', (req, res) => {
         FROM visitors
         LEFT JOIN employees
         ON visitors.employee_id = employees.id
-        WHERE visitors.status = 'pending'
+        WHERE visitors.status = 'pending_security'
         AND visitors.employee_id = ?
     `;
 
@@ -279,7 +279,7 @@ router.get('/approve-mail/:id', async (req, res) => {
         FROM visitors
         WHERE id = ?
         AND approval_token = ?
-        AND status = 'pending'
+        AND status = 'pending_security'
         `,
         [visitorId, token],
         async (err, rows) => {
@@ -361,7 +361,7 @@ router.get('/reject-mail/:id', (req, res) => {
         FROM visitors
         WHERE id = ?
         AND approval_token = ?
-        AND status = 'pending'
+        AND status = 'pending_security'
         `,
         [visitorId, token],
         (err, rows) => {

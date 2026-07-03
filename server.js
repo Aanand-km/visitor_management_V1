@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
+const securityRoutes = require("./routes/security");
 
 console.log(process.env.GEMINI_API_KEY);
 
@@ -19,7 +20,7 @@ const authRoutes =
 app.use(cors());
 app.use(express.json());
 app.use('/visitor', visitorRoutes);
-
+app.use("/security", securityRoutes);
 app.use('/ocr', ocrRoutes);
 app.use('/employees', employeeRoutes);
 app.use('/auth', authRoutes);
