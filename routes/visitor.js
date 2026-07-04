@@ -71,7 +71,8 @@ router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 
     fs.appendFileSync(
         './logs.txt',
         `\n${new Date().toISOString()} - ${JSON.stringify(req.body)}\n`
-    ); const approvalToken = crypto.randomBytes(32).toString('hex');
+    );
+    const approvalToken = crypto.randomBytes(32).toString('hex');
     const sql = `
 INSERT INTO visitors
 (

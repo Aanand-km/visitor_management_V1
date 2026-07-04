@@ -4,8 +4,6 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const securityRoutes = require("./routes/security");
 
-console.log(process.env.GEMINI_API_KEY);
-
 const db = require('./db/db');
 const visitorRoutes = require('./routes/visitor');
 const employeeRoutes = require('./routes/employee');

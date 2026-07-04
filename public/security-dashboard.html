@@ -4,6 +4,7 @@
 <head>
   <title>Security Dashboard</title>
   <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="security-dashboard.css">
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
@@ -149,7 +150,43 @@
   </div>
 
   <div class="container">
+    <div class="stats">
 
+      <div class="stat-card">
+        <h2 id="waitingCount">0</h2>
+        <p>Waiting Verification</p>
+      </div>
+
+      <div class="stat-card">
+        <h2 id="employeeCount">0</h2>
+        <p>Waiting Employee</p>
+      </div>
+
+      <div class="stat-card">
+        <h2 id="approvedCount">0</h2>
+        <p>Approved Today</p>
+      </div>
+
+      <div class="stat-card">
+        <h2 id="checkedCount">0</h2>
+        <p>Checked In</p>
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <h2>Pending Visitors</h2>
+
+      <button id="refreshBtn" class="refresh-btn">🔄 Refresh</button>
+
+      <input id="search" type="text" placeholder="Search visitor...">
+
+      <div id="visitorList">
+
+      </div>
+
+    </div>
     <div class="card">
       <h2>QR Check-In / Check-Out</h2>
 

@@ -1,0 +1,337 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f6f9;
+  color: #111827;
+}
+
+/* Header */
+.header {
+  background: #000;
+  color: white;
+  padding: 25px 40px;
+  font-size: 2rem;
+  font-weight: 700;
+  border-bottom: 4px solid #ff6b00;
+}
+
+/* Main Container */
+.container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* Cards */
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 25px;
+}
+
+.card h2 {
+  color: #111827;
+  margin-bottom: 25px;
+  font-size: 24px;
+}
+
+/* Scanner */
+#reader {
+  width: 420px;
+  max-width: 100%;
+  margin: 25px auto;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Button */
+#startScanner {
+  background: #ff6b00;
+  color: white;
+  border: none;
+  padding: 14px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: block;
+  margin: 0 auto 25px;
+}
+
+#startScanner:hover {
+  background: #e45f00;
+  transform: translateY(-2px);
+}
+
+#startScanner:active {
+  transform: translateY(0);
+}
+
+/* Result Box */
+#result {
+  margin-top: 25px;
+  padding: 25px;
+  border-radius: 16px;
+  background: #ffffff;
+  border-left: 6px solid #ff6b00;
+  font-size: 18px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+/* Success State */
+.success {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+/* Visitor Name */
+.visitor-name {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* Status Badge */
+.badge {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* Dashboard Counters */
+.stats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 200px;
+  background: white;
+  border-radius: 18px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card h2 {
+  color: #ff6b00;
+  font-size: 36px;
+  margin: 10px 0;
+}
+
+.stat-card p {
+  color: #6b7280;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Search Input */
+#search {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  margin-bottom: 25px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+#search:focus {
+  outline: none;
+  border-color: #ff6b00;
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+}
+
+/* Visitor List Item */
+#visitorList > div {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 18px;
+  transition: all 0.3s ease;
+}
+
+#visitorList > div:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-color: #ff6b00;
+}
+
+#visitorList h3 {
+  color: #111827;
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+#visitorList p {
+  color: #6b7280;
+  margin: 10px 0;
+  font-size: 15px;
+}
+
+/* Visitor List Button */
+#visitorList button {
+  background: #ff6b00;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+}
+
+#visitorList button:hover {
+  background: #e45f00;
+  transform: translateY(-2px);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.empty-state p {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+/* Error Message */
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #dc2626;
+}
+
+/* Success Message */
+.success-msg {
+  background: #dcfce7;
+  color: #166534;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #16a34a;
+}
+
+/* Refresh Button */
+.refresh-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+/* Loading Spinner */
+.loading {
+  text-align: center;
+  padding: 30px;
+  color: #6b7280;
+}
+
+.spinner {
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #ff6b00;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    font-size: 1.5rem;
+    padding: 20px;
+  }
+
+  .container {
+    margin: 20px auto;
+    padding: 0 15px;
+  }
+
+  .stats {
+    flex-direction: column;
+  }
+
+  .stat-card {
+    min-width: auto;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  #reader {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    font-size: 1.2rem;
+    padding: 15px;
+  }
+
+  .container {
+    padding: 0 10px;
+  }
+
+  .card {
+    padding: 15px;
+  }
+
+  .stat-card h2 {
+    font-size: 28px;
+  }
+
+  #visitorList > div {
+    padding: 15px;
+  }
+
+  #visitorList h3 {
+    font-size: 18px;
+  }
+}

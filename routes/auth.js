@@ -40,7 +40,7 @@ router.post('/login',(req,res)=>{
 
             const token = jwt.sign(
                 {
-                    id: employee.employee_id
+                    id: employee.id
                 },
                 process.env.JWT_SECRET,
                 {
