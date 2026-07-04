@@ -1,7 +1,8 @@
+
 const express = require("express");
 const router = express.Router();
 const db = require("../db/db");
-
+console.log("✅ Security routes loaded");
 /*
 ---------------------------------------------------------
 Get All Visitors Waiting For Security Verification
