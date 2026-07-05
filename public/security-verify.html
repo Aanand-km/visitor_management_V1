@@ -440,7 +440,11 @@
                     throw new Error(data.message || 'Failed to approve visitor');
                 }
 
-                document.getElementById('success').textContent = '✓ Visitor approved successfully! Pass ID: ' + data.passId;
+                if (data.passId) {
+                    document.getElementById('success').textContent = '✓ Visitor approved successfully! Pass ID: ' + data.passId;
+                } else {
+                    document.getElementById('success').textContent = '✓ Visitor verified successfully! Waiting for employee approval.';
+                }
                 document.getElementById('success').style.display = 'block';
 
                 setTimeout(() => {

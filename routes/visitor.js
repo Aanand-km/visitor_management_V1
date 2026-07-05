@@ -164,10 +164,8 @@ VALUES
 });
 
 
-/*router.get('/pending_security', (req, res) => {
-
+router.get('/pending/:employeeId', (req, res) => {
     const employeeId = req.params.employeeId;
-
     const sql = `
         SELECT
             visitors.id,
@@ -183,95 +181,135 @@ VALUES
         FROM visitors
         LEFT JOIN employees
         ON visitors.employee_id = employees.id
-        WHERE visitors.status = 'pending_security'
+        WHERE visitors.employee_id = ?
+        AND visitors.status = 'pending_employee'
         ORDER BY visitors.created_at DESC
     `;
 
-    db.query(
-        sql,
-        [employeeId],
-        (err, result) => {
-
-            if (err) {
-                return res.status(500).json({
-                    message: 'Database Error'
-                });
-            }
-            console.log(result);
-            res.json(result);
-
-        }
-    );
-});*/
-
-router.put('/approve/:id', async (req, res) => {
-
-    const visitorId = req.params.id;
-
-    const passId = 'PASS-' + Date.now();
-
-    const qrText = `http://ducktail-five-prideful.ngrok-free.dev/visitor/scan/${visitorId}`;
-
-    const qrCode = await QRCode.toDataURL(qrText);
-
-    const sql = `
-    UPDATE visitors
-    SET
-        status = 'approved',
-        pass_id = ?,
-        qr_code = ?,
-        approved_at = NOW()
-    WHERE id = ?
-`;
-    console.log("Approving Visitor:", visitorId);
-    console.log("Generated Pass:", passId);
-    db.query(
-        sql,
-        [passId, qrCode, visitorId],
-        (err, result) => {
-            console.log("DB Result:", result);
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ message: 'Database Error' });
-            }
-            const visitorSql = `
-SELECT
-    name,
-    email
-FROM visitors
-WHERE id = ?
-`;
-
-            db.query(
-                visitorSql,
-                [visitorId],
-                async (err, visitorResult) => {
-
-                    if (
-                        !err &&
-                        visitorResult.length > 0
-                    ) {
-
-                        try {
-
-                            await sendVisitorPassEmail(visitorResult[0].email, visitorResult[0].name, visitorId, passId);
-
-                            console.log('Visitor pass email sent');
-
-                        } catch (emailErr) {
-
-                            console.error(emailErr);
-                        }
-                    }
-                }
-            );
-            res.json({
-                message: 'Visitor Approved',
-                visitorId,
-                passId
+    db.query(sql, [employeeId], (err, result) => {
+        if (err) {
+            console.error("Error fetching pending visitors for employee:", err);
+            return res.status(500).json({
+                message: 'Database Error'
             });
         }
-    );
+        res.json(result);
+    });
+});
+
+router.put('/approve/:id', async (req, res) => {
+    const visitorId = req.params.id;
+
+    // Get visitor's current status and employee info
+    const checkSql = `
+        SELECT v.status, v.name, v.phone, v.email, v.purpose, v.approval_token, v.employee_id, e.email AS employee_email
+        FROM visitors v
+        LEFT JOIN employees e ON v.employee_id = e.id
+        WHERE v.id = ?
+    `;
+
+    db.query(checkSql, [visitorId], async (err, checkResult) => {
+        if (err) {
+            console.error("Error checking visitor status:", err);
+            return res.status(500).json({ message: 'Database Error' });
+        }
+
+        if (checkResult.length === 0) {
+            return res.status(404).json({ message: 'Visitor not found' });
+        }
+
+        const visitor = checkResult[0];
+
+        if (visitor.status === 'pending_security') {
+            // Security verification: Update status to pending_employee
+            const updateSql = `
+                UPDATE visitors
+                SET status = 'pending_employee'
+                WHERE id = ?
+            `;
+            db.query(updateSql, [visitorId], async (updateErr) => {
+                if (updateErr) {
+                    console.error("Error updating status to pending_employee:", updateErr);
+                    return res.status(500).json({ message: 'Database Error' });
+                }
+
+                // Send email notification to employee
+                if (visitor.employee_email) {
+                    try {
+                        await sendEmployeeNotification(visitor.employee_email, {
+                            id: visitorId,
+                            token: visitor.approval_token,
+                            name: visitor.name,
+                            phone: visitor.phone,
+                            email: visitor.email,
+                            purpose: visitor.purpose
+                        });
+                        console.log('Employee email sent after security approval');
+                    } catch (mailError) {
+                        console.error('Email Notification Error:', mailError);
+                    }
+                }
+
+                return res.json({
+                    message: 'Verified by security, pending employee approval',
+                    status: 'pending_employee'
+                });
+            });
+
+        } else if (visitor.status === 'pending_employee') {
+            // Employee approval: Transition status to approved, generate pass & QR
+            const passId = 'PASS-' + Date.now();
+            const qrText = `http://ducktail-five-prideful.ngrok-free.dev/visitor/scan/${visitorId}`;
+            let qrCode;
+            try {
+                qrCode = await QRCode.toDataURL(qrText);
+            } catch (qrErr) {
+                console.error("QR Code Error:", qrErr);
+                return res.status(500).json({ message: 'Error generating QR Code' });
+            }
+
+            const sql = `
+                UPDATE visitors
+                SET
+                    status = 'approved',
+                    pass_id = ?,
+                    qr_code = ?,
+                    approved_at = NOW()
+                WHERE id = ?
+            `;
+
+            console.log("Approving Visitor (Final Employee Approval):", visitorId);
+            console.log("Generated Pass:", passId);
+
+            db.query(sql, [passId, qrCode, visitorId], async (err, result) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).json({ message: 'Database Error' });
+                }
+
+                // Send pass email to visitor
+                if (visitor.email) {
+                    try {
+                        await sendVisitorPassEmail(visitor.email, visitor.name, visitorId, passId);
+                        console.log('Visitor pass email sent');
+                    } catch (emailErr) {
+                        console.error('Visitor pass email send error:', emailErr);
+                    }
+                }
+
+                return res.json({
+                    message: 'Visitor Approved',
+                    visitorId,
+                    passId
+                });
+            });
+
+        } else {
+            return res.status(400).json({
+                message: `Visitor cannot be approved from status: ${visitor.status}`
+            });
+        }
+    });
 });
 
 router.get('/approve-mail/:id', async (req, res) => {
