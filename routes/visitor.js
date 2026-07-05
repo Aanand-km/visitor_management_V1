@@ -14,6 +14,39 @@ const crypto = require('crypto');
 
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const jwt = require('jsonwebtoken');
+
+function verifyEmployeeOrSecurityToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Access Denied: No Token Provided' });
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) return res.status(403).json({ message: 'Invalid or Expired Token' });
+        if (decoded.role === 'security' || decoded.id) {
+            req.user = decoded;
+            next();
+        } else {
+            return res.status(403).json({ message: 'Unauthorized Access' });
+        }
+    });
+}
+
+function verifyEmployeeToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Access Denied: No Token Provided' });
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err || !decoded.id) return res.status(403).json({ message: 'Invalid or Expired Token' });
+        
+        if (req.params.employeeId && parseInt(req.params.employeeId) !== decoded.id) {
+            return res.status(403).json({ message: 'Unauthorized employee access' });
+        }
+        req.employee = decoded;
+        next();
+    });
+}
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -68,6 +101,7 @@ router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 
         `\n${new Date().toISOString()} - ${JSON.stringify(req.body)}\n`
     );
     const approvalToken = crypto.randomBytes(32).toString('hex');
+    const passToken = crypto.randomBytes(32).toString('hex');
     const sql = `
 INSERT INTO visitors
 (
@@ -81,12 +115,13 @@ INSERT INTO visitors
     document_type,
     document_number,
     approval_token,
+    pass_token,
     status,
     consent_given
 )
 VALUES
 (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_security', ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_security', ?
 )
 `;
 
@@ -104,6 +139,7 @@ VALUES
             document_type,
             document_number,
             approvalToken,
+            passToken,
             consent_given
         ], (err, result) => {
 
@@ -159,7 +195,7 @@ VALUES
 });
 
 
-router.get('/pending/:employeeId', (req, res) => {
+router.get('/pending/:employeeId', verifyEmployeeToken, (req, res) => {
     const employeeId = req.params.employeeId;
     const sql = `
         SELECT
@@ -192,12 +228,12 @@ router.get('/pending/:employeeId', (req, res) => {
     });
 });
 
-router.put('/approve/:id', async (req, res) => {
+router.put('/approve/:id', verifyEmployeeOrSecurityToken, async (req, res) => {
     const visitorId = req.params.id;
 
     // Get visitor's current status and employee info
     const checkSql = `
-        SELECT v.status, v.name, v.phone, v.email, v.purpose, v.approval_token, v.employee_id, e.email AS employee_email
+        SELECT v.status, v.name, v.phone, v.email, v.purpose, v.approval_token, v.pass_token, v.employee_id, e.email AS employee_email
         FROM visitors v
         LEFT JOIN employees e ON v.employee_id = e.id
         WHERE v.id = ?
@@ -254,7 +290,7 @@ router.put('/approve/:id', async (req, res) => {
         } else if (visitor.status === 'pending_employee') {
             // Employee approval: Transition status to approved, generate pass & QR
             const passId = 'PASS-' + Date.now();
-            const qrText = `http://ducktail-five-prideful.ngrok-free.dev/visitor/scan/${visitorId}`;
+            const qrText = `http://ducktail-five-prideful.ngrok-free.dev/visitor/scan/${visitorId}?token=${visitor.pass_token}`;
             let qrCode;
             try {
                 qrCode = await QRCode.toDataURL(qrText);
@@ -285,7 +321,7 @@ router.put('/approve/:id', async (req, res) => {
                 // Send pass email to visitor
                 if (visitor.email) {
                     try {
-                        await sendVisitorPassEmail(visitor.email, visitor.name, visitorId, passId);
+                        await sendVisitorPassEmail(visitor.email, visitor.name, visitorId, passId, visitor.pass_token);
                         console.log('Visitor pass email sent');
                     } catch (emailErr) {
                         console.error('Visitor pass email send error:', emailErr);
@@ -344,7 +380,7 @@ router.get('/approve-mail/:id', async (req, res) => {
 
             const passId = 'PASS-' + Date.now();
 
-            const qrText = `https://visitor-management-jp03.onrender.com/visitor/scan/${visitorId}`;
+            const qrText = `https://visitor-management-jp03.onrender.com/visitor/scan/${visitorId}?token=${rows[0].pass_token}`;
 
             const qrCode = await QRCode.toDataURL(qrText);
 
@@ -373,7 +409,8 @@ router.get('/approve-mail/:id', async (req, res) => {
                             rows[0].email,
                             rows[0].name,
                             visitorId,
-                            passId
+                            passId,
+                            rows[0].pass_token
                         );
 
                     } catch (e) {
@@ -381,8 +418,7 @@ router.get('/approve-mail/:id', async (req, res) => {
                         console.error(e);
                     }
 
-                    res.redirect(`https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}`
-                    );
+                    res.redirect(`https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}&token=${rows[0].pass_token}`);
                 }
             );
         }
@@ -481,8 +517,7 @@ console.log("🔥 HIT /visitor/all");
     });
 });
 
-router.put('/reject/:id', (req, res) => {
-
+router.put('/reject/:id', verifyEmployeeOrSecurityToken, (req, res) => {
     const visitorId = req.params.id;
 
     const sql = `
@@ -507,8 +542,12 @@ router.put('/reject/:id', (req, res) => {
 });
 
 router.get('/pass/:id', (req, res) => {
-
     const visitorId = req.params.id;
+    const token = req.query.token;
+
+    if (!token) {
+        return res.status(403).json({ message: 'Access Denied: Missing Pass Token' });
+    }
 
     const sql = `SELECT
     visitors.id,
@@ -525,11 +564,11 @@ router.get('/pass/:id', (req, res) => {
 FROM visitors
 LEFT JOIN employees
 ON visitors.employee_id = employees.id
-WHERE visitors.id = ?`;
+WHERE visitors.id = ? AND visitors.pass_token = ?`;
 
     db.query(
         sql,
-        [visitorId],
+        [visitorId, token],
         (err, result) => {
 
             if (err) {
@@ -538,12 +577,18 @@ WHERE visitors.id = ?`;
                 });
             }
 
+            if (result.length === 0) {
+                return res.status(403).json({
+                    message: 'Access Denied: Invalid Pass Token'
+                });
+            }
+
             res.json(result[0]);
         }
     );
 });
 
-router.get('/approved/count', (req, res) => {
+router.get('/approved/count', verifyEmployeeOrSecurityToken, (req, res) => {
 
     const sql = `
     SELECT COUNT(*) AS total
@@ -567,8 +612,12 @@ router.get('/approved/count', (req, res) => {
 
 
 router.get('/scan/:id', (req, res) => {
-
     const visitorId = req.params.id;
+    const token = req.query.token;
+
+    if (!token) {
+        return res.status(403).send('Access Denied: Missing Pass Token');
+    }
 
     db.query(
         `
@@ -576,9 +625,9 @@ router.get('/scan/:id', (req, res) => {
             name,
             status
         FROM visitors
-        WHERE id = ?
+        WHERE id = ? AND pass_token = ?
         `,
-        [visitorId],
+        [visitorId, token],
         (err, result) => {
 
             if (err || result.length === 0) {

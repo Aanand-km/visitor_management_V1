@@ -3,7 +3,46 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db/db");
 const { verifyVisitorDocument } = require("../services/aiService");
+const jwt = require("jsonwebtoken");
+
 console.log("✅ Security routes loaded");
+
+// Middleware to verify security token
+function verifySecurityToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ message: 'Access Denied: No Token Provided' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err || decoded.role !== 'security') {
+            return res.status(403).json({ message: 'Invalid or Expired Token' });
+        }
+        req.securityUser = decoded;
+        next();
+    });
+}
+
+/*
+---------------------------------------------------------
+Security Guard Login
+POST /security/login
+---------------------------------------------------------
+*/
+router.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const expectedUser = process.env.SECURITY_USER || 'security';
+    const expectedPass = process.env.SECURITY_PASS || 'Security@123';
+
+    if (username === expectedUser && password === expectedPass) {
+        const token = jwt.sign({ role: 'security' }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        res.json({ success: true, token });
+    } else {
+        res.status(401).json({ success: false, message: 'Invalid Username or Password' });
+    }
+});
 
 /*
 ---------------------------------------------------------
@@ -12,7 +51,7 @@ GET /security/pending
 ---------------------------------------------------------
 */
 
-router.get("/pending", (req, res) => {
+router.get("/pending", verifySecurityToken, (req, res) => {
 
     const sql = `
         SELECT
@@ -55,7 +94,7 @@ router.get("/pending", (req, res) => {
 
 });
 
-router.get("/ai-verify/:id", (req, res) => {
+router.get("/ai-verify/:id", verifySecurityToken, (req, res) => {
 
     const visitorId = req.params.id;
 
@@ -133,7 +172,7 @@ PUT /security/reject/:id
 ---------------------------------------------------------
 */
 
-router.put("/reject/:id", (req, res) => {
+router.put("/reject/:id", verifySecurityToken, (req, res) => {
 
     const visitorId = req.params.id;
     const { reason } = req.body;

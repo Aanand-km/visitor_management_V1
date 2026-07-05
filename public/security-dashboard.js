@@ -1,12 +1,29 @@
+const securityToken = localStorage.getItem('securityToken');
+if (!securityToken) {
+    window.location.href = 'security-login.html';
+}
+
+function logoutSecurity() {
+    localStorage.removeItem('securityToken');
+    window.location.href = 'security-login.html';
+}
+
 let allVisitors = [];
 
 async function loadPendingVisitors() {
     try {
         document.getElementById('visitorList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading visitors...</p></div>';
 
-        const response = await fetch("/security/pending");
+        const response = await fetch("/security/pending", {
+            headers: {
+                'Authorization': `Bearer ${securityToken}`
+            }
+        });
 
         if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                logoutSecurity();
+            }
             throw new Error('Failed to fetch pending visitors');
         }
 

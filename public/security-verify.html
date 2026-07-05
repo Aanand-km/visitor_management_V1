@@ -234,8 +234,9 @@
 
 <body>
 
-    <div class="header">
-        🔒 Visitor Verification
+    <div class="header" style="display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; padding: 25px 40px;">
+        <span>🔒 Visitor Verification</span>
+        <button onclick="logoutSecurity()" style="background: transparent; color: white; border: 2px solid white; padding: 8px 16px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.3s; width: auto;">Logout</button>
     </div>
 
     <div class="container">
@@ -314,6 +315,16 @@
     </div>
 
     <script>
+        const securityToken = localStorage.getItem('securityToken');
+        if (!securityToken) {
+            window.location.href = 'security-login.html';
+        }
+
+        function logoutSecurity() {
+            localStorage.removeItem('securityToken');
+            window.location.href = 'security-login.html';
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const visitorId = urlParams.get('id');
 
@@ -321,7 +332,18 @@
             try {
                 document.getElementById('loading').style.display = 'block';
 
-                const response = await fetch(`/security/pending`);
+                const response = await fetch(`/security/pending`, {
+                    headers: {
+                        'Authorization': `Bearer ${securityToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        logoutSecurity();
+                    }
+                    throw new Error('Failed to load visitor details');
+                }
                 const data = await response.json();
 
                 const visitor = data.visitors.find(v => v.id == visitorId);
@@ -370,7 +392,11 @@
                 document.getElementById('aiReport').style.display = 'none';
                 document.getElementById('verificationLoading').style.display = 'block';
 
-                const response = await fetch(`/security/ai-verify/${visitorId}`);
+                const response = await fetch(`/security/ai-verify/${visitorId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${securityToken}`
+                    }
+                });
                 const report = await response.json();
 
                 if (!response.ok) {
@@ -435,7 +461,10 @@
 
                 const response = await fetch(`/visitor/approve/${visitorId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${securityToken}`
+                    }
                 });
 
                 const data = await response.json();
@@ -469,7 +498,10 @@
 
                 const response = await fetch(`/visitor/reject/${visitorId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${securityToken}`
+                    },
                     body: JSON.stringify({ reason })
                 });
 

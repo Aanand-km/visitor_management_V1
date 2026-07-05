@@ -445,7 +445,12 @@
 
                 const response =
                     await fetch(
-                        `/visitor/pending/${employeeId}`
+                        `/visitor/pending/${employeeId}`,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        }
                     );
                 const visitors = await response.json();
                 console.log(visitors);
@@ -511,7 +516,12 @@
 
             const response =
                 await fetch(
-                    '/visitor/approved/count'
+                    '/visitor/approved/count',
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }
                 );
 
             const data =
@@ -529,7 +539,10 @@
         async function approveVisitor(id) {
             try {
                 const response = await fetch(`/visitor/approve/${id}`, {
-                    method: 'PUT'
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
                 const result = await response.json();
                 if (result.passId) {
@@ -546,7 +559,10 @@
             if (confirm('Are you sure you want to reject this visitor?')) {
                 try {
                     await fetch(`/visitor/reject/${id}`, {
-                        method: 'PUT'
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
                     });
                     loadVisitors();
                 } catch (error) {

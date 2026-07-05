@@ -243,11 +243,22 @@
     <script>
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
+        const token = params.get('token');
 
         async function loadPass() {
             try {
-                const resp = await fetch(`/visitor/pass/${id}`);
-                if (!resp.ok) return console.error('Failed to load pass', resp.status);
+                const resp = await fetch(`/visitor/pass/${id}?token=${token}`);
+                if (!resp.ok) {
+                    document.body.innerHTML = `
+                        <div style="max-width: 500px; margin: 100px auto; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; font-family: Arial, sans-serif;">
+                            <h1 style="color: #dc2626; font-size: 2.5rem; margin-bottom: 20px;">Access Denied</h1>
+                            <p style="color: #4b5563; font-size: 1.1rem; line-height: 1.6;">
+                                You do not have permission to access this visitor pass. The URL may be invalid or expired.
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }
                 const visitor = await resp.json();
 
                 document.getElementById('name').innerText = visitor.name || '';

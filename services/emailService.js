@@ -121,11 +121,12 @@ async function sendVisitorPassEmail(
     visitorEmail,
     visitorName,
     visitorId,
-    passId
+    passId,
+    passToken
 ) {
 
     const passLink =
-        `https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}`;
+        `https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}&token=${passToken}`;
 
     const response = await fetch(
         'https://api.brevo.com/v3/smtp/email',
