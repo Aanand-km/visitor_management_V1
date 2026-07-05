@@ -32,6 +32,15 @@ app.get('/', (req, res) => {
     res.send('Visitor Management API Running');
 });
 
+app.use((err, req, res, next) => {
+    console.error("=== GLOBAL ERROR HANDLER ===");
+    console.error(err.stack || err);
+    res.status(500).json({
+        message: "Internal Server Error",
+        error: err.message || err
+    });
+});
+
 
 
 const PORT = process.env.PORT || 3000;
