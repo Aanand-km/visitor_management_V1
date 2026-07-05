@@ -15,7 +15,15 @@ OCR
 async function extractDocumentDetails(imagePath, mimeType, documentType) {
 
     try {
-        const imageBuffer = fs.readFileSync(imagePath);
+        let imageBuffer;
+        if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+            const res = await fetch(imagePath);
+            if (!res.ok) throw new Error(`Failed to fetch image from URL ${imagePath}: ${res.statusText}`);
+            const arrayBuffer = await res.arrayBuffer();
+            imageBuffer = Buffer.from(arrayBuffer);
+        } else {
+            imageBuffer = fs.readFileSync(imagePath);
+        }
 
         const base64Image = imageBuffer.toString("base64");
 
@@ -118,9 +126,22 @@ async function verifyVisitorDocument(
 
         console.log("Working Directory :", process.cwd());
         console.log("Database Path     :", imagePath);
-        console.log("Absolute Path     :", absolutePath);
 
-        const imageBuffer = fs.readFileSync(absolutePath);
+        let imageBuffer;
+        if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+            const res = await fetch(imagePath);
+            if (!res.ok) throw new Error(`Failed to fetch image from URL ${imagePath}: ${res.statusText}`);
+            const arrayBuffer = await res.arrayBuffer();
+            imageBuffer = Buffer.from(arrayBuffer);
+        } else {
+            const absolutePath = path.join(
+                process.cwd(),
+                imagePath.replace(/^[/\\]/, "")
+            );
+            console.log("Absolute Path     :", absolutePath);
+            imageBuffer = fs.readFileSync(absolutePath);
+        }
+
         const base64Image = imageBuffer.toString("base64");
 
         const response = await ai.models.generateContent({

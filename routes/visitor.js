@@ -12,42 +12,37 @@ const {
 const path = require('path');
 const crypto = require('crypto');
 
-const storage = multer.diskStorage({
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-    destination: function (req, file, cb) {
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-        let uploadPath;
-
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+        let folder = 'visitor_management/others';
         if (file.fieldname === 'photo') {
-            uploadPath = path.join(__dirname, '../uploads/photos');
+            folder = 'visitor_management/photos';
+        } else if (file.fieldname === 'document') {
+            folder = 'visitor_management/documents';
         }
-
-        else if (file.fieldname === 'document') {
-            uploadPath = path.join(__dirname, '../uploads/documents');
-        }
-
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-
-        cb(null, uploadPath);
-    },
-
-    filename: function (req, file, cb) {
-
-        cb(
-            null,
-            Date.now() + '-' + file.originalname
-        );
-
+        return {
+            folder: folder,
+            allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
+            resource_type: 'auto',
+            public_id: Date.now() + '-' + path.parse(file.originalname).name
+        };
     }
-
 });
 
 const upload = multer({ storage });
 
 
-console.log('Visitor routes loaded with file logging support');
+console.log('Visitor routes loaded with Cloudinary storage');
 
 router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 'document', maxCount: 1 }]), (req, res) => {
     const {
@@ -61,8 +56,8 @@ router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 
         consent_given
     } = req.body;
 
-    const photoPath = req.files?.photo ? `/uploads/photos/${req.files.photo[0].filename}` : null;
-    const documentPath = req.files?.document ? `/uploads/documents/${req.files.document[0].filename}` : null;;
+    const photoPath = req.files?.photo ? req.files.photo[0].path : null;
+    const documentPath = req.files?.document ? req.files.document[0].path : null;
 
     console.log(req.body);
     console.log(req.files);
