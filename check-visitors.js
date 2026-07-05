@@ -1,7 +1,7 @@
 const db = require('./db/db');
 
 setTimeout(() => {
-  db.query('SELECT id, name, aadhaar_number, status FROM visitors ORDER BY id DESC LIMIT 3', (err, result) => {
+  db.query('SELECT id, name, document_number, status FROM visitors ORDER BY id DESC LIMIT 3', (err, result) => {
       if (err) {
           console.error('Error:', err);
       } else {
@@ -9,7 +9,7 @@ setTimeout(() => {
           result.forEach((row, index) => {
               console.log(`\n${index + 1}. ID: ${row.id}`);
               console.log(`   Name: ${row.name}`);
-              console.log(`   Aadhaar: ${row.aadhaar_number || 'NULL'}`);
+              console.log(`   Document Number: ${row.document_number || 'NULL'}`);
               console.log(`   Status: ${row.status}`);
           });
       }

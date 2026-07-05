@@ -72,11 +72,14 @@ router.get("/ai-verify/:id", (req, res) => {
 
         if (err) {
 
-            console.error("AI Verification DB Error:", err);
+            console.error("========== DATABASE ERROR ==========");
+            console.error(err);
 
             return res.status(500).json({
                 message: "Database Error",
-                error: err.message
+                error: err.message,
+                code: err.code,
+                sql: err.sql
             });
 
         }

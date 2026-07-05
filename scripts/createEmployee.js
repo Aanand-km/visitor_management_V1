@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const db = require('./db/db');
+const db = require('../db/db');
 
 async function createEmployee() {
 

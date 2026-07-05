@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 const { GoogleGenAI } = require("@google/genai");
 
 const ai = new GoogleGenAI({
@@ -16,22 +17,22 @@ async function extractDocumentDetails(imagePath, mimeType, documentType) {
     try {
         const imageBuffer = fs.readFileSync(imagePath);
 
-    const base64Image = imageBuffer.toString("base64");
+        const base64Image = imageBuffer.toString("base64");
 
-    const response =
-        await ai.models.generateContent({
+        const response =
+            await ai.models.generateContent({
 
-            model: "gemini-2.5-flash",
+                model: "gemini-2.5-flash",
 
-            contents: [
-                {
-                    inlineData: {
-                        mimeType,
-                        data: base64Image
-                    }
-                },
-                {
-                     text: `
+                contents: [
+                    {
+                        inlineData: {
+                            mimeType,
+                            data: base64Image
+                        }
+                    },
+                    {
+                        text: `
 You are an OCR engine.
 
 The uploaded identity document is a ${documentType}.
@@ -61,27 +62,27 @@ Return ONLY valid JSON.
     "documentNumber": ""
 }
 `
-                }
-            ]
+                    }
+                ]
 
-        });
+            });
 
-     let text = response.text;
+        let text = response.text;
 
-text = text.replace(/```json/g, "");
-text = text.replace(/```/g, "");
+        text = text.replace(/```json/g, "");
+        text = text.replace(/```/g, "");
 
-console.log("Gemini Raw Response:");
-console.log(text);
+        console.log("Gemini Raw Response:");
+        console.log(text);
 
-return JSON.parse(text);
+        return JSON.parse(text);
 
-} catch (error) {
+    } catch (error) {
 
-    console.error("OCR AI ERROR");
-    console.error(error);
+        console.error("OCR AI ERROR");
+        console.error(error);
 
-    throw error;
+        throw error;
 
     }
 
@@ -108,8 +109,18 @@ async function verifyVisitorDocument(
         console.log("Type:", documentType);
         console.log("Number:", documentNumber);
 
-        const imageBuffer = fs.readFileSync(imagePath);
 
+
+        const absolutePath = path.join(
+            process.cwd(),
+            imagePath.replace(/^[/\\]/, "")
+        );
+
+        console.log("Working Directory :", process.cwd());
+        console.log("Database Path     :", imagePath);
+        console.log("Absolute Path     :", absolutePath);
+
+        const imageBuffer = fs.readFileSync(absolutePath);
         const base64Image = imageBuffer.toString("base64");
 
         const response = await ai.models.generateContent({

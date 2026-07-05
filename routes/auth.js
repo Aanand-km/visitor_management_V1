@@ -78,6 +78,13 @@ router.post('/signup', async (req, res) => {
         [employeeId, email],
         async (err, result) => {
 
+            if (err) {
+                console.error("Signup DB Error:", err);
+                return res.status(500).json({
+                    message: "Database Error"
+                });
+            }
+
             if (result.length === 0) {
 
                 return res.status(404).json({

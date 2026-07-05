@@ -416,7 +416,7 @@ router.get('/reject-mail/:id', (req, res) => {
 });
 
 router.get('/all', (req, res) => {
-
+console.log("🔥 HIT /visitor/all");
     const sql = `
         SELECT
             visitors.id,
@@ -434,10 +434,15 @@ router.get('/all', (req, res) => {
     db.query(sql, (err, result) => {
 
         if (err) {
-            return res.status(500).json({
-                message: 'Database Error'
-            });
-        }
+    console.error("MYSQL ERROR:", err);
+
+    return res.status(500).json({
+        message: "Database Error",
+        code: err.code,
+        sqlMessage: err.sqlMessage,
+        sql: err.sql
+    });
+}
 
         res.json(result);
     });
