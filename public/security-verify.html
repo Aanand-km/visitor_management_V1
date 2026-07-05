@@ -279,7 +279,7 @@
                     </div>
                 </div>
 
-                <h3 style="margin-top: 30px; margin-bottom: 15px;">Document Preview</h3>
+                <h3 style="margin-top: 30px; margin-bottom: 15px;">Document File</h3>
                 <div id="documentPreview" style="text-align: center;">
                     <div class="loading">
                         <p>Loading document...</p>
@@ -355,7 +355,11 @@
         function loadDocumentPreview(documentPath) {
             const preview = document.getElementById('documentPreview');
             if (documentPath) {
-                preview.innerHTML = `<img src="${documentPath}" alt="Visitor Document" class="document-preview">`;
+                preview.innerHTML = `
+                    <a href="${documentPath}" target="_blank" class="btn-verify" style="display: inline-block; background: #2563eb; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 10px auto;">
+                        📄 Open Document in New Tab
+                    </a>
+                `;
             } else {
                 preview.innerHTML = '<p style="color: #6b7280;">No document available</p>';
             }

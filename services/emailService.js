@@ -25,134 +25,89 @@ async function sendEmployeeNotification(employeeEmail, visitor) {
                 ],
                 subject: 'New Visitor Registration',
                 htmlContent: `
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:25px 10px;font-family:Arial,sans-serif;">
-<tr>
-<td align="center">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Visitor Registration</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6f8;padding:20px 10px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);border-collapse:separate;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color:#111827;padding:30px 20px;text-align:center;">
+                            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:bold;letter-spacing:-0.5px;">
+                                Visitor Management System
+                            </h1>
+                            <p style="margin:8px 0 0;color:#f59e0b;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">
+                                New Visitor Request
+                            </p>
+                        </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding:30px 20px;">
+                            <p style="margin:0 0 16px;font-size:16px;color:#111827;font-weight:bold;">Hello,</p>
+                            <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
+                                A new visitor has requested entry to meet you. Please review their details and choose an action below.
+                            </p>
+                            
+                            <!-- Details Table -->
+                            <table width="100%" cellpadding="12" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;border-collapse:separate;margin-bottom:30px;">
+                                <tr style="background-color:#f9fafb;">
+                                    <td width="35%" style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Visitor Name</td>
+                                    <td style="font-size:14px;color:#111827;font-weight:bold;border-bottom:1px solid #e5e7eb;">${visitor.name}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Phone</td>
+                                    <td style="font-size:14px;color:#111827;border-bottom:1px solid #e5e7eb;">${visitor.phone}</td>
+                                </tr>
+                                <tr style="background-color:#f9fafb;">
+                                    <td style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Email</td>
+                                    <td style="font-size:14px;color:#111827;border-bottom:1px solid #e5e7eb;">${visitor.email}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size:14px;color:#6b7280;font-weight:bold;">Purpose</td>
+                                    <td style="font-size:14px;color:#111827;">${visitor.purpose}</td>
+                                </tr>
+                            </table>
 
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:10px;overflow:hidden;">
-
-<tr>
-<td style="background:#111111;padding:25px;text-align:center;">
-<h1 style="margin:0;color:#ffffff;font-size:28px;">
-Visitor Management System
-</h1>
-
-<p style="margin:10px 0 0;color:#f59e0b;font-size:16px;">
-New Visitor Approval Request
-</p>
-</td>
-</tr>
-
-<tr>
-<td style="padding:30px;">
-
-<p style="font-size:16px;color:#333333;">
-Hello,
-</p>
-
-<p style="font-size:15px;color:#555555;line-height:24px;">
-A new visitor has requested entry into the premises.
-Please review the visitor details below.
-</p>
-
-<table width="100%" cellpadding="10" cellspacing="0" style="margin-top:20px;border-collapse:collapse;">
-
-<tr style="background:#fafafa;">
-<td><b>Visitor Name</b></td>
-<td>${visitor.name}</td>
-</tr>
-
-<tr>
-<td><b>Phone</b></td>
-<td>${visitor.phone}</td>
-</tr>
-
-<tr style="background:#fafafa;">
-<td><b>Email</b></td>
-<td>${visitor.email}</td>
-</tr>
-
-<tr>
-<td><b>Purpose</b></td>
-<td>${visitor.purpose}</td>
-</tr>
-
-</table>
-
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:35px;">
-<tr>
-
-<td align="center">
-
-<a href="${approveLink}"
-style="
-background:#16a34a;
-color:#ffffff;
-padding:14px 28px;
-text-decoration:none;
-font-weight:bold;
-border-radius:6px;
-display:inline-block;">
-APPROVE
-</a>
-
-</td>
-
-</tr>
-
-<tr><td height="15"></td></tr>
-
-<tr>
-
-<td align="center">
-
-<a href="${rejectLink}"
-style="
-background:#dc2626;
-color:#ffffff;
-padding:14px 28px;
-text-decoration:none;
-font-weight:bold;
-border-radius:6px;
-display:inline-block;">
-REJECT
-</a>
-
-</td>
-
-</tr>
-
-</table>
-
-</td>
-</tr>
-
-<tr>
-
-<td style="
-background:#f8f8f8;
-padding:20px;
-text-align:center;
-font-size:12px;
-color:#777777;
-line-height:20px;">
-
-This email was generated automatically by
-<b>Visitor Management System</b>.
-
-<br><br>
-
-Please do not reply to this email.
-
-</td>
-
-</tr>
-
-</table>
-
-</td>
-</tr>
-</table>
+                            <!-- Action Buttons -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center" style="padding-bottom:16px;">
+                                        <a href="${approveLink}" style="background-color:#16a34a;color:#ffffff;padding:14px 40px;text-decoration:none;font-weight:bold;font-size:15px;border-radius:8px;display:inline-block;width:80%;max-width:260px;text-align:center;box-shadow:0 2px 4px rgba(22,163,74,0.2);">
+                                            APPROVE VISIT
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <a href="${rejectLink}" style="background-color:#dc2626;color:#ffffff;padding:14px 40px;text-decoration:none;font-weight:bold;font-size:15px;border-radius:8px;display:inline-block;width:80%;max-width:260px;text-align:center;box-shadow:0 2px 4px rgba(220,38,38,0.2);">
+                                            REJECT VISIT
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color:#f9fafb;padding:24px 20px;text-align:center;font-size:12px;color:#9ca3af;line-height:1.5;border-top:1px solid #f3f4f6;">
+                            This email was automatically generated by the <strong>Visitor Management System</strong>.<br>
+                            Please do not reply directly to this email.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
 `
             })
         }
@@ -193,68 +148,78 @@ async function sendVisitorPassEmail(
                 ],
                 subject: 'Visitor Pass Approved',
                 htmlContent: `
-<div style="max-width:650px;margin:auto;font-family:Arial,sans-serif;background:#f4f6f9;padding:30px;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Pass Approved</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6f8;padding:20px 10px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);border-collapse:separate;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color:#1e3a8a;padding:30px 20px;text-align:center;">
+                            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:bold;letter-spacing:-0.5px;">
+                                Visitor Management System
+                            </h1>
+                            <p style="margin:8px 0 0;color:#93c5fd;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">
+                                Pass Approved
+                            </p>
+                        </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding:30px 20px;">
+                            <p style="margin:0 0 16px;font-size:18px;color:#111827;font-weight:bold;">Hello ${visitorName},</p>
+                            <p style="margin:0 0 24px;font-size:15px;color:#4b5563;line-height:1.6;">
+                                Your visitor request has been approved. Below are your pass details. Please keep your pass ready upon entry.
+                            </p>
+                            
+                            <!-- Details Table -->
+                            <table width="100%" cellpadding="14" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;border-collapse:separate;margin-bottom:30px;">
+                                <tr style="background-color:#f9fafb;">
+                                    <td width="35%" style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Pass ID</td>
+                                    <td style="font-size:14px;color:#111827;font-weight:bold;border-bottom:1px solid #e5e7eb;">${passId}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size:14px;color:#6b7280;font-weight:bold;">Status</td>
+                                    <td style="font-size:14px;color:#16a34a;font-weight:bold;">Approved</td>
+                                </tr>
+                            </table>
 
-    <div style="background:#111827;color:white;padding:20px;text-align:center;border-radius:12px 12px 0 0;">
-        <h1 style="margin:0;">Visitor Management System</h1>
-        <p style="margin-top:8px;color:#d1d5db;">
-            Visitor Pass Approved
-        </p>
-    </div>
-
-    <div style="background:white;padding:30px;border-radius:0 0 12px 12px;">
-
-        <h2>Hello ${visitorName},</h2>
-
-        <p>
-            Your visitor request has been approved.
-        </p>
-
-        <table style="width:100%;margin-top:20px;border-collapse:collapse;">
-
-            <tr>
-                <td style="padding:12px;font-weight:bold;">Pass ID</td>
-                <td>${passId}</td>
-            </tr>
-
-            <tr style="background:#f9fafb;">
-                <td style="padding:12px;font-weight:bold;">Status</td>
-                <td style="color:#16a34a;font-weight:bold;">
-                    Approved
-                </td>
-            </tr>
-
-        </table>
-
-        <div style="margin-top:35px;text-align:center;">
-
-            <a href="${passLink}"
-               style="
-               background:#2563eb;
-               color:white;
-               padding:14px 35px;
-               border-radius:8px;
-               text-decoration:none;
-               font-weight:bold;">
-               View Visitor Pass
-            </a>
-
-        </div>
-
-        <p style="margin-top:30px;">
-            Please keep your visitor pass ready while entering the premises.
-        </p>
-
-        <hr style="margin:40px 0;">
-
-        <p style="color:#6b7280;font-size:13px;text-align:center;">
-            This email was automatically generated by the
-            Visitor Management System.
-        </p>
-
-    </div>
-
-</div>
+                            <!-- Action Button -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <a href="${passLink}" style="background-color:#2563eb;color:#ffffff;padding:14px 40px;text-decoration:none;font-weight:bold;font-size:15px;border-radius:8px;display:inline-block;width:80%;max-width:280px;text-align:center;box-shadow:0 2px 4px rgba(37,99,235,0.2);">
+                                            VIEW VISITOR PASS
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin:24px 0 0;font-size:14px;color:#6b7280;line-height:1.5;text-align:center;">
+                                Please carry a digital or printed copy of this pass during your visit.
+                            </p>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color:#f9fafb;padding:24px 20px;text-align:center;font-size:12px;color:#9ca3af;line-height:1.5;border-top:1px solid #f3f4f6;">
+                            This email was automatically generated by the <strong>Visitor Management System</strong>.<br>
+                            Please do not reply directly to this email.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
 `
             })
         }
