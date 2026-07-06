@@ -720,4 +720,13 @@ router.post('/check-in-out', verifyEmployeeOrSecurityToken, (req, res) => {
 
 
 
+router.get('/temp-db-check', (req, res) => {
+    db.query('DESCRIBE visitors', (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message, stack: err.stack });
+        }
+        res.json({ fields: rows.map(r => r.Field), schema: rows });
+    });
+});
+
 module.exports = router;
