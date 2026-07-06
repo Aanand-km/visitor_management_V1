@@ -8,6 +8,36 @@ const db = require('./db/db');
 const visitorRoutes = require('./routes/visitor');
 const employeeRoutes = require('./routes/employee');
 
+// Self-healing database schema migrations
+function runMigrations() {
+    const columns = [
+        { name: 'pass_token', type: 'VARCHAR(255) NULL' },
+        { name: 'employee_name_input', type: 'VARCHAR(255) NULL' },
+        { name: 'department_input', type: 'VARCHAR(100) NULL' },
+        { name: 'rejection_reason', type: 'VARCHAR(255) NULL' },
+        { name: 'rejected_at', type: 'DATETIME NULL' }
+    ];
+
+    columns.forEach(col => {
+        db.query(`SHOW COLUMNS FROM visitors LIKE '${col.name}'`, (err, rows) => {
+            if (err) {
+                console.error(`Error checking column ${col.name}:`, err);
+                return;
+            }
+            if (rows.length === 0) {
+                db.query(`ALTER TABLE visitors ADD COLUMN ${col.name} ${col.type}`, (alterErr) => {
+                    if (alterErr) {
+                        console.error(`Failed to add column ${col.name} to visitors table:`, alterErr);
+                    } else {
+                        console.log(`Successfully added column ${col.name} to visitors table.`);
+                    }
+                });
+            }
+        });
+    });
+}
+runMigrations();
+
 const app = express();
 const ocrRoutes =
     require('./routes/ocr');
