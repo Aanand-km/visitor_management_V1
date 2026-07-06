@@ -243,7 +243,7 @@ async function sendVisitorRejectionEmail(recipientEmail, visitorName, reason) {
             body: JSON.stringify({
                 sender: {
                     name: 'Visitor Management System',
-                    email: process.env.BREVO_USER
+                    email: 'anandkm539@gmail.com'
                 },
                 to: [
                     {
