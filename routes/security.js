@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db/db");
 const { verifyVisitorDocument } = require("../services/aiService");
+const { sendVisitorRejectionEmail } = require("../services/emailService");
 const jwt = require("jsonwebtoken");
 
 console.log("✅ Security routes loaded");
@@ -217,31 +218,39 @@ router.put("/reject/:id", verifySecurityToken, (req, res) => {
         WHERE id = ?
     `;
 
-    db.query(sql, [reason || 'Not specified', visitorId], (err, result) => {
-
-        if (err) {
-            console.error('Rejection DB Error:', err);
-
-            return res.status(500).json({
-                success: false,
-                message: "Database Error",
-                error: err.message
-            });
-        }
-
-        if (result.affectedRows === 0) {
+    const getVisitorSql = 'SELECT name, email FROM visitors WHERE id = ?';
+    db.query(getVisitorSql, [visitorId], (getErr, getRes) => {
+        if (getErr || getRes.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Visitor Not Found"
             });
         }
 
-        res.json({
-            success: true,
-            message: "Visitor rejected successfully",
-            visitorId
-        });
+        const visitor = getRes[0];
 
+        db.query(sql, [reason || 'Not specified', visitorId], (err, result) => {
+
+            if (err) {
+                console.error('Rejection DB Error:', err);
+
+                return res.status(500).json({
+                    success: false,
+                    message: "Database Error",
+                    error: err.message
+                });
+            }
+
+            sendVisitorRejectionEmail(visitor.email, visitor.name, reason || 'Not specified')
+                .catch(mailErr => console.error("Error sending rejection email:", mailErr));
+
+            res.json({
+                success: true,
+                message: "Visitor rejected successfully",
+                visitorId
+            });
+
+        });
     });
 
 });

@@ -6,7 +6,8 @@ const multer = require('multer');
 const db = require('../db/db');
 const {
     sendEmployeeNotification,
-    sendVisitorPassEmail
+    sendVisitorPassEmail,
+    sendVisitorRejectionEmail
 } = require('../services/emailService');
 
 const path = require('path');
@@ -521,16 +522,19 @@ console.log("🔥 HIT /visitor/all");
 
 router.put('/reject/:id', verifyEmployeeOrSecurityToken, (req, res) => {
     const visitorId = req.params.id;
+    const reason = req.body.reason || 'Rejected by Host Employee';
 
     const sql = `
         UPDATE visitors
         SET 
             status = 'rejected',
+            rejection_reason = ?,
+            rejected_at = NOW(),
             approval_token = NULL
         WHERE id = ?
     `;
 
-    db.query(sql, [visitorId], (err, result) => {
+    db.query(sql, [reason, visitorId], (err, result) => {
 
         if (err) {
             console.error(err);
@@ -538,6 +542,18 @@ router.put('/reject/:id', verifyEmployeeOrSecurityToken, (req, res) => {
                 message: 'Database Error'
             });
         }
+
+        // Fetch visitor name and email to send rejection email
+        const getVisitorSql = 'SELECT name, email FROM visitors WHERE id = ?';
+        db.query(getVisitorSql, [visitorId], (getErr, getRes) => {
+            if (getErr || getRes.length === 0) {
+                console.error("Error finding visitor for rejection email:", getErr);
+            } else {
+                const visitor = getRes[0];
+                sendVisitorRejectionEmail(visitor.email, visitor.name, reason)
+                    .catch(mailErr => console.error("Error sending rejection email:", mailErr));
+            }
+        });
 
         res.json({
             message: 'Visitor Rejected'
