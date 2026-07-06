@@ -154,12 +154,44 @@ function onScanSuccess(decodedText) {
         scanner.clear();
     }
 
-    const visitorId = decodedText.split('/').pop();
+    let visitorId = null;
+    let token = null;
 
-    fetch(`/visitor/scan/${visitorId}`)
+    try {
+        const url = new URL(decodedText);
+        visitorId = url.searchParams.get('id');
+        token = url.searchParams.get('token');
+    } catch (e) {
+        // Fallback for older format: /visitor/scan/ID?token=TOKEN
+        const matches = decodedText.match(/visitor\/scan\/(\d+)/);
+        if (matches) {
+            visitorId = matches[1];
+            const tokenMatch = decodedText.match(/[?&]token=([^&]+)/);
+            if (tokenMatch) {
+                token = tokenMatch[1];
+            }
+        }
+    }
+
+    if (!visitorId || !token) {
+        document.getElementById('result').innerHTML = `<div class="error" style="color: #ef4444; font-weight: bold;">❌ Invalid QR Code Format</div>`;
+        setTimeout(() => {
+            startScanner();
+        }, 3000);
+        return;
+    }
+
+    fetch('/visitor/check-in-out', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${securityToken}`
+        },
+        body: JSON.stringify({ id: visitorId, token: token })
+    })
         .then(res => {
             if (!res.ok) {
-                throw new Error('Visitor not found or invalid QR code');
+                throw new Error('Verification failed or unauthorized scan');
             }
             return res.text();
         })
@@ -171,10 +203,10 @@ function onScanSuccess(decodedText) {
         })
         .catch(error => {
             console.error('QR Scan Error:', error);
-            document.getElementById('result').innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            document.getElementById('result').innerHTML = `<div class="error" style="color: #ef4444; font-weight: bold;">❌ Error: ${error.message}</div>`;
             setTimeout(() => {
                 startScanner();
-            }, 2000);
+            }, 3000);
         });
 }
 

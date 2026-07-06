@@ -290,7 +290,7 @@ router.put('/approve/:id', verifyEmployeeOrSecurityToken, async (req, res) => {
         } else if (visitor.status === 'pending_employee') {
             // Employee approval: Transition status to approved, generate pass & QR
             const passId = 'PASS-' + Date.now();
-            const qrText = `http://ducktail-five-prideful.ngrok-free.dev/visitor/scan/${visitorId}?token=${visitor.pass_token}`;
+            const qrText = `http://ducktail-five-prideful.ngrok-free.dev/visitor-pass.html?id=${visitorId}&token=${visitor.pass_token}`;
             let qrCode;
             try {
                 qrCode = await QRCode.toDataURL(qrText);
@@ -382,7 +382,7 @@ router.get('/approve-mail/:id', async (req, res) => {
 
             const passId = 'PASS-' + Date.now();
 
-            const qrText = `https://visitor-management-jp03.onrender.com/visitor/scan/${visitorId}?token=${rows[0].pass_token}`;
+            const qrText = `https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}&token=${rows[0].pass_token}`;
 
             const qrCode = await QRCode.toDataURL(qrText);
 
@@ -427,7 +427,7 @@ router.get('/approve-mail/:id', async (req, res) => {
     );
 });
 
-router.get('/reject-mail/:id', (req, res) => {
+router.get('/-mail/:id', (req, res) => {
 
     const visitorId = req.params.id;
     const token = req.query.token;
@@ -615,12 +615,11 @@ router.get('/approved/count', verifyEmployeeOrSecurityToken, (req, res) => {
 
 
 
-router.get('/scan/:id', (req, res) => {
-    const visitorId = req.params.id;
-    const token = req.query.token;
+router.post('/check-in-out', verifyEmployeeOrSecurityToken, (req, res) => {
+    const { id, token } = req.body;
 
-    if (!token) {
-        return res.status(403).send('Access Denied: Missing Pass Token');
+    if (!id || !token) {
+        return res.status(400).send('<h1>Missing parameters</h1>');
     }
 
     db.query(
@@ -631,11 +630,11 @@ router.get('/scan/:id', (req, res) => {
         FROM visitors
         WHERE id = ? AND pass_token = ?
         `,
-        [visitorId, token],
+        [id, token],
         (err, result) => {
 
             if (err || result.length === 0) {
-                return res.status(404).send('Visitor not found');
+                return res.status(404).send('<h1>Visitor not found or invalid pass</h1>');
             }
 
             const visitor = result[0];
@@ -650,16 +649,18 @@ router.get('/scan/:id', (req, res) => {
                         check_in_time = NOW()
                     WHERE id = ?
                     `,
-                    [visitorId]
+                    [id],
+                    (updateErr) => {
+                        if (updateErr) {
+                            return res.status(500).send('<h1>Database Error</h1>');
+                        }
+                        return res.send(`
+                            <h1 style="color: #16a34a; font-size: 2rem;">✅ Check-In Successful</h1>
+                            <h2 style="font-size: 1.5rem; margin-top: 10px; color: #1f2937;">${visitor.name}</h2>
+                        `);
+                    }
                 );
-
-                return res.send(`
-                    <h1>✅ Check-In Successful</h1>
-                    <h2>${visitor.name}</h2>
-                `);
-            }
-
-            if (visitor.status === 'checked_in') {
+            } else if (visitor.status === 'checked_in') {
 
                 db.query(
                     `
@@ -669,19 +670,23 @@ router.get('/scan/:id', (req, res) => {
                         check_out_time = NOW()
                     WHERE id = ?
                     `,
-                    [visitorId]
+                    [id],
+                    (updateErr) => {
+                        if (updateErr) {
+                            return res.status(500).send('<h1>Database Error</h1>');
+                        }
+                        return res.send(`
+                            <h1 style="color: #2563eb; font-size: 2rem;">✅ Check-Out Successful</h1>
+                            <h2 style="font-size: 1.5rem; margin-top: 10px; color: #1f2937;">${visitor.name}</h2>
+                        `);
+                    }
                 );
-
+            } else {
                 return res.send(`
-                    <h1>✅ Check-Out Successful</h1>
-                    <h2>${visitor.name}</h2>
+                    <h1 style="color: #ef4444; font-size: 2rem;">Visit Already Completed</h1>
+                    <h2 style="font-size: 1.5rem; margin-top: 10px; color: #1f2937;">${visitor.name}</h2>
                 `);
             }
-
-            return res.send(`
-                <h1>Visit Already Completed</h1>
-                <h2>${visitor.name}</h2>
-            `);
         }
     );
 });
