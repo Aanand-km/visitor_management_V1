@@ -85,7 +85,7 @@ router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 
         document_type,
         document_number,
         purpose,
-        employee_id,
+        employee_name_input,
         consent_given
     } = req.body;
 
@@ -109,7 +109,7 @@ INSERT INTO visitors
     phone,
     email,
     purpose,
-    employee_id,
+    employee_name_input,
     photo_path,
     document_path,
     document_type,
@@ -133,7 +133,7 @@ VALUES
             phone,
             email,
             purpose,
-            employee_id,
+            employee_name_input,
             photoPath,
             documentPath,
             document_type,

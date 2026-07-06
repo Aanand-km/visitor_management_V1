@@ -278,6 +278,14 @@
                         <strong>Document Number</strong>
                         <span id="documentNumber">-</span>
                     </div>
+                    <div>
+                        <strong>Host Employee (Visitor Input)</strong>
+                        <span id="hostEmployeeInput">-</span>
+                    </div>
+                    <div>
+                        <strong>AI Matched Host Employee</strong>
+                        <span id="matchedEmployeeName" style="color: #ff6b00; font-weight: bold;">Not Matched Yet</span>
+                    </div>
                 </div>
 
                 <h3 style="margin-top: 30px; margin-bottom: 15px;">Document File</h3>
@@ -359,6 +367,8 @@
                 document.getElementById('visitorPurpose').textContent = visitor.purpose;
                 document.getElementById('documentType').textContent = visitor.document_type;
                 document.getElementById('documentNumber').textContent = visitor.document_number;
+                document.getElementById('hostEmployeeInput').textContent = visitor.employee_name_input || 'Not Entered';
+                document.getElementById('matchedEmployeeName').textContent = visitor.employee_name || 'Not Matched Yet';
 
                 // Load document preview
                 loadDocumentPreview(visitor.document_path);
@@ -401,6 +411,12 @@
 
                 if (!response.ok) {
                     throw new Error(report.message || 'AI verification failed');
+                }
+
+                if (report.matchedEmployee && report.matchedEmployee.name) {
+                    document.getElementById('matchedEmployeeName').textContent = `${report.matchedEmployee.name} (${report.matchedEmployee.department || 'N/A'}) [Confidence: ${report.matchedEmployee.confidence}%]`;
+                } else {
+                    document.getElementById('matchedEmployeeName').textContent = 'Could not match any employee';
                 }
 
                 displayAIReport(report);

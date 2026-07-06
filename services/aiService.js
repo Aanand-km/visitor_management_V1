@@ -107,7 +107,9 @@ AI Verification
 async function verifyVisitorDocument(
     imagePath,
     documentType,
-    documentNumber
+    documentNumber,
+    employeeNameInput,
+    employeeList
 ) {
 
     try {
@@ -116,6 +118,7 @@ async function verifyVisitorDocument(
         console.log("Image:", imagePath);
         console.log("Type:", documentType);
         console.log("Number:", documentNumber);
+        console.log("Employee Name Input:", employeeNameInput);
 
 
 
@@ -169,15 +172,25 @@ ${documentType}
 Expected Document Number:
 ${documentNumber}
 
-Return ONLY valid JSON.
+Also, match the visitor's manually entered host employee name to the correct employee from the organization list.
+Manually entered host employee: "${employeeNameInput || ''}"
+Actual Employee List:
+${JSON.stringify(employeeList || [])}
 
+Return ONLY valid JSON in this format:
 {
-  "confidence":95,
-  "documentReadable":true,
-  "documentValid":true,
-  "ocrMatched":true,
-  "warnings":[],
-  "recommendation":"Proceed" 
+  "confidence": 95,
+  "documentReadable": true,
+  "documentValid": true,
+  "ocrMatched": true,
+  "warnings": [],
+  "recommendation": "Proceed",
+  "matchedEmployee": {
+    "id": null, // ID of the best matched employee from the Actual Employee List, or null if no match found
+    "name": null, // Name of the matched employee, or null
+    "department": null, // Department of the matched employee, or null
+    "confidence": 0 // Match confidence percentage (0-100), or 0 if null
+  }
 }
 `
                 }

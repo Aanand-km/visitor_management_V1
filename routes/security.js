@@ -64,6 +64,7 @@ router.get("/pending", verifySecurityToken, (req, res) => {
             visitors.document_number,
             visitors.document_path,
             visitors.created_at,
+            visitors.employee_name_input,
             employees.name AS employee_name
         FROM visitors
         LEFT JOIN employees
@@ -102,12 +103,13 @@ router.get("/ai-verify/:id", verifySecurityToken, (req, res) => {
         SELECT
             document_path,
             document_type,
-            document_number
+            document_number,
+            employee_name_input
         FROM visitors
         WHERE id=?
     `;
 
-    db.query(sql, [visitorId], async (err, result) => {
+    db.query(sql, [visitorId], (err, result) => {
 
         if (err) {
 
@@ -131,35 +133,64 @@ router.get("/ai-verify/:id", verifySecurityToken, (req, res) => {
 
         }
 
-        try {
+        const visitor = result[0];
 
-            const report =
-                await verifyVisitorDocument(
+        // Fetch employee list for AI context matching
+        db.query('SELECT id, name, department, email FROM employees', async (empErr, empList) => {
+            if (empErr) {
+                console.error("Employee Query Error:", empErr);
+                return res.status(500).json({ message: "Database Error" });
+            }
 
-                    result[0].document_path,
+            try {
 
-                    result[0].document_type,
+                const report =
+                    await verifyVisitorDocument(
 
-                    result[0].document_number
+                        visitor.document_path,
 
-                );
+                        visitor.document_type,
 
-            res.json(report);
+                        visitor.document_number,
 
-        }
+                        visitor.employee_name_input,
 
-        catch (error) {
+                        empList
 
-            console.error("========== AI ERROR ==========");
-            console.error(error);
-            console.error(error.stack);
+                    );
 
-            res.status(500).json({
-                message: "AI Verification Failed",
-                error: error.message
-            });
+                // If AI resolves a high-confidence match (>= 70%), save to database
+                if (report.matchedEmployee && report.matchedEmployee.id && report.matchedEmployee.confidence >= 70) {
+                    db.query(
+                        'UPDATE visitors SET employee_id = ? WHERE id = ?',
+                        [report.matchedEmployee.id, visitorId],
+                        (updateErr) => {
+                            if (updateErr) {
+                                console.error("Error updating matched employee_id:", updateErr);
+                            } else {
+                                console.log(`Linked visitor ID ${visitorId} to employee ID ${report.matchedEmployee.id}`);
+                            }
+                        }
+                    );
+                }
 
-        }
+                res.json(report);
+
+            }
+
+            catch (error) {
+
+                console.error("========== AI ERROR ==========");
+                console.error(error);
+                console.error(error.stack);
+
+                res.status(500).json({
+                    message: "AI Verification Failed",
+                    error: error.message
+                });
+
+            }
+        });
 
     });
 
