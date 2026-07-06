@@ -303,6 +303,7 @@ router.put('/approve/:id', verifyEmployeeOrSecurityToken, async (req, res) => {
                 UPDATE visitors
                 SET
                     status = 'approved',
+                    approval_token = NULL,
                     pass_id = ?,
                     qr_code = ?,
                     approved_at = NOW()
@@ -331,7 +332,8 @@ router.put('/approve/:id', verifyEmployeeOrSecurityToken, async (req, res) => {
                 return res.json({
                     message: 'Visitor Approved',
                     visitorId,
-                    passId
+                    passId,
+                    passToken: visitor.pass_token
                 });
             });
 
@@ -354,7 +356,7 @@ router.get('/approve-mail/:id', async (req, res) => {
         FROM visitors
         WHERE id = ?
         AND approval_token = ?
-        AND status = 'pending_security'
+        AND status = 'pending_employee'
         `,
         [visitorId, token],
         async (err, rows) => {
@@ -418,7 +420,7 @@ router.get('/approve-mail/:id', async (req, res) => {
                         console.error(e);
                     }
 
-                    res.redirect(`https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}&token=${rows[0].pass_token}`);
+                    res.redirect(`/visitor-pass.html?id=${visitorId}&token=${rows[0].pass_token}`);
                 }
             );
         }
@@ -436,7 +438,7 @@ router.get('/reject-mail/:id', (req, res) => {
         FROM visitors
         WHERE id = ?
         AND approval_token = ?
-        AND status = 'pending_security'
+        AND status = 'pending_employee'
         `,
         [visitorId, token],
         (err, rows) => {
@@ -522,7 +524,9 @@ router.put('/reject/:id', verifyEmployeeOrSecurityToken, (req, res) => {
 
     const sql = `
         UPDATE visitors
-        SET status = 'rejected'
+        SET 
+            status = 'rejected',
+            approval_token = NULL
         WHERE id = ?
     `;
 
