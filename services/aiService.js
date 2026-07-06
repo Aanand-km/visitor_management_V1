@@ -109,6 +109,7 @@ async function verifyVisitorDocument(
     documentType,
     documentNumber,
     employeeNameInput,
+    departmentInput,
     employeeList
 ) {
 
@@ -119,6 +120,7 @@ async function verifyVisitorDocument(
         console.log("Type:", documentType);
         console.log("Number:", documentNumber);
         console.log("Employee Name Input:", employeeNameInput);
+        console.log("Department Input:", departmentInput);
 
 
 
@@ -172,10 +174,22 @@ ${documentType}
 Expected Document Number:
 ${documentNumber}
 
-Also, match the visitor's manually entered host employee name to the correct employee from the organization list.
+Also, verify the visitor's manually entered host employee name and department against the Actual Employee List.
 Manually entered host employee: "${employeeNameInput || ''}"
+Selected host department: "${departmentInput || ''}"
 Actual Employee List:
 ${JSON.stringify(employeeList || [])}
+
+Rules for host employee verification:
+1. Match the visitor's manually entered employee name against the Actual Employee List (allow spelling variations, nicknames, or partial names).
+2. Check if the matched employee belongs to the selected host department.
+3. If the employee does not exist in the database at all:
+   - set matchedEmployee.id, name, department to null, and confidence to 0.
+   - Add this warning to the warnings array: "No such employee in this department"
+4. If the employee exists in the database but belongs to a DIFFERENT department than the selected host department:
+   - set matchedEmployee.id, name, department, confidence to the database employee's correct values.
+   - Add this warning to the warnings array: "This very employee is in other department: [Actual Department Name]"
+   - set matchedEmployee.departmentMismatch to true.
 
 Return ONLY valid JSON in this format:
 {
@@ -183,13 +197,14 @@ Return ONLY valid JSON in this format:
   "documentReadable": true,
   "documentValid": true,
   "ocrMatched": true,
-  "warnings": [],
+  "warnings": [], // Add document warnings or department/employee mismatch warnings here!
   "recommendation": "Proceed",
   "matchedEmployee": {
-    "id": null, // ID of the best matched employee from the Actual Employee List, or null if no match found
-    "name": null, // Name of the matched employee, or null
-    "department": null, // Department of the matched employee, or null
-    "confidence": 0 // Match confidence percentage (0-100), or 0 if null
+    "id": null, // ID of matched employee, or null
+    "name": null, // Name of matched employee, or null
+    "department": null, // Department of matched employee, or null
+    "confidence": 0, // Match confidence percentage (0-100), or 0 if null
+    "departmentMismatch": false // True if matched employee belongs to a different department than selected
   }
 }
 `
@@ -221,11 +236,43 @@ Return ONLY valid JSON in this format:
     }
 
 }
+async function matchEmployeeWithAI(employeeNameInput, employeeList) {
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [
+                {
+                    text: `
+You are a database entity matching assistant.
+Match the manually entered employee name/details to the correct employee from the organization list.
 
+Input name to meet: "${employeeNameInput}"
+Actual Employee List:
+${JSON.stringify(employeeList)}
+
+Return ONLY valid JSON in this format:
+{
+  "id": null, // ID of the best matched employee from the Actual Employee List, or null if no match found
+  "name": null, // Name of the matched employee, or null
+  "department": null, // Department of the matched employee, or null
+  "confidence": 0 // Match confidence percentage (0-100), or 0 if null
+}
+`
+                }
+            ]
+        });
+
+        let text = response.text;
+        text = text.replace(/```json/g, "").replace(/```/g, "");
+        return JSON.parse(text);
+    } catch (e) {
+        console.error("AI Matching helper error:", e);
+        return null;
+    }
+}
 
 module.exports = {
-
     extractDocumentDetails,
-    verifyVisitorDocument
-
+    verifyVisitorDocument,
+    matchEmployeeWithAI
 };

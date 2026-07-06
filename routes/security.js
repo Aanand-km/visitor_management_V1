@@ -66,6 +66,7 @@ router.get("/pending", verifySecurityToken, (req, res) => {
             visitors.document_path,
             visitors.created_at,
             visitors.employee_name_input,
+            visitors.department_input,
             employees.name AS employee_name
         FROM visitors
         LEFT JOIN employees
@@ -105,7 +106,8 @@ router.get("/ai-verify/:id", verifySecurityToken, (req, res) => {
             document_path,
             document_type,
             document_number,
-            employee_name_input
+            employee_name_input,
+            department_input
         FROM visitors
         WHERE id=?
     `;
@@ -155,6 +157,8 @@ router.get("/ai-verify/:id", verifySecurityToken, (req, res) => {
                         visitor.document_number,
 
                         visitor.employee_name_input,
+
+                        visitor.department_input,
 
                         empList
 

@@ -83,7 +83,7 @@ function displayVisitors(visitors) {
             </p>
 
             <p>
-                👨 <strong>For Employee:</strong> ${visitor.employee_name ? escapeHtml(visitor.employee_name) : 'N/A'}
+                👨 <strong>For Employee:</strong> ${visitor.employee_name ? escapeHtml(visitor.employee_name) : (visitor.employee_name_input ? escapeHtml(visitor.employee_name_input) + ' (' + escapeHtml(visitor.department_input || 'N/A') + ') (Unverified)' : 'N/A')}
             </p>
 
             <p>

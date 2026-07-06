@@ -279,6 +279,10 @@
                         <span id="documentNumber">-</span>
                     </div>
                     <div>
+                        <strong>Host Department (Visitor Input)</strong>
+                        <span id="hostDepartmentInput">-</span>
+                    </div>
+                    <div>
                         <strong>Host Employee (Visitor Input)</strong>
                         <span id="hostEmployeeInput">-</span>
                     </div>
@@ -367,6 +371,7 @@
                 document.getElementById('visitorPurpose').textContent = visitor.purpose;
                 document.getElementById('documentType').textContent = visitor.document_type;
                 document.getElementById('documentNumber').textContent = visitor.document_number;
+                document.getElementById('hostDepartmentInput').textContent = visitor.department_input || 'Not Selected';
                 document.getElementById('hostEmployeeInput').textContent = visitor.employee_name_input || 'Not Entered';
                 document.getElementById('matchedEmployeeName').textContent = visitor.employee_name || 'Not Matched Yet';
 
@@ -414,9 +419,14 @@
                 }
 
                 if (report.matchedEmployee && report.matchedEmployee.name) {
-                    document.getElementById('matchedEmployeeName').textContent = `${report.matchedEmployee.name} (${report.matchedEmployee.department || 'N/A'}) [Confidence: ${report.matchedEmployee.confidence}%]`;
+                    const matchText = `${report.matchedEmployee.name} (${report.matchedEmployee.department || 'N/A'}) [Confidence: ${report.matchedEmployee.confidence}%]`;
+                    if (report.matchedEmployee.departmentMismatch) {
+                        document.getElementById('matchedEmployeeName').innerHTML = `<span style="color: #ef4444;">⚠️ Mismatch: ${matchText}</span>`;
+                    } else {
+                        document.getElementById('matchedEmployeeName').innerHTML = `<span style="color: #16a34a;">✓ Match: ${matchText}</span>`;
+                    }
                 } else {
-                    document.getElementById('matchedEmployeeName').textContent = 'Could not match any employee';
+                    document.getElementById('matchedEmployeeName').innerHTML = '<span style="color: #ef4444;">❌ No matching employee found</span>';
                 }
 
                 displayAIReport(report);

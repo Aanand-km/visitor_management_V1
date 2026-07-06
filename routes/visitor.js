@@ -16,6 +16,7 @@ const crypto = require('crypto');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const jwt = require('jsonwebtoken');
+const { matchEmployeeWithAI } = require('../services/aiService');
 
 function verifyEmployeeOrSecurityToken(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -87,6 +88,7 @@ router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 
         document_number,
         purpose,
         employee_name_input,
+        department_input,
         consent_given
     } = req.body;
 
@@ -111,6 +113,7 @@ INSERT INTO visitors
     email,
     purpose,
     employee_name_input,
+    department_input,
     photo_path,
     document_path,
     document_type,
@@ -122,7 +125,7 @@ INSERT INTO visitors
 )
 VALUES
 (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_security', ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_security', ?
 )
 `;
 
@@ -135,6 +138,7 @@ VALUES
             email,
             purpose,
             employee_name_input,
+            department_input,
             photoPath,
             documentPath,
             document_type,
@@ -149,44 +153,49 @@ VALUES
                 return res.status(500).json({ message: 'Database Error' });
             }
             const visitorId = result.insertId;
-            /* const employeeSql = `
-                                     SELECT email
-                                     FROM employees
-                                     WHERE id = ?
-                                 `;
- 
-             db.query(employeeSql, [employee_id], async (err, employeeResult) => {
- 
-                 if (
-                     !err &&
-                     employeeResult.length > 0
-                 ) {
- 
-                     try {
- 
-                         await sendEmployeeNotification(
- 
-                             employeeResult[0].email,
- 
-                             {
-                                 id: visitorId,
-                                 token: approvalToken,
-                                 name,
-                                 phone,
-                                 email,
-                                 purpose
-                             }
-                         );
- 
-                         console.log('Employee email sent');
- 
-                     } catch (mailError) {
- 
-                         console.error('Email Error:', mailError);
-                     }
-                 }
-             }
-             );*/
+
+            // Asynchronously resolve employee matching in background to prevent delay
+            const exactSql = "SELECT id FROM employees WHERE LOWER(name) = LOWER(?) AND LOWER(department) = LOWER(?)";
+            db.query(exactSql, [
+                employee_name_input ? employee_name_input.trim() : '',
+                department_input ? department_input.trim() : ''
+            ], (exactErr, exactRows) => {
+                if (!exactErr && exactRows.length > 0) {
+                    // Exact name and department match! Update immediately.
+                    db.query(
+                        'UPDATE visitors SET employee_id = ? WHERE id = ?',
+                        [exactRows[0].id, visitorId],
+                        (updateErr) => {
+                            if (!updateErr) {
+                                console.log(`Linked visitor ID ${visitorId} directly (exact name & dept match) to employee ID ${exactRows[0].id}`);
+                            }
+                        }
+                    );
+                } else if (employee_name_input) {
+                    // Fallback to Gemini matching in the background
+                    db.query('SELECT id, name, department, email FROM employees', async (empErr, empList) => {
+                        if (!empErr && empList.length > 0) {
+                            try {
+                                const matched = await matchEmployeeWithAI(`${employee_name_input} (Dept: ${department_input})`, empList);
+                                if (matched && matched.id && matched.confidence >= 70) {
+                                    db.query(
+                                        'UPDATE visitors SET employee_id = ? WHERE id = ?',
+                                        [matched.id, visitorId],
+                                        (updateErr) => {
+                                            if (!updateErr) {
+                                                console.log(`Linked visitor ID ${visitorId} via background AI to employee ID ${matched.id}`);
+                                            }
+                                        }
+                                    );
+                                }
+                            } catch (aiErr) {
+                                console.error("Background AI match execution error:", aiErr);
+                            }
+                        }
+                    });
+                }
+            });
+
             res.json({
                 message: 'Registration submitted successfully. Waiting for Security verification.',
                 visitorId
