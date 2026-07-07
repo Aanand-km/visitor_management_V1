@@ -211,7 +211,7 @@ PUT /security/reject/:id
 router.put("/reject/:id", verifySecurityToken, (req, res) => {
 
     const visitorId = req.params.id;
-    const { reason } = req.body;
+    const reason = (req.body && req.body.reason) || 'Not specified';
 
     const sql = `
         UPDATE visitors

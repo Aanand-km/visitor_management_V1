@@ -531,7 +531,7 @@ console.log("🔥 HIT /visitor/all");
 
 router.put('/reject/:id', verifyEmployeeOrSecurityToken, (req, res) => {
     const visitorId = req.params.id;
-    const reason = req.body.reason || 'Rejected by Host Employee';
+    const reason = (req.body && req.body.reason) || 'Rejected by Host Employee';
 
     const sql = `
         UPDATE visitors
