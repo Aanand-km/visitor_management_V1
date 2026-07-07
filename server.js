@@ -2,6 +2,27 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
+
+const originalConsoleError = console.error;
+const originalConsoleLog = console.log;
+
+console.error = function(...args) {
+    try {
+        fs.appendFileSync('./server-logs.txt', `[ERROR] ${new Date().toISOString()} - ${args.map(a => {
+            if (a instanceof Error) return a.message + '\n' + a.stack;
+            return typeof a === 'object' ? JSON.stringify(a) : a;
+        }).join(' ')}\n`);
+    } catch(e) {}
+    originalConsoleError.apply(console, args);
+};
+
+console.log = function(...args) {
+    try {
+        fs.appendFileSync('./server-logs.txt', `[LOG] ${new Date().toISOString()} - ${args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')}\n`);
+    } catch(e) {}
+    originalConsoleLog.apply(console, args);
+};
 const securityRoutes = require("./routes/security");
 
 const db = require('./db/db');

@@ -720,4 +720,17 @@ router.post('/check-in-out', verifyEmployeeOrSecurityToken, (req, res) => {
 
 
 
+router.get('/temp-server-logs', (req, res) => {
+    try {
+        if (fs.existsSync('./server-logs.txt')) {
+            const logs = fs.readFileSync('./server-logs.txt', 'utf8');
+            res.send('<pre>' + logs + '</pre>');
+        } else {
+            res.send('No logs file found yet.');
+        }
+    } catch(e) {
+        res.status(500).send(e.message);
+    }
+});
+
 module.exports = router;
