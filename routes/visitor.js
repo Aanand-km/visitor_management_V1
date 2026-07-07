@@ -437,7 +437,7 @@ router.get('/approve-mail/:id', async (req, res) => {
     );
 });
 
-router.get('/-mail/:id', (req, res) => {
+router.get('/reject-mail/:id', (req, res) => {
 
     const visitorId = req.params.id;
     const token = req.query.token;
@@ -477,14 +477,26 @@ router.get('/-mail/:id', (req, res) => {
 
             }
 
+            const reason = 'Rejected via Host Email Link';
             db.query(
                 `
                 UPDATE visitors
-                SET status = 'rejected',
-                approval_token=NULL
+                SET 
+                    status = 'rejected',
+                    rejection_reason = ?,
+                    rejected_at = NOW(),
+                    approval_token = NULL
                 WHERE id = ?
                 `,
-                [visitorId]
+                [reason, visitorId],
+                (updateErr) => {
+                    if (updateErr) {
+                        console.error("DB update error in reject-mail:", updateErr);
+                    } else {
+                        sendVisitorRejectionEmail(rows[0].email, rows[0].name, reason)
+                            .catch(mailErr => console.error("Error sending rejection email:", mailErr));
+                    }
+                }
             );
 
             res.send(`
