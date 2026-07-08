@@ -8,10 +8,14 @@ const jwt = require("jsonwebtoken");
 
 console.log("✅ Security routes loaded");
 
+const asyncHandler = fn => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
+
 // Middleware to verify security token
 function verifySecurityToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = req.cookies.token || (authHeader && authHeader.split(' ')[1]);
     
     if (!token) {
         return res.status(401).json({ message: 'Access Denied: No Token Provided' });
@@ -39,6 +43,14 @@ router.post('/login', (req, res) => {
 
     if (username === expectedUser && password === expectedPass) {
         const token = jwt.sign({ role: 'security' }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000 // 1 day
+        });
+
         res.json({ success: true, token });
     } else {
         res.status(401).json({ success: false, message: 'Invalid Username or Password' });
@@ -97,7 +109,7 @@ router.get("/pending", verifySecurityToken, (req, res) => {
 
 });
 
-router.get("/ai-verify/:id", verifySecurityToken, (req, res) => {
+router.get("/ai-verify/:id", verifySecurityToken, asyncHandler(async (req, res) => {
 
     const visitorId = req.params.id;
 
@@ -149,32 +161,21 @@ router.get("/ai-verify/:id", verifySecurityToken, (req, res) => {
 
                 const report =
                     await verifyVisitorDocument(
-
                         visitor.document_path,
-
                         visitor.document_type,
-
                         visitor.document_number,
-
                         visitor.employee_name_input,
-
                         visitor.department_input,
-
                         empList
-
                     );
 
-                // If AI resolves a high-confidence match (>= 70%), save to database
-                if (report.matchedEmployee && report.matchedEmployee.id && report.matchedEmployee.confidence >= 70) {
+                // Auto-link the visitor to resolved employee_id in database if match found
+                if (report.matchedEmployeeId) {
                     db.query(
                         'UPDATE visitors SET employee_id = ? WHERE id = ?',
-                        [report.matchedEmployee.id, visitorId],
+                        [report.matchedEmployeeId, visitorId],
                         (updateErr) => {
-                            if (updateErr) {
-                                console.error("Error updating matched employee_id:", updateErr);
-                            } else {
-                                console.log(`Linked visitor ID ${visitorId} to employee ID ${report.matchedEmployee.id}`);
-                            }
+                            if (updateErr) console.error("Error auto-linking visitor to employee:", updateErr);
                         }
                     );
                 }
@@ -199,7 +200,7 @@ router.get("/ai-verify/:id", verifySecurityToken, (req, res) => {
 
     });
 
-});
+}));
 
 /*
 ---------------------------------------------------------

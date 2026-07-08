@@ -345,6 +345,7 @@
                 document.getElementById('loading').style.display = 'block';
 
                 const response = await fetch(`/security/pending`, {
+                    credentials: 'include',
                     headers: {
                         'Authorization': `Bearer ${securityToken}`
                     }
@@ -408,6 +409,7 @@
                 document.getElementById('verificationLoading').style.display = 'block';
 
                 const response = await fetch(`/security/ai-verify/${visitorId}`, {
+                    credentials: 'include',
                     headers: {
                         'Authorization': `Bearer ${securityToken}`
                     }
@@ -487,6 +489,7 @@
 
                 const response = await fetch(`/visitor/approve/${visitorId}`, {
                     method: 'PUT',
+                    credentials: 'include',
                     headers: { 
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${securityToken}`
@@ -524,6 +527,7 @@
 
                 const response = await fetch(`/visitor/reject/${visitorId}`, {
                     method: 'PUT',
+                    credentials: 'include',
                     headers: { 
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${securityToken}`

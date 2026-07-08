@@ -420,7 +420,7 @@
                 }
 
                 // If not in localStorage, try to fetch from backend
-                const response = await fetch('/employee/me');
+                const response = await fetch('/employee/me', { credentials: 'include' });
                 if (response.ok) {
                     const employee = await response.json();
                     const employeeName = employee.name || 'Employee';
@@ -447,6 +447,7 @@
                     await fetch(
                         `/visitor/pending/${employeeId}`,
                         {
+                            credentials: 'include',
                             headers: {
                                 'Authorization': `Bearer ${token}`
                             }
@@ -518,6 +519,7 @@
                 await fetch(
                     '/visitor/approved/count',
                     {
+                        credentials: 'include',
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
@@ -540,6 +542,7 @@
             try {
                 const response = await fetch(`/visitor/approve/${id}`, {
                     method: 'PUT',
+                    credentials: 'include',
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -560,6 +563,7 @@
                 try {
                     await fetch(`/visitor/reject/${id}`, {
                         method: 'PUT',
+                        credentials: 'include',
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }

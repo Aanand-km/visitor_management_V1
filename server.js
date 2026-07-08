@@ -66,8 +66,40 @@ const ocrRoutes =
 const authRoutes =
     require('./routes/auth');
 
+const cookieParser = require('cookie-parser');
+
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
+// General API limiter
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per window
+    message: { message: 'Too many requests from this IP, please try again later.' }
+});
+
+// Strict auth & registration rate limiter
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // limit each IP to 20 login/register requests per window
+    message: { message: 'Too many login or registration attempts. Please try again after 15 minutes.' }
+});
+
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false
+}));
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
+
+// Mount rate limiters
+app.use('/visitor/register', authLimiter);
+app.use('/security/login', authLimiter);
+app.use('/auth/login', authLimiter);
+app.use('/visitor', apiLimiter);
+app.use('/security', apiLimiter);
+
 app.use('/visitor', visitorRoutes);
 app.use("/security", securityRoutes);
 app.use('/ocr', ocrRoutes);

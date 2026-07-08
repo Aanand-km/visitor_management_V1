@@ -15,6 +15,7 @@ async function loadPendingVisitors() {
         document.getElementById('visitorList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading visitors...</p></div>';
 
         const response = await fetch("/security/pending", {
+            credentials: 'include',
             headers: {
                 'Authorization': `Bearer ${securityToken}`
             }
@@ -183,6 +184,7 @@ function onScanSuccess(decodedText) {
 
     fetch('/visitor/check-in-out', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${securityToken}`

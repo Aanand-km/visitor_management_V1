@@ -12,6 +12,7 @@ const {
 
 const path = require('path');
 const crypto = require('crypto');
+const Joi = require('joi');
 
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -20,7 +21,7 @@ const { matchEmployeeWithAI } = require('../services/aiService');
 
 function verifyEmployeeOrSecurityToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = req.cookies.token || (authHeader && authHeader.split(' ')[1]);
     if (!token) return res.status(401).json({ message: 'Access Denied: No Token Provided' });
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
@@ -36,7 +37,7 @@ function verifyEmployeeOrSecurityToken(req, res, next) {
 
 function verifyEmployeeToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = req.cookies.token || (authHeader && authHeader.split(' ')[1]);
     if (!token) return res.status(401).json({ message: 'Access Denied: No Token Provided' });
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
@@ -49,6 +50,10 @@ function verifyEmployeeToken(req, res, next) {
         next();
     });
 }
+
+const asyncHandler = fn => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -80,6 +85,26 @@ const upload = multer({ storage });
 console.log('Visitor routes loaded with Cloudinary storage');
 
 router.post('/register', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 'document', maxCount: 1 }]), (req, res) => {
+    const registerSchema = Joi.object({
+        name: Joi.string().min(2).max(100).required(),
+        phone: Joi.string().pattern(/^[0-9+ ]{10,18}$/).required(),
+        email: Joi.string().email().required(),
+        document_type: Joi.string().required(),
+        document_number: Joi.string().required(),
+        purpose: Joi.string().max(255).required(),
+        employee_name_input: Joi.string().min(2).max(100).required(),
+        department_input: Joi.string().required(),
+        consent_given: Joi.any().required()
+    });
+
+    const { error } = registerSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            message: 'Validation Error',
+            details: error.details.map(d => d.message).join(', ')
+        });
+    }
+
     const {
         name,
         phone,
@@ -238,7 +263,7 @@ router.get('/pending/:employeeId', verifyEmployeeToken, (req, res) => {
     });
 });
 
-router.put('/approve/:id', verifyEmployeeOrSecurityToken, async (req, res) => {
+router.put('/approve/:id', verifyEmployeeOrSecurityToken, asyncHandler(async (req, res) => {
     const visitorId = req.params.id;
 
     // Get visitor's current status and employee info
@@ -287,27 +312,18 @@ router.put('/approve/:id', verifyEmployeeOrSecurityToken, async (req, res) => {
                         });
                         console.log('Employee email sent after security approval');
                     } catch (mailError) {
-                        console.error('Email Notification Error:', mailError);
+                        console.error('Mail Error:', mailError);
                     }
                 }
 
-                return res.json({
-                    message: 'Verified by security, pending employee approval',
-                    status: 'pending_employee'
-                });
+                return res.json({ message: 'Approved by Security. Employee Approval Pending.' });
             });
 
         } else if (visitor.status === 'pending_employee') {
-            // Employee approval: Transition status to approved, generate pass & QR
+            // Employee verification: Approve visitor (Final Approval)
             const passId = 'PASS-' + Date.now();
-            const qrText = `http://ducktail-five-prideful.ngrok-free.dev/visitor-pass.html?id=${visitorId}&token=${visitor.pass_token}`;
-            let qrCode;
-            try {
-                qrCode = await QRCode.toDataURL(qrText);
-            } catch (qrErr) {
-                console.error("QR Code Error:", qrErr);
-                return res.status(500).json({ message: 'Error generating QR Code' });
-            }
+            const qrText = `https://visitor-management-jp03.onrender.com/visitor-pass.html?id=${visitorId}&token=${visitor.pass_token}`;
+            const qrCode = await QRCode.toDataURL(qrText);
 
             const sql = `
                 UPDATE visitors
@@ -353,9 +369,9 @@ router.put('/approve/:id', verifyEmployeeOrSecurityToken, async (req, res) => {
             });
         }
     });
-});
+}));
 
-router.get('/approve-mail/:id', async (req, res) => {
+router.get('/approve-mail/:id', asyncHandler(async (req, res) => {
 
     const visitorId = req.params.id;
     const token = req.query.token;
@@ -436,7 +452,7 @@ router.get('/approve-mail/:id', async (req, res) => {
             );
         }
     );
-});
+}));
 
 router.get('/reject-mail/:id', (req, res) => {
 
