@@ -211,7 +211,7 @@ PUT /security/reject/:id
 router.put("/reject/:id", verifySecurityToken, (req, res) => {
 
     const visitorId = req.params.id;
-    const reason = (req.body && req.body.reason) || 'Not specified';
+    const reason = 'Rejected by security';
 
     const sql = `
         UPDATE visitors
@@ -233,7 +233,7 @@ router.put("/reject/:id", verifySecurityToken, (req, res) => {
 
         const visitor = getRes[0];
 
-        db.query(sql, [reason || 'Not specified', visitorId], (err, result) => {
+        db.query(sql, [reason, visitorId], (err, result) => {
 
             if (err) {
                 console.error('Rejection DB Error:', err);
@@ -245,7 +245,7 @@ router.put("/reject/:id", verifySecurityToken, (req, res) => {
                 });
             }
 
-            sendVisitorRejectionEmail(visitor.email, visitor.name, reason || 'Not specified')
+            sendVisitorRejectionEmail(visitor.email, visitor.name, reason)
                 .catch(mailErr => console.error("Error sending rejection email:", mailErr));
 
             res.json({

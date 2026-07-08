@@ -332,7 +332,7 @@ router.put('/approve/:id', verifyEmployeeOrSecurityToken, async (req, res) => {
                 // Send pass email to visitor
                 if (visitor.email) {
                     try {
-                        await sendVisitorPassEmail(visitor.email, visitor.name, visitorId, passId, visitor.pass_token);
+                        await sendVisitorPassEmail(visitor.email, visitor.name, visitorId, passId, visitor.pass_token, 'Approved by security and employee');
                         console.log('Visitor pass email sent');
                     } catch (emailErr) {
                         console.error('Visitor pass email send error:', emailErr);
@@ -422,7 +422,8 @@ router.get('/approve-mail/:id', async (req, res) => {
                             rows[0].name,
                             visitorId,
                             passId,
-                            rows[0].pass_token
+                            rows[0].pass_token,
+                            'Approved by security and employee'
                         );
 
                     } catch (e) {
@@ -477,7 +478,7 @@ router.get('/reject-mail/:id', (req, res) => {
 
             }
 
-            const reason = 'Rejected via Host Email Link';
+            const reason = 'Approved by security but rejected by employee';
             db.query(
                 `
                 UPDATE visitors
@@ -543,7 +544,7 @@ console.log("🔥 HIT /visitor/all");
 
 router.put('/reject/:id', verifyEmployeeOrSecurityToken, (req, res) => {
     const visitorId = req.params.id;
-    const reason = (req.body && req.body.reason) || 'Rejected by Host Employee';
+    const reason = 'Approved by security but rejected by employee';
 
     const sql = `
         UPDATE visitors

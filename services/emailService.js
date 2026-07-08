@@ -122,7 +122,8 @@ async function sendVisitorPassEmail(
     visitorName,
     visitorId,
     passId,
-    passToken
+    passToken,
+    approvalReason = 'Approved by security and employee'
 ) {
 
     const passLink =
@@ -185,6 +186,10 @@ async function sendVisitorPassEmail(
                                 <tr style="background-color:#f9fafb;">
                                     <td width="35%" style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Pass ID</td>
                                     <td style="font-size:14px;color:#111827;font-weight:bold;border-bottom:1px solid #e5e7eb;">${passId}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Reason</td>
+                                    <td style="font-size:14px;color:#111827;font-weight:bold;border-bottom:1px solid #e5e7eb;">${approvalReason}</td>
                                 </tr>
                                 <tr>
                                     <td style="font-size:14px;color:#6b7280;font-weight:bold;">Status</td>
