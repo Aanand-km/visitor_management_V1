@@ -560,41 +560,49 @@ console.log("🔥 HIT /visitor/all");
 
 router.put('/reject/:id', verifyEmployeeOrSecurityToken, (req, res) => {
     const visitorId = req.params.id;
-    const reason = 'Approved by security but rejected by employee';
 
-    const sql = `
-        UPDATE visitors
-        SET 
-            status = 'rejected',
-            rejection_reason = ?,
-            rejected_at = NOW(),
-            approval_token = NULL
-        WHERE id = ?
-    `;
-
-    db.query(sql, [reason, visitorId], (err, result) => {
-
-        if (err) {
-            console.error(err);
+    // Fetch visitor details first to know the current status and get name/email
+    const getVisitorSql = 'SELECT name, email, status FROM visitors WHERE id = ?';
+    db.query(getVisitorSql, [visitorId], (getErr, getRes) => {
+        if (getErr || getRes.length === 0) {
+            console.error("Error finding visitor for rejection:", getErr);
             return res.status(500).json({
-                message: 'Database Error'
+                message: getErr ? 'Database Error' : 'Visitor not found' 
             });
         }
 
-        // Fetch visitor name and email to send rejection email
-        const getVisitorSql = 'SELECT name, email FROM visitors WHERE id = ?';
-        db.query(getVisitorSql, [visitorId], (getErr, getRes) => {
-            if (getErr || getRes.length === 0) {
-                console.error("Error finding visitor for rejection email:", getErr);
-            } else {
-                const visitor = getRes[0];
-                sendVisitorRejectionEmail(visitor.email, visitor.name, reason)
-                    .catch(mailErr => console.error("Error sending rejection email:", mailErr));
-            }
-        });
+        const visitor = getRes[0];
+        
+        // Determine the rejection reason based on current status
+        const reason = visitor.status === 'pending_security' 
+            ? 'Rejected by security' 
+            : 'Approved by security but rejected by employee';
 
-        res.json({
-            message: 'Visitor Rejected'
+        const sql = `
+            UPDATE visitors
+            SET 
+                status = 'rejected',
+                rejection_reason = ?,
+                rejected_at = NOW(),
+                approval_token = NULL
+            WHERE id = ?
+        `;
+
+        db.query(sql, [reason, visitorId], (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    message: 'Database Error'
+                });
+            }
+
+            // Send rejection email using the fetched details and correct reason
+            sendVisitorRejectionEmail(visitor.email, visitor.name, reason)
+                .catch(mailErr => console.error("Error sending rejection email:", mailErr));
+
+            res.json({
+                message: 'Visitor Rejected'
+            });
         });
     });
 });
