@@ -25,7 +25,7 @@ const response =
 await fetch('/auth/signup',{
 
 method:'POST',
-
+credentials: "include",
 headers:{
 'Content-Type':
 'application/json'

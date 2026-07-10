@@ -15,7 +15,7 @@ document.getElementById('loginForm')
         await fetch('/auth/login', {
 
           method: 'POST',
-
+          credentials: "include",
           headers: {
             'Content-Type':
               'application/json'
@@ -35,21 +35,13 @@ document.getElementById('loginForm')
         console.log(data);
 console.log(data.employee);
 console.log(data.employee.id);
-        localStorage.setItem(
-          'token',
-          data.token
-        );
-        localStorage.setItem(
-          'employeeId',
-          data.employee.id
-        );
-        localStorage.setItem(
-          'employeeName',
-          data.employee.name
-        );
+        sessionStorage.setItem(
+    "employeeName",
+    data.employee.name
+);
 
         window.location.href =
-          'employee-dashboard.html';
+"/auth/dashboard"; 
 
       } else {
 

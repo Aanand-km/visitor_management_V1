@@ -347,9 +347,7 @@
 
                 const response = await fetch(`/security/pending`, {
                     credentials: 'include',
-                    headers: {
-                        'Authorization': `Bearer ${securityToken}`
-                    }
+                    
                 });
                 
                 if (!response.ok) {
@@ -411,9 +409,7 @@
 
                 const response = await fetch(`/security/ai-verify/${visitorId}`, {
                     credentials: 'include',
-                    headers: {
-                        'Authorization': `Bearer ${securityToken}`
-                    }
+                    
                 });
                 const report = await response.json();
 
@@ -493,7 +489,7 @@
                     credentials: 'include',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${securityToken}`
+                        
                     }
                 });
 
@@ -531,7 +527,7 @@
                     credentials: 'include',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${securityToken}`
+                        
                     },
                     body: JSON.stringify({ reason })
                 });

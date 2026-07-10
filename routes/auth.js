@@ -48,7 +48,7 @@ router.post('/login',(req,res)=>{
                 }
             );
 
-            res.cookie('token', token, {
+            res.cookie('employeeToken', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
@@ -56,15 +56,68 @@ router.post('/login',(req,res)=>{
             });
 
             res.json({
-                token,
-                employee
-            });
+    success: true,
+    employee: {
+        id: employee.id,
+        name: employee.name
+    }
+});
 
         }
     );
 
 });
+function verifyEmployeeToken(req, res, next) {
 
+    const authHeader = req.headers["authorization"];
+
+    const token =
+    req.cookies.employeeToken ||
+        (authHeader && authHeader.split(" ")[1]);
+
+    if (!token) {
+        return res.status(401).json({
+            message: "Login Required"
+        });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+
+        if (err) {
+
+            return res.status(403).json({
+                message: "Invalid Token"
+            });
+
+        }
+
+        req.employee = decoded;
+
+        next();
+
+    });
+
+}
+router.get("/check-auth", verifyEmployeeToken, (req, res) => {
+
+    res.json({
+        authenticated: true
+    });
+
+});
+router.post("/logout", (req, res) => {
+
+    res.clearCookie("employeeToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict"
+    });
+
+    res.json({
+        success: true
+    });
+
+});
 router.post('/signup', async (req, res) => {
 
     const {

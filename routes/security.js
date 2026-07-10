@@ -56,7 +56,7 @@ router.post('/login', (req, res) => {
     if (username === expectedUser && password === expectedPass) {
         const token = jwt.sign({ role: 'security' }, process.env.JWT_SECRET, { expiresIn: '1d' });
         
-        res.cookie('token', token, {
+       res.cookie("securityToken", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
@@ -92,7 +92,7 @@ POST /security/logout
 
 router.post("/logout", (req, res) => {
 
-    res.clearCookie("token", {
+    res.clearCookie("securityToken", {
         httpOnly: true,
         sameSite: "strict",
         secure: process.env.NODE_ENV === "production"

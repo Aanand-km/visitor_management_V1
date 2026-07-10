@@ -230,8 +230,10 @@ VALUES
 });
 
 
-router.get('/pending/:employeeId', verifyEmployeeToken, (req, res) => {
-    const employeeId = req.params.employeeId;
+router.get('/pending', verifyEmployeeToken, (req, res) => {
+
+    const employeeId = req.employee.id;
+
     const sql = `
         SELECT
             visitors.id,
@@ -246,23 +248,27 @@ router.get('/pending/:employeeId', verifyEmployeeToken, (req, res) => {
             employees.name AS employee_name
         FROM visitors
         LEFT JOIN employees
-        ON visitors.employee_id = employees.id
+            ON visitors.employee_id = employees.id
         WHERE visitors.employee_id = ?
         AND visitors.status = 'pending_employee'
         ORDER BY visitors.created_at DESC
     `;
 
     db.query(sql, [employeeId], (err, result) => {
+
         if (err) {
-            console.error("Error fetching pending visitors for employee:", err);
+            console.error("Error fetching pending visitors:", err);
+
             return res.status(500).json({
-                message: 'Database Error'
+                message: "Database Error"
             });
         }
-        res.json(result);
-    });
-});
 
+        res.json(result);
+
+    });
+
+});
 router.put('/approve/:id', verifyEmployeeOrSecurityToken, asyncHandler(async (req, res) => {
     const visitorId = req.params.id;
 
@@ -525,7 +531,7 @@ router.get('/reject-mail/:id', (req, res) => {
     );
 });
 
-router.get('/all', (req, res) => {
+router.get('/all', verifyEmployeeOrSecurityToken, (req, res) => {
 console.log("🔥 HIT /visitor/all");
     const sql = `
         SELECT
@@ -757,7 +763,7 @@ router.post('/check-in-out', verifyEmployeeOrSecurityToken, (req, res) => {
 
 
 
-router.get('/temp-server-logs', (req, res) => {
+router.get('/temp-server-logs', verifyEmployeeOrSecurityToken, (req,res)=>{
     try {
         if (fs.existsSync('./server-logs.txt')) {
             const logs = fs.readFileSync('./server-logs.txt', 'utf8');

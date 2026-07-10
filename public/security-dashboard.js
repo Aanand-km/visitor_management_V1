@@ -41,9 +41,7 @@ async function loadPendingVisitors() {
 
         const response = await fetch("/security/pending", {
             credentials: 'include',
-            headers: {
-                'Authorization': `Bearer ${securityToken}`
-            }
+            
         });
 
         if (!response.ok) {
@@ -226,7 +224,7 @@ function onScanSuccess(decodedText) {
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${securityToken}`
+            
         },
         body: JSON.stringify({ id: visitorId, token: token })
     })

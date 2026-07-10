@@ -398,26 +398,44 @@
     </div>
 
     <script>
-        const token =
-            localStorage.getItem('token');
+        async function checkEmployeeLogin() {
 
-        if (!token) {
+            try {
 
-            window.location.href =
-                'employee-login.html';
+                const response =
+                    await fetch(
+                        "/auth/check-auth",
+                        {
+                            credentials: "include"
+                        }
+                    );
+
+                if (!response.ok) {
+
+                    window.location.href = "employee-login.html";
+                    return;
+
+                }
+
+            }
+
+            catch {
+
+                window.location.href = "employee-login.html";
+
+            }
 
         }
 
-        document.getElementById('employeeName').innerText = localStorage.getItem('employeeName');
+        checkEmployeeLogin();
+
+        document.getElementById("employeeName").innerText =
+            sessionStorage.getItem("employeeName") || "Employee";
         // Load employee name on page load
         async function loadEmployeeName() {
             try {
                 // First, try to get from localStorage
-                const employeeNameFromStorage = localStorage.getItem('employeeName');
-                if (employeeNameFromStorage) {
-                    document.getElementById('employeeName').innerText = employeeNameFromStorage;
-                    return;
-                }
+                
 
                 // If not in localStorage, try to fetch from backend
                 const response = await fetch('/employee/me', { credentials: 'include' });
@@ -425,7 +443,7 @@
                     const employee = await response.json();
                     const employeeName = employee.name || 'Employee';
                     document.getElementById('employeeName').innerText = employeeName;
-                    localStorage.setItem('employeeName', employeeName);
+                    sessionStorage.setItem('employeeName', employeeName);
                 } else {
                     document.getElementById('employeeName').innerText = 'Employee';
                 }
@@ -440,19 +458,14 @@
 
         async function loadVisitors() {
             try {
-                const employeeId =
-                    localStorage.getItem('employeeId');
+                
 
-                const response =
-                    await fetch(
-                        `/visitor/pending/${employeeId}`,
-                        {
-                            credentials: 'include',
-                            headers: {
-                                'Authorization': `Bearer ${token}`
-                            }
-                        }
-                    );
+                const response = await fetch(
+    "/visitor/pending",
+    {
+        credentials: "include"
+    }
+);
                 const visitors = await response.json();
                 console.log(visitors);
 
@@ -502,17 +515,17 @@
 
         function escapeHtml(unsafe) {
 
-    if (unsafe === null || unsafe === undefined) {
-        return '';
-    }
+            if (unsafe === null || unsafe === undefined) {
+                return '';
+            }
 
-    return String(unsafe)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
+            return String(unsafe)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
         async function loadApprovalCount() {
 
             const response =
@@ -520,9 +533,7 @@
                     '/visitor/approved/count',
                     {
                         credentials: 'include',
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
+                        
                     }
                 );
 
@@ -543,9 +554,7 @@
                 const response = await fetch(`/visitor/approve/${id}`, {
                     method: 'PUT',
                     credentials: 'include',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    
                 });
                 const result = await response.json();
                 if (result.passId) {
@@ -564,9 +573,7 @@
                     await fetch(`/visitor/reject/${id}`, {
                         method: 'PUT',
                         credentials: 'include',
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
+                        
                     });
                     loadVisitors();
                 } catch (error) {
@@ -575,10 +582,18 @@
                 }
             }
         }
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('employeeName');
-            window.location.href = 'employee-login.html';
+        document.getElementById('logoutBtn').addEventListener('click', async() => {
+            await fetch("/auth/logout", {
+
+                method: "POST",
+
+                credentials: "include"
+
+            });
+
+            sessionStorage.clear();
+
+            window.location.href = "employee-login.html";
         });
 
     </script>
