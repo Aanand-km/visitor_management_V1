@@ -89,3 +89,4 @@ router.get('/me', verifyEmployeeToken, (req, res) => {
     });
 
 });
+module.exports = router;

@@ -100,8 +100,14 @@ app.use('/auth/login', authLimiter);
 app.use('/visitor', apiLimiter);
 app.use('/security', apiLimiter);
 
+console.log("visitorRoutes:", typeof visitorRoutes, visitorRoutes?.constructor?.name);
+console.log("securityRoutes:", typeof securityRoutes, securityRoutes?.constructor?.name);
+console.log("ocrRoutes:", typeof ocrRoutes, ocrRoutes?.constructor?.name);
+console.log("employeeRoutes:", typeof employeeRoutes, employeeRoutes?.constructor?.name);
+console.log("authRoutes:", typeof authRoutes, authRoutes?.constructor?.name);
+
 app.use('/visitor', visitorRoutes);
-app.use("/security", securityRoutes);
+app.use('/security', securityRoutes);
 app.use('/ocr', ocrRoutes);
 app.use('/employees', employeeRoutes);
 app.use('/auth', authRoutes);

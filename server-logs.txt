@@ -28,3 +28,26 @@
 [LOG] 2026-07-10T04:28:21.356Z - ✅ Security routes loaded
 [LOG] 2026-07-10T04:28:23.901Z - Visitor routes loaded with Cloudinary storage
 [LOG] 2026-07-10T04:28:24.111Z - Server running on port 3000
+[LOG] 2026-07-10T09:56:16.657Z - ◇ injected env (0) from .env [2m// tip: ◈ encrypted .env [www.dotenvx.com][0m
+[LOG] 2026-07-10T09:56:17.267Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-10T09:56:19.161Z - ✅ Security routes loaded
+[LOG] 2026-07-10T09:56:23.262Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-10T10:02:35.547Z - ◇ injected env (0) from .env [2m// tip: ◈ encrypted .env [www.dotenvx.com][0m
+[LOG] 2026-07-10T10:02:35.976Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-10T10:02:36.711Z - ✅ Security routes loaded
+[LOG] 2026-07-10T10:02:38.453Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-10T10:02:38.787Z - visitorRoutes: function Function
+[LOG] 2026-07-10T10:02:38.848Z - securityRoutes: function Function
+[LOG] 2026-07-10T10:02:38.895Z - ocrRoutes: function Function
+[LOG] 2026-07-10T10:02:38.946Z - employeeRoutes: object Object
+[LOG] 2026-07-10T10:02:39.027Z - authRoutes: function Function
+[LOG] 2026-07-10T10:17:23.612Z - ◇ injected env (0) from .env [2m// tip: ◈ encrypted .env [www.dotenvx.com][0m
+[LOG] 2026-07-10T10:17:24.004Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-10T10:17:24.687Z - ✅ Security routes loaded
+[LOG] 2026-07-10T10:17:26.184Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-10T10:17:26.349Z - visitorRoutes: function Function
+[LOG] 2026-07-10T10:17:26.351Z - securityRoutes: function Function
+[LOG] 2026-07-10T10:17:26.353Z - ocrRoutes: function Function
+[LOG] 2026-07-10T10:17:26.355Z - employeeRoutes: function Function
+[LOG] 2026-07-10T10:17:26.361Z - authRoutes: function Function
+[LOG] 2026-07-10T10:17:26.376Z - Server running on port 3000
