@@ -438,7 +438,7 @@
                 
 
                 // If not in localStorage, try to fetch from backend
-                const response = await fetch('/employee/me', { credentials: 'include' });
+                const response = await fetch('/employees/me', { credentials: 'include' });
                 if (response.ok) {
                     const employee = await response.json();
                     const employeeName = employee.name || 'Employee';

@@ -37,7 +37,7 @@ function verifyEmployeeToken(req, res, next) {
     });
 
 }
-router.get('/', (req, res) => {
+router.get('/', verifyEmployeeToken, (req, res) => {
 
     const sql = 'SELECT * FROM employees';
 

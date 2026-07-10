@@ -21,7 +21,10 @@ const { matchEmployeeWithAI } = require('../services/aiService');
 
 function verifyEmployeeOrSecurityToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = req.cookies.token || (authHeader && authHeader.split(' ')[1]);
+    const token =
+    req.cookies.securityToken ||
+    req.cookies.employeeToken ||
+    (authHeader && authHeader.split(" ")[1]);
     if (!token) return res.status(401).json({ message: 'Access Denied: No Token Provided' });
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
@@ -37,7 +40,9 @@ function verifyEmployeeOrSecurityToken(req, res, next) {
 
 function verifyEmployeeToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = req.cookies.token || (authHeader && authHeader.split(' ')[1]);
+    const token =
+    req.cookies.employeeToken ||
+    (authHeader && authHeader.split(" ")[1]);
     if (!token) return res.status(401).json({ message: 'Access Denied: No Token Provided' });
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
