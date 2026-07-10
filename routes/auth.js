@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db/db');
-
+const path = require("path");
 const router = express.Router();
 
 router.post('/login',(req,res)=>{
@@ -201,6 +201,13 @@ router.post('/signup', async (req, res) => {
         }
     );
 
+});
+
+
+router.get("/dashboard", verifyEmployeeToken, (req, res) => {
+    res.sendFile(
+        path.join(__dirname, "../views/employee-dashboard.html")
+    );
 });
 
 module.exports = router;

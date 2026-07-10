@@ -51,3 +51,13 @@
 [LOG] 2026-07-10T10:17:26.355Z - employeeRoutes: function Function
 [LOG] 2026-07-10T10:17:26.361Z - authRoutes: function Function
 [LOG] 2026-07-10T10:17:26.376Z - Server running on port 3000
+[LOG] 2026-07-10T10:27:32.962Z - ◇ injected env (0) from .env [2m// tip: ◈ secrets for agents [www.dotenvx.com][0m
+[LOG] 2026-07-10T10:27:33.416Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-10T10:27:34.208Z - ✅ Security routes loaded
+[LOG] 2026-07-10T10:27:35.954Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-10T10:27:36.260Z - visitorRoutes: function Function
+[LOG] 2026-07-10T10:27:36.265Z - securityRoutes: function Function
+[LOG] 2026-07-10T10:27:36.291Z - ocrRoutes: function Function
+[LOG] 2026-07-10T10:27:36.307Z - employeeRoutes: function Function
+[LOG] 2026-07-10T10:27:36.315Z - authRoutes: function Function
+[LOG] 2026-07-10T10:27:36.336Z - Server running on port 3000
