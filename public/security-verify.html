@@ -327,15 +327,16 @@
     </div>
 
     <script>
-        const securityToken = localStorage.getItem('securityToken');
-        if (!securityToken) {
-            window.location.href = 'security-login.html';
-        }
+        
 
-        function logoutSecurity() {
-            localStorage.removeItem('securityToken');
-            window.location.href = 'security-login.html';
-        }
+        async function logoutSecurity() {
+    await fetch('/security/logout', {
+        method: 'POST',
+        credentials: 'include'
+    });
+
+    window.location.href = 'security-login.html';
+}
 
         const urlParams = new URLSearchParams(window.location.search);
         const visitorId = urlParams.get('id');

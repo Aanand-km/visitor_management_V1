@@ -1,10 +1,35 @@
-const securityToken = localStorage.getItem('securityToken');
-if (!securityToken) {
-    window.location.href = 'security-login.html';
+async function checkLogin() {
+
+    try {
+
+        const response = await fetch("/security/check-auth", {
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+
+            window.location.href = "/security-login.html";
+            return;
+
+        }
+
+    } catch (err) {
+
+        window.location.href = "/security-login.html";
+
+    }
+
 }
 
-function logoutSecurity() {
-    localStorage.removeItem('securityToken');
+checkLogin();
+
+
+async function logoutSecurity() {
+    await fetch('/security/logout', {
+        method: 'POST',
+        credentials: 'include'
+    });
+
     window.location.href = 'security-login.html';
 }
 
@@ -149,6 +174,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+async function logoutSecurity() {
+
+    await fetch("/security/logout", {
+
+        method: "POST",
+
+        credentials: "include"
+
+    });
+
+    window.location.href = "/security-login.html";
+
+}
 
 function onScanSuccess(decodedText) {
     if (scanner) {

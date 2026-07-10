@@ -9,6 +9,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     try {
         const response = await fetch('/security/login', {
+            credentials: "include",
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -23,10 +24,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
 
         // Save token to localStorage
-        localStorage.setItem('securityToken', data.token);
+        // localStorage.setItem('securityToken', data.token);
 
         // Redirect to dashboard
-        window.location.href = 'security-dashboard.html';
+        window.location.href = "/security/dashboard";
 
     } catch (err) {
         errorEl.textContent = '❌ ' + err.message;

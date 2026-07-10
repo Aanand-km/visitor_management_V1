@@ -1,4 +1,4 @@
-
+const path= require("path")
 const express = require("express");
 const router = express.Router();
 const db = require("../db/db");
@@ -29,7 +29,19 @@ function verifySecurityToken(req, res, next) {
         next();
     });
 }
+/*
+---------------------------------------------------------
+Security Dashboard
+---------------------------------------------------------
+*/
 
+router.get("/dashboard", verifySecurityToken, (req, res) => {
+
+    res.sendFile(
+        path.join(__dirname, "../views/security-dashboard.html")
+    );
+
+});
 /*
 ---------------------------------------------------------
 Security Guard Login
@@ -51,12 +63,46 @@ router.post('/login', (req, res) => {
             maxAge: 24 * 60 * 60 * 1000 // 1 day
         });
 
-        res.json({ success: true, token });
+        res.json({ success: true });
     } else {
         res.status(401).json({ success: false, message: 'Invalid Username or Password' });
     }
 });
+/*
+---------------------------------------------------------
+Check Security Authentication
+GET /security/check-auth
+---------------------------------------------------------
+*/
 
+router.get("/check-auth", verifySecurityToken, (req, res) => {
+
+    res.json({
+        authenticated: true,
+        user: req.securityUser
+    });
+
+});
+/*
+---------------------------------------------------------
+Logout Security
+POST /security/logout
+---------------------------------------------------------
+*/
+
+router.post("/logout", (req, res) => {
+
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production"
+    });
+
+    res.json({
+        success: true
+    });
+
+});
 /*
 ---------------------------------------------------------
 Get All Visitors Waiting For Security Verification
