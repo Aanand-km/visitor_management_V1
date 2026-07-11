@@ -15,7 +15,7 @@ const asyncHandler = fn => (req, res, next) => {
 // Middleware to verify security token
 function verifySecurityToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = req.cookies.token || (authHeader && authHeader.split(' ')[1]);
+    const token = req.cookies.securityToken || (authHeader && authHeader.split(' ')[1]);
     
     if (!token) {
         return res.status(401).json({ message: 'Access Denied: No Token Provided' });

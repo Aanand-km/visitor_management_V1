@@ -71,3 +71,6 @@
 [LOG] 2026-07-10T10:52:49.071Z - employeeRoutes: function Function
 [LOG] 2026-07-10T10:52:49.075Z - authRoutes: function Function
 [LOG] 2026-07-10T10:52:49.090Z - Server running on port 3000
+[LOG] 2026-07-11T11:00:54.066Z - ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+[LOG] 2026-07-11T11:00:54.726Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-11T11:00:55.984Z - ✅ Security routes loaded

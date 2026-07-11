@@ -9,7 +9,7 @@ function verifyEmployeeToken(req, res, next) {
     const authHeader = req.headers["authorization"];
 
     const token =
-        req.cookies.token ||
+        req.cookies.employeeToken ||
         (authHeader && authHeader.split(" ")[1]);
 
     if (!token) {
