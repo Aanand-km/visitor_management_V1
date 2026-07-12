@@ -60,6 +60,7 @@ function runMigrations() {
 runMigrations();
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (needed for express-rate-limit behind Render/Nginx)
 const ocrRoutes =
     require('./routes/ocr');
 
