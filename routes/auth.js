@@ -205,6 +205,7 @@ router.post('/signup', async (req, res) => {
 
 
 router.get("/dashboard", verifyEmployeeToken, (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile(
         path.join(__dirname, "../views/employee-dashboard.html")
     );

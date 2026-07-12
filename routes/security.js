@@ -36,7 +36,7 @@ Security Dashboard
 */
 
 router.get("/dashboard", verifySecurityToken, (req, res) => {
-
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile(
         path.join(__dirname, "../views/security-dashboard.html")
     );
