@@ -558,7 +558,7 @@
                 });
                 const result = await response.json();
                 if (result.passId) {
-                    window.open(`visitor-pass.html?id=${result.visitorId}&token=${result.passToken}`);
+                    window.open(`/visitor-pass.html?id=${result.visitorId}&token=${result.passToken}`);
                 }
                 loadVisitors();
             } catch (error) {
