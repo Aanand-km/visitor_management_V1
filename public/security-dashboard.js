@@ -30,7 +30,7 @@ async function logoutSecurity() {
         credentials: 'include'
     });
 
-    window.location.href = 'security-login.html';
+    window.location.href = '/security-login.html';
 }
 
 let allVisitors = [];
@@ -131,7 +131,7 @@ function displayVisitors(visitors) {
 }
 
 function verifyVisitor(visitorId) {
-    window.location.href = `security-verify.html?id=${visitorId}`;
+    window.location.href = `/security-verify.html?id=${visitorId}`;
 }
 
 function escapeHtml(text) {

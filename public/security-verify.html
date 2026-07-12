@@ -335,7 +335,7 @@
         credentials: 'include'
     });
 
-    window.location.href = 'security-login.html';
+    window.location.href = '/security-login.html';
 }
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -507,7 +507,7 @@
                 document.getElementById('success').style.display = 'block';
 
                 setTimeout(() => {
-                    window.location.href = 'security-dashboard.html';
+                    window.location.href = '/security/dashboard';
                 }, 2000);
 
             } catch (error) {
@@ -542,7 +542,7 @@
                 document.getElementById('success').style.display = 'block';
 
                 setTimeout(() => {
-                    window.location.href = 'security-dashboard.html';
+                    window.location.href = '/security/dashboard';
                 }, 2000);
 
             } catch (error) {
@@ -553,7 +553,7 @@
         }
 
         function goBack() {
-            window.location.href = 'security-dashboard.html';
+            window.location.href = '/security/dashboard';
         }
 
         // Load on page load
