@@ -125,6 +125,8 @@ router.get("/pending", verifySecurityToken, (req, res) => {
             visitors.created_at,
             visitors.employee_name_input,
             visitors.department_input,
+            visitors.status,
+            visitors.employee_id,
             employees.name AS employee_name
         FROM visitors
         LEFT JOIN employees
