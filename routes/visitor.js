@@ -840,14 +840,14 @@ router.get('/secure-file/:fileType/:visitorId', (req, res) => {
                 return res.redirect(rawUrl);
             }
 
-            let publicIdWithFormat = parts[1];
-            if (publicIdWithFormat.startsWith('v')) {
-                const nextSlash = publicIdWithFormat.indexOf('/');
-                if (nextSlash !== -1) {
-                    publicIdWithFormat = publicIdWithFormat.substring(nextSlash + 1);
-                }
-            }
+            let pathSegments = parts[1].split('/');
+            pathSegments = pathSegments.filter(segment => {
+                if (segment.startsWith('s--')) return false;
+                if (/^v\d+$/.test(segment)) return false;
+                return true;
+            });
 
+            let publicIdWithFormat = pathSegments.join('/');
             const lastDot = publicIdWithFormat.lastIndexOf('.');
             const publicId = lastDot !== -1 ? publicIdWithFormat.substring(0, lastDot) : publicIdWithFormat;
 
