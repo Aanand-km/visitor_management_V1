@@ -331,8 +331,127 @@ async function sendVisitorRejectionEmail(recipientEmail, visitorName, reason) {
     console.log('Rejection Email:', data);
 }
 
+async function sendSecurityNotification(securityEmail, visitor) {
+    const loginLink = `https://visitor-management-jp03.onrender.com/security-login.html`;
+
+    const response = await fetch(
+        'https://api.brevo.com/v3/smtp/email',
+        {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: {
+                    email: 'anandkm539@gmail.com',
+                    name: 'Visitor Management System'
+                },
+                to: [
+                    {
+                        email: securityEmail
+                    }
+                ],
+                subject: 'New Visitor Request Pending Verification',
+                htmlContent: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Visitor Request - Action Required</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6f8;padding:20px 10px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);border-collapse:separate;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color:#ff6b00;padding:30px 20px;text-align:center;">
+                            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:bold;letter-spacing:-0.5px;">
+                                Visitor Management System
+                            </h1>
+                            <p style="margin:8px 0 0;color:#ffffff;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;opacity:0.9;">
+                                Security Verification Required
+                            </p>
+                        </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding:30px 20px;">
+                            <p style="margin:0 0 16px;font-size:16px;color:#111827;font-weight:bold;">Hello Security Team,</p>
+                            <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
+                                A new visitor request has arrived on the security portal. Please review the details below and log in to the portal to verify and approve.
+                            </p>
+                            
+                            <!-- Details Table -->
+                            <table width="100%" cellpadding="12" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;border-collapse:separate;margin-bottom:30px;">
+                                <tr style="background-color:#f9fafb;">
+                                    <td width="35%" style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Visitor Name</td>
+                                    <td style="font-size:14px;color:#111827;font-weight:bold;border-bottom:1px solid #e5e7eb;">${visitor.name}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Phone</td>
+                                    <td style="font-size:14px;color:#111827;border-bottom:1px solid #e5e7eb;">${visitor.phone}</td>
+                                </tr>
+                                <tr style="background-color:#f9fafb;">
+                                    <td style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Email</td>
+                                    <td style="font-size:14px;color:#111827;border-bottom:1px solid #e5e7eb;">${visitor.email}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Purpose</td>
+                                    <td style="font-size:14px;color:#111827;border-bottom:1px solid #e5e7eb;">${visitor.purpose}</td>
+                                </tr>
+                                <tr style="background-color:#f9fafb;">
+                                    <td style="font-size:14px;color:#6b7280;font-weight:bold;border-bottom:1px solid #e5e7eb;">Employee to Meet</td>
+                                    <td style="font-size:14px;color:#111827;border-bottom:1px solid #e5e7eb;">${visitor.employee_name_input} (Dept: ${visitor.department_input || 'N/A'})</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size:14px;color:#6b7280;font-weight:bold;">Document Info</td>
+                                    <td style="font-size:14px;color:#111827;">${visitor.document_type || 'N/A'} - ${visitor.document_number || 'N/A'}</td>
+                                </tr>
+                            </table>
+
+                            <!-- Action Button -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <a href="${loginLink}" style="background-color:#ff6b00;color:#ffffff;padding:14px 40px;text-decoration:none;font-weight:bold;font-size:15px;border-radius:8px;display:inline-block;width:80%;max-width:280px;text-align:center;box-shadow:0 2px 4px rgba(255,107,0,0.2);">
+                                            LOGIN TO SECURITY PORTAL
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color:#f9fafb;padding:24px 20px;text-align:center;font-size:12px;color:#9ca3af;line-height:1.5;border-top:1px solid #f3f4f6;">
+                            This email was automatically generated by the <strong>Visitor Management System</strong>.<br>
+                            Please do not reply directly to this email.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+`
+            })
+        }
+    );
+
+    const data = await response.json();
+    console.log('Security Notification Email Status:', data);
+    return data;
+}
+
 module.exports = {
     sendEmployeeNotification,
     sendVisitorPassEmail,
-    sendVisitorRejectionEmail
+    sendVisitorRejectionEmail,
+    sendSecurityNotification
 };

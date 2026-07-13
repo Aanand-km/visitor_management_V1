@@ -7,7 +7,8 @@ const db = require('../db/db');
 const {
     sendEmployeeNotification,
     sendVisitorPassEmail,
-    sendVisitorRejectionEmail
+    sendVisitorRejectionEmail,
+    sendSecurityNotification
 } = require('../services/emailService');
 
 const path = require('path');
@@ -183,6 +184,23 @@ VALUES
                 return res.status(500).json({ message: 'Database Error' });
             }
             const visitorId = result.insertId;
+
+            // Notify security team
+            const securityEmail = process.env.SECURITY_EMAIL;
+            if (securityEmail) {
+                sendSecurityNotification(securityEmail, {
+                    name,
+                    phone,
+                    email,
+                    purpose,
+                    employee_name_input,
+                    department_input,
+                    document_type,
+                    document_number
+                }).catch(mailErr => {
+                    console.error("Failed to send security notification email:", mailErr);
+                });
+            }
 
             // Asynchronously resolve employee matching in background to prevent delay
             const exactSql = "SELECT id FROM employees WHERE LOWER(name) = LOWER(?) AND LOWER(department) = LOWER(?)";
