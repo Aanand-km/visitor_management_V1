@@ -112,6 +112,15 @@ app.use('/security', securityRoutes);
 app.use('/ocr', ocrRoutes);
 app.use('/employees', employeeRoutes);
 app.use('/auth', authRoutes);
+
+app.get('/security-dashboard.html', (req, res) => {
+    res.redirect('/security/dashboard');
+});
+
+app.get('/employee-dashboard.html', (req, res) => {
+    res.redirect('/auth/dashboard');
+});
+
 app.use(express.static('public'));
 app.use(
     '/uploads',
