@@ -204,11 +204,24 @@ router.post('/signup', async (req, res) => {
 });
 
 
-router.get("/dashboard", verifyEmployeeToken, (req, res) => {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-    res.sendFile(
-        path.join(__dirname, "../views/employee-dashboard.html")
-    );
+router.get("/dashboard", (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = req.cookies.employeeToken || (authHeader && authHeader.split(' ')[1]);
+    
+    if (!token) {
+        return res.redirect("/employee-login.html");
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err || !decoded.id) {
+            return res.redirect("/employee-login.html");
+        }
+        req.employee = decoded;
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.sendFile(
+            path.join(__dirname, "../views/employee-dashboard.html")
+        );
+    });
 });
 
 module.exports = router;

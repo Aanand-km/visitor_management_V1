@@ -35,12 +35,24 @@ Security Dashboard
 ---------------------------------------------------------
 */
 
-router.get("/dashboard", verifySecurityToken, (req, res) => {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-    res.sendFile(
-        path.join(__dirname, "../views/security-dashboard.html")
-    );
+router.get("/dashboard", (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = req.cookies.securityToken || (authHeader && authHeader.split(' ')[1]);
+    
+    if (!token) {
+        return res.redirect("/security-login.html");
+    }
 
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err || decoded.role !== 'security') {
+            return res.redirect("/security-login.html");
+        }
+        req.securityUser = decoded;
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.sendFile(
+            path.join(__dirname, "../views/security-dashboard.html")
+        );
+    });
 });
 /*
 ---------------------------------------------------------
