@@ -39,20 +39,28 @@ router.post('/login',(req,res)=>{
             }
 
             const token = jwt.sign(
-                {
-                    id: employee.id
-                },
+                { id: employee.id },
                 process.env.JWT_SECRET,
-                {
-                    expiresIn:'1d'
-                }
+                { expiresIn: '15m' }
+            );
+            const refreshToken = jwt.sign(
+                { id: employee.id, isRefreshToken: true },
+                process.env.JWT_SECRET,
+                { expiresIn: '7d' }
             );
 
             res.cookie('employeeToken', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 24 * 60 * 60 * 1000 // 1 day
+                maxAge: 15 * 60 * 1000 // 15 mins
+            });
+
+            res.cookie('employeeRefreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
 
             res.json({
@@ -68,35 +76,44 @@ router.post('/login',(req,res)=>{
 
 });
 function verifyEmployeeToken(req, res, next) {
-
     const authHeader = req.headers["authorization"];
+    const token = req.cookies.employeeToken || (authHeader && authHeader.split(" ")[1]);
+    const refreshToken = req.cookies.employeeRefreshToken;
 
-    const token =
-    req.cookies.employeeToken ||
-        (authHeader && authHeader.split(" ")[1]);
+    const handleRefresh = () => {
+        if (!refreshToken) {
+            return res.status(401).json({ message: "Login Required (Session Expired)" });
+        }
+        jwt.verify(refreshToken, process.env.JWT_SECRET, (refErr, refDecoded) => {
+            if (refErr || !refDecoded.id) {
+                return res.status(403).json({ message: "Invalid or Expired Session" });
+            }
+            const newToken = jwt.sign({ id: refDecoded.id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+            res.cookie('employeeToken', newToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 15 * 60 * 1000
+            });
+            req.employee = refDecoded;
+            next();
+        });
+    };
 
     if (!token) {
-        return res.status(401).json({
-            message: "Login Required"
-        });
+        return handleRefresh();
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-
         if (err) {
-
-            return res.status(403).json({
-                message: "Invalid Token"
-            });
-
+            if (err.name === 'TokenExpiredError') {
+                return handleRefresh();
+            }
+            return res.status(403).json({ message: "Invalid Token" });
         }
-
         req.employee = decoded;
-
         next();
-
     });
-
 }
 router.get("/check-auth", verifyEmployeeToken, (req, res) => {
 
@@ -108,6 +125,11 @@ router.get("/check-auth", verifyEmployeeToken, (req, res) => {
 router.post("/logout", (req, res) => {
 
     res.clearCookie("employeeToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict"
+    });
+    res.clearCookie("employeeRefreshToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict"

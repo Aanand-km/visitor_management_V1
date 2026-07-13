@@ -28,6 +28,7 @@ const securityRoutes = require("./routes/security");
 const db = require('./db/db');
 const visitorRoutes = require('./routes/visitor');
 const employeeRoutes = require('./routes/employee');
+const { purgeOldVisitorRecords } = require('./services/purgeService');
 
 // Self-healing database schema migrations
 function runMigrations() {
@@ -137,6 +138,10 @@ app.use((err, req, res, next) => {
 });
 
 
+
+// Start Auto-Purge Retention Scheduler
+purgeOldVisitorRecords();
+setInterval(purgeOldVisitorRecords, 24 * 60 * 60 * 1000); // 24-hour cycle
 
 const PORT = process.env.PORT || 3000;
 

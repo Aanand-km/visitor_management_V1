@@ -16,14 +16,41 @@ const asyncHandler = fn => (req, res, next) => {
 function verifySecurityToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = req.cookies.securityToken || (authHeader && authHeader.split(' ')[1]);
+    const refreshToken = req.cookies.securityRefreshToken;
+
+    const handleRefresh = () => {
+        if (!refreshToken) {
+            return res.status(401).json({ message: 'Access Denied: Session Expired. Please login again.' });
+        }
+        jwt.verify(refreshToken, process.env.JWT_SECRET, (refErr, refDecoded) => {
+            if (refErr || refDecoded.role !== 'security') {
+                return res.status(403).json({ message: 'Session Expired: Please Login Again' });
+            }
+            const newToken = jwt.sign({ role: 'security' }, process.env.JWT_SECRET, { expiresIn: '15m' });
+            res.cookie("securityToken", newToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 15 * 60 * 1000
+            });
+            req.securityUser = refDecoded;
+            next();
+        });
+    };
     
     if (!token) {
-        return res.status(401).json({ message: 'Access Denied: No Token Provided' });
+        return handleRefresh();
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err || decoded.role !== 'security') {
+        if (err) {
+            if (err.name === 'TokenExpiredError') {
+                return handleRefresh();
+            }
             return res.status(403).json({ message: 'Invalid or Expired Token' });
+        }
+        if (decoded.role !== 'security') {
+            return res.status(403).json({ message: 'Unauthorized access' });
         }
         req.securityUser = decoded;
         next();
@@ -66,13 +93,21 @@ router.post('/login', (req, res) => {
     const expectedPass = process.env.SECURITY_PASS || 'Security@123';
 
     if (username === expectedUser && password === expectedPass) {
-        const token = jwt.sign({ role: 'security' }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ role: 'security' }, process.env.JWT_SECRET, { expiresIn: '15m' });
+        const refreshToken = jwt.sign({ role: 'security', isRefreshToken: true }, process.env.JWT_SECRET, { expiresIn: '7d' });
         
-       res.cookie("securityToken", token, {
+        res.cookie("securityToken", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
-            maxAge: 24 * 60 * 60 * 1000 // 1 day
+            maxAge: 15 * 60 * 1000 // 15 mins
+        });
+        
+        res.cookie("securityRefreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
         res.json({ success: true });
@@ -105,6 +140,11 @@ POST /security/logout
 router.post("/logout", (req, res) => {
 
     res.clearCookie("securityToken", {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production"
+    });
+    res.clearCookie("securityRefreshToken", {
         httpOnly: true,
         sameSite: "strict",
         secure: process.env.NODE_ENV === "production"

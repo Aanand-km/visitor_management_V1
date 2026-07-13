@@ -22,33 +22,112 @@ const { matchEmployeeWithAI } = require('../services/aiService');
 
 function verifyEmployeeOrSecurityToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token =
-    req.cookies.securityToken ||
-    req.cookies.employeeToken ||
-    (authHeader && authHeader.split(" ")[1]);
-    if (!token) return res.status(401).json({ message: 'Access Denied: No Token Provided' });
+    const securityToken = req.cookies.securityToken;
+    const employeeToken = req.cookies.employeeToken;
+    const bearerToken = authHeader && authHeader.split(" ")[1];
+    
+    const securityRefreshToken = req.cookies.securityRefreshToken;
+    const employeeRefreshToken = req.cookies.employeeRefreshToken;
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) return res.status(403).json({ message: 'Invalid or Expired Token' });
-        if (decoded.role === 'security' || decoded.id) {
+    const trySecurityRefresh = () => {
+        if (!securityRefreshToken) return tryEmployeeRefresh();
+        jwt.verify(securityRefreshToken, process.env.JWT_SECRET, (refErr, refDecoded) => {
+            if (refErr || refDecoded.role !== 'security') return tryEmployeeRefresh();
+            const newToken = jwt.sign({ role: 'security' }, process.env.JWT_SECRET, { expiresIn: '15m' });
+            res.cookie("securityToken", newToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 15 * 60 * 1000
+            });
+            req.user = refDecoded;
+            next();
+        });
+    };
+
+    const tryEmployeeRefresh = () => {
+        if (!employeeRefreshToken) {
+            return res.status(401).json({ message: 'Access Denied: No Token Provided' });
+        }
+        jwt.verify(employeeRefreshToken, process.env.JWT_SECRET, (refErr, refDecoded) => {
+            if (refErr || !refDecoded.id) {
+                return res.status(401).json({ message: 'Access Denied: Session Expired' });
+            }
+            const newToken = jwt.sign({ id: refDecoded.id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+            res.cookie('employeeToken', newToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 15 * 60 * 1000
+            });
+            req.user = refDecoded;
+            next();
+        });
+    };
+
+    if (securityToken) {
+        jwt.verify(securityToken, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                if (err.name === 'TokenExpiredError') return trySecurityRefresh();
+                return tryEmployeeRefresh();
+            }
             req.user = decoded;
             next();
-        } else {
-            return res.status(403).json({ message: 'Unauthorized Access' });
-        }
-    });
+        });
+    } else if (employeeToken) {
+        jwt.verify(employeeToken, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                if (err.name === 'TokenExpiredError') return tryEmployeeRefresh();
+                return trySecurityRefresh();
+            }
+            req.user = decoded;
+            next();
+        });
+    } else if (bearerToken) {
+        jwt.verify(bearerToken, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) return res.status(403).json({ message: 'Invalid Token' });
+            req.user = decoded;
+            next();
+        });
+    } else {
+        trySecurityRefresh();
+    }
 }
 
 function verifyEmployeeToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token =
-    req.cookies.employeeToken ||
-    (authHeader && authHeader.split(" ")[1]);
-    if (!token) return res.status(401).json({ message: 'Access Denied: No Token Provided' });
+    const token = req.cookies.employeeToken || (authHeader && authHeader.split(" ")[1]);
+    const refreshToken = req.cookies.employeeRefreshToken;
+
+    const handleRefresh = () => {
+        if (!refreshToken) {
+            return res.status(401).json({ message: 'Access Denied: Session Expired' });
+        }
+        jwt.verify(refreshToken, process.env.JWT_SECRET, (refErr, refDecoded) => {
+            if (refErr || !refDecoded.id) {
+                return res.status(403).json({ message: 'Session Expired' });
+            }
+            const newToken = jwt.sign({ id: refDecoded.id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+            res.cookie('employeeToken', newToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 15 * 60 * 1000
+            });
+            req.employee = refDecoded;
+            next();
+        });
+    };
+
+    if (!token) {
+        return handleRefresh();
+    }
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err || !decoded.id) return res.status(403).json({ message: 'Invalid or Expired Token' });
-        
+        if (err) {
+            if (err.name === 'TokenExpiredError') return handleRefresh();
+            return res.status(403).json({ message: 'Invalid Token' });
+        }
         if (req.params.employeeId && parseInt(req.params.employeeId) !== decoded.id) {
             return res.status(403).json({ message: 'Unauthorized employee access' });
         }
@@ -564,6 +643,8 @@ console.log("🔥 HIT /visitor/all");
             visitors.phone,
             visitors.status,
             visitors.created_at,
+            visitors.check_in_time,
+            visitors.check_out_time,
             employees.name AS employee_name
         FROM visitors
         LEFT JOIN employees

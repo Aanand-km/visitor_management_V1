@@ -298,6 +298,8 @@
                         <th>Meeting With</th>
                         <th>Status</th>
                         <th>Date</th>
+                        <th>Check-In</th>
+                        <th>Check-Out</th>
                     </tr>
                 </thead>
                 <tbody id="visitorBody"></tbody>
@@ -351,12 +353,14 @@
                         <td>${escapeHtml(visitor.employee_name || 'N/A')}</td>
                         <td><span class="status-badge ${statusClass}">${visitor.status}</span></td>
                         <td>${new Date(visitor.created_at).toLocaleString()}</td>
+                        <td>${visitor.check_in_time ? new Date(visitor.check_in_time).toLocaleString() : '<span style="color: var(--muted)">-</span>'}</td>
+                        <td>${visitor.check_out_time ? new Date(visitor.check_out_time).toLocaleString() : '<span style="color: var(--muted)">-</span>'}</td>
                     `;
                     body.appendChild(row);
                 });
             } catch (error) {
                 console.error('Error loading visitor logs:', error);
-                document.getElementById('visitorBody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading logs. Please try again.</td></tr>';
+                document.getElementById('visitorBody').innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Error loading logs. Please try again.</td></tr>';
             }
         }
 

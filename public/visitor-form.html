@@ -502,6 +502,18 @@
 
                 <input type="file" id="visitorCameraInput" accept="image/*" capture="user" style="display:none">
             </form>
+            <!-- Webcam Capture Modal -->
+            <div id="webcamModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; box-sizing: border-box;">
+                <div style="background-color: #fefefe; margin: auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 480px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; gap: 15px; box-sizing: border-box;">
+                    <h3 style="margin: 0; color: #1f2937;">Live Camera Capture</h3>
+                    <video id="webcamVideo" style="width: 100%; max-height: 360px; border-radius: 8px; background-color: #000; transform: scaleX(-1);" autoplay playsinline></video>
+                    <canvas id="webcamCanvas" style="display: none;"></canvas>
+                    <div style="display: flex; gap: 10px; width: 100%; justify-content: center;">
+                        <button id="webcamCaptureBtn" class="btn" type="button" style="background-color: #ff6b00; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold;">Snap Photo</button>
+                        <button id="webcamCloseBtn" class="btn-secondary" type="button" style="padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Cancel</button>
+                    </div>
+                </div>
+            </div>
 
             <p id="message"></p>
 
@@ -922,10 +934,66 @@
             document.getElementById('documentCameraInput').click();
         }
 
-        function openVisitorCamera() {
+        let webcamStream = null;
 
-            document.getElementById('visitorCameraInput').click();
+        function openVisitorCamera() {
+            const modal = document.getElementById('webcamModal');
+            const video = document.getElementById('webcamVideo');
+            
+            modal.style.display = 'flex';
+
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } })
+                .then(stream => {
+                    webcamStream = stream;
+                    video.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error("Camera access failed:", err);
+                    // Fallback to hidden camera input for mobile file chooser
+                    document.getElementById('visitorCameraInput').click();
+                    modal.style.display = 'none';
+                });
         }
+
+        document.getElementById('webcamCloseBtn').addEventListener('click', stopWebcam);
+
+        function stopWebcam() {
+            const modal = document.getElementById('webcamModal');
+            modal.style.display = 'none';
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+                webcamStream = null;
+            }
+        }
+
+        document.getElementById('webcamCaptureBtn').addEventListener('click', function () {
+            const video = document.getElementById('webcamVideo');
+            const canvas = document.getElementById('webcamCanvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+
+            // Draw current video frame (mirrored)
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // reset
+
+            canvas.toBlob(function (blob) {
+                if (blob) {
+                    const file = new File([blob], `selfie-${Date.now()}.jpg`, { type: 'image/jpeg' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    
+                    document.getElementById('visitorPhoto').files = dataTransfer.files;
+                    document.getElementById('visitorPhotoStatus').innerText = '✅ Captured (Live)';
+                    
+                    updateFieldAvailability();
+                    stopWebcam();
+                }
+            }, 'image/jpeg', 0.95);
+        });
 
         document.getElementById('documentCameraInput').addEventListener('change', function () {
 
