@@ -194,21 +194,15 @@ async function verifyVisitorDocument(
 
         const base64Image = imageBuffer.toString("base64");
 
-        const response = await ai.models.generateContent({
-
-            model: "gemini-2.5-flash",
-
-            contents: [
-
-                {
-                    inlineData: {
-                        mimeType: "image/jpeg",
-                        data: base64Image
-                    }
-                },
-
-                {
-                    text: `
+        const verifyContents = [
+            {
+                inlineData: {
+                    mimeType: "image/jpeg",
+                    data: base64Image
+                }
+            },
+            {
+                text: `
 You are an AI Security Assistant.
 
 Analyze the uploaded visitor identity document.
@@ -253,11 +247,22 @@ Return ONLY valid JSON in this format:
   }
 }
 `
-                }
+            }
+        ];
 
-            ]
-
-        });
+        let response;
+        try {
+            response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: verifyContents
+            });
+        } catch (firstErr) {
+            console.warn("Gemini 2.5 Flash failed, attempting fallback to Gemini 1.5 Flash...", firstErr.message);
+            response = await ai.models.generateContent({
+                model: "gemini-1.5-flash",
+                contents: verifyContents
+            });
+        }
 
         let text = response.text;
 
@@ -283,11 +288,9 @@ Return ONLY valid JSON in this format:
 }
 async function matchEmployeeWithAI(employeeNameInput, employeeList) {
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: [
-                {
-                    text: `
+        const matchContents = [
+            {
+                text: `
 You are a database entity matching assistant.
 Match the manually entered employee name/details to the correct employee from the organization list.
 
@@ -303,9 +306,22 @@ Return ONLY valid JSON in this format:
   "confidence": 0 // Match confidence percentage (0-100), or 0 if null
 }
 `
-                }
-            ]
-        });
+            }
+        ];
+
+        let response;
+        try {
+            response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: matchContents
+            });
+        } catch (firstErr) {
+            console.warn("Gemini 2.5 Flash matching failed, attempting fallback to Gemini 1.5 Flash...", firstErr.message);
+            response = await ai.models.generateContent({
+                model: "gemini-1.5-flash",
+                contents: matchContents
+            });
+        }
 
         let text = response.text;
         text = text.replace(/```json/g, "").replace(/```/g, "");

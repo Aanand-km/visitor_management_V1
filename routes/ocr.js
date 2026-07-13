@@ -38,26 +38,15 @@ router.post(
                     'base64'
                 );
 
-            const response =
-                await ai.models.generateContent({
-
-                    model: 'gemini-2.5-flash',
-
-                    contents: [
-
-                        {
-                            inlineData: {
-
-                                mimeType:
-                                    req.file.mimetype,
-
-                                data:
-                                    base64Image
-                            }
-                        },
-
-                        {
-                            text: `
+            const ocrContents = [
+                {
+                    inlineData: {
+                        mimeType: req.file.mimetype,
+                        data: base64Image
+                    }
+                },
+                {
+                    text: `
 You are an OCR engine.
 
 The uploaded identity document is a ${documentType}.
@@ -87,9 +76,22 @@ Return ONLY valid JSON.
     "documentNumber": ""
 }
 `
-                        }
-                    ]
+                }
+            ];
+
+            let response;
+            try {
+                response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: ocrContents
                 });
+            } catch (firstErr) {
+                console.warn("Gemini 2.5 Flash OCR failed, attempting fallback to Gemini 1.5 Flash...", firstErr.message);
+                response = await ai.models.generateContent({
+                    model: 'gemini-1.5-flash',
+                    contents: ocrContents
+                });
+            }
 
             let text = response.text;
 
