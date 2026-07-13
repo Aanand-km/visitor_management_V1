@@ -67,17 +67,18 @@ async function loadPendingVisitors() {
     }
 }
 
-function loadStats() {
+async function loadStats() {
     try {
-        const pendingCount = allVisitors.filter(v => v.status === 'pending_security').length;
-        document.getElementById("waitingCount").innerText = pendingCount;
-
-        const employeeCount = new Set(allVisitors.map(v => v.employee_id)).size;
-        document.getElementById("employeeCount").innerText = employeeCount;
-
-        document.getElementById("approvedCount").innerText = '0';
-        document.getElementById("checkedCount").innerText = '0';
-
+        const response = await fetch("/security/stats", {
+            credentials: "include"
+        });
+        if (!response.ok) throw new Error("Failed to fetch statistics");
+        const stats = await response.json();
+        
+        document.getElementById("waitingCount").innerText = stats.pending_security;
+        document.getElementById("employeeCount").innerText = stats.pending_employee;
+        document.getElementById("approvedCount").innerText = stats.approved_today;
+        document.getElementById("checkedCount").innerText = stats.checked_in;
     } catch (error) {
         console.error('Error loading stats:', error);
     }

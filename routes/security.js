@@ -360,4 +360,28 @@ router.put("/reject/:id", verifySecurityToken, (req, res) => {
 
 });
 
+/*
+---------------------------------------------------------
+GET /security/stats
+Get Dashboard Stats
+---------------------------------------------------------
+*/
+router.get("/stats", verifySecurityToken, (req, res) => {
+    const sql = `
+        SELECT 
+            COALESCE(SUM(CASE WHEN status = 'pending_security' THEN 1 ELSE 0 END), 0) AS pending_security,
+            COALESCE(SUM(CASE WHEN status = 'pending_employee' THEN 1 ELSE 0 END), 0) AS pending_employee,
+            COALESCE(SUM(CASE WHEN DATE(approved_at) = CURDATE() THEN 1 ELSE 0 END), 0) AS approved_today,
+            COALESCE(SUM(CASE WHEN status = 'checked_in' THEN 1 ELSE 0 END), 0) AS checked_in
+        FROM visitors;
+    `;
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.error('Stats DB Error:', err);
+            return res.status(500).json({ message: 'Database Error' });
+        }
+        res.json(result[0]);
+    });
+});
+
 module.exports = router;
