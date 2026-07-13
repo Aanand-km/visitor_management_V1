@@ -78,6 +78,7 @@ const storage = new CloudinaryStorage({
         }
         return {
             folder: folder,
+            type: 'authenticated',
             allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
             resource_type: 'auto',
             public_id: Date.now() + '-' + path.parse(file.originalname).name
@@ -796,6 +797,103 @@ router.get('/temp-server-logs', verifyEmployeeOrSecurityToken, (req,res)=>{
         }
     } catch(e) {
         res.status(500).send(e.message);
+    }
+});
+
+router.get('/secure-file/:fileType/:visitorId', (req, res) => {
+    const { fileType, visitorId } = req.params;
+    const tokenQuery = req.query.token;
+
+    if (fileType !== 'photo' && fileType !== 'document') {
+        return res.status(400).json({ message: 'Invalid file type' });
+    }
+
+    const checkAuthAndFetch = (isAuthorized) => {
+        if (!isAuthorized) {
+            return res.status(403).json({ message: 'Access Denied: Unauthorized' });
+        }
+
+        const fieldName = fileType === 'photo' ? 'photo_path' : 'document_path';
+        db.query(`SELECT ${fieldName} FROM visitors WHERE id = ?`, [visitorId], (err, rows) => {
+            if (err || rows.length === 0) {
+                return res.status(404).json({ message: 'Visitor or file not found' });
+            }
+
+            const rawUrl = rows[0][fieldName];
+            if (!rawUrl) {
+                return res.status(404).json({ message: 'File not uploaded' });
+            }
+
+            // Local file fallback
+            if (!rawUrl.startsWith('http')) {
+                const absolutePath = path.join(__dirname, '..', rawUrl);
+                if (fs.existsSync(absolutePath)) {
+                    return res.sendFile(absolutePath);
+                }
+                return res.status(404).json({ message: 'Local file not found' });
+            }
+
+            // Cloudinary URL parsing
+            const splitKey = rawUrl.includes('/authenticated/') ? '/authenticated/' : '/upload/';
+            const parts = rawUrl.split(splitKey);
+            if (parts.length < 2) {
+                return res.redirect(rawUrl);
+            }
+
+            let publicIdWithFormat = parts[1];
+            if (publicIdWithFormat.startsWith('v')) {
+                const nextSlash = publicIdWithFormat.indexOf('/');
+                if (nextSlash !== -1) {
+                    publicIdWithFormat = publicIdWithFormat.substring(nextSlash + 1);
+                }
+            }
+
+            const lastDot = publicIdWithFormat.lastIndexOf('.');
+            const publicId = lastDot !== -1 ? publicIdWithFormat.substring(0, lastDot) : publicIdWithFormat;
+
+            const resourceTypeMatch = rawUrl.match(/res\.cloudinary\.com\/[^/]+\/([^/]+)/);
+            const resourceType = resourceTypeMatch ? resourceTypeMatch[1] : 'image';
+            const deliveryType = rawUrl.includes('/authenticated/') ? 'authenticated' : 'upload';
+
+            try {
+                const secureUrl = cloudinary.url(publicId, {
+                    sign_url: true,
+                    type: deliveryType,
+                    resource_type: resourceType,
+                    expires_at: Math.floor(Date.now() / 1000) + 900 // 15 minutes
+                });
+                res.redirect(secureUrl);
+            } catch (signErr) {
+                console.error('Error signing Cloudinary URL:', signErr);
+                res.redirect(rawUrl);
+            }
+        });
+    };
+
+    const authHeader = req.headers['authorization'];
+    const token = req.cookies.securityToken || req.cookies.employeeToken || (authHeader && authHeader.split(" ")[1]);
+
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (!err && (decoded.role === 'security' || decoded.id)) {
+                return checkAuthAndFetch(true);
+            }
+            if (tokenQuery) {
+                db.query('SELECT pass_token FROM visitors WHERE id = ?', [visitorId], (dbErr, rows) => {
+                    const isPassTokenValid = !dbErr && rows.length > 0 && rows[0].pass_token === tokenQuery;
+                    return checkAuthAndFetch(isPassTokenValid);
+                });
+            } else {
+                return checkAuthAndFetch(false);
+            }
+        });
+    } else if (tokenQuery) {
+        db.query('SELECT pass_token FROM visitors WHERE id = ?', [visitorId], (dbErr, rows) => {
+            const isPassTokenValid = !dbErr && rows.length > 0 && rows[0].pass_token === tokenQuery;
+            return checkAuthAndFetch(isPassTokenValid);
+        });
+    } else {
+        return checkAuthAndFetch(false);
     }
 });
 

@@ -1,10 +1,53 @@
 const fs = require("fs");
 const path = require("path");
 const { GoogleGenAI } = require("@google/genai");
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY
 });
+
+function signUrlIfCloudinary(rawUrl) {
+    if (!rawUrl || !rawUrl.startsWith('http')) return rawUrl;
+    if (!rawUrl.includes('cloudinary.com')) return rawUrl;
+
+    const splitKey = rawUrl.includes('/authenticated/') ? '/authenticated/' : '/upload/';
+    const parts = rawUrl.split(splitKey);
+    if (parts.length < 2) return rawUrl;
+
+    let publicIdWithFormat = parts[1];
+    if (publicIdWithFormat.startsWith('v')) {
+        const nextSlash = publicIdWithFormat.indexOf('/');
+        if (nextSlash !== -1) {
+            publicIdWithFormat = publicIdWithFormat.substring(nextSlash + 1);
+        }
+    }
+
+    const lastDot = publicIdWithFormat.lastIndexOf('.');
+    const publicId = lastDot !== -1 ? publicIdWithFormat.substring(0, lastDot) : publicIdWithFormat;
+
+    const resourceTypeMatch = rawUrl.match(/res\.cloudinary\.com\/[^/]+\/([^/]+)/);
+    const resourceType = resourceTypeMatch ? resourceTypeMatch[1] : 'image';
+    const deliveryType = rawUrl.includes('/authenticated/') ? 'authenticated' : 'upload';
+
+    try {
+        return cloudinary.url(publicId, {
+            sign_url: true,
+            type: deliveryType,
+            resource_type: resourceType,
+            expires_at: Math.floor(Date.now() / 1000) + 900 // 15 minutes
+        });
+    } catch (err) {
+        console.error('Error signing Cloudinary URL inside AI service:', err);
+        return rawUrl;
+    }
+}
 
 /*
 ==========================================
@@ -17,7 +60,8 @@ async function extractDocumentDetails(imagePath, mimeType, documentType) {
     try {
         let imageBuffer;
         if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-            const res = await fetch(imagePath);
+            const signedUrl = signUrlIfCloudinary(imagePath);
+            const res = await fetch(signedUrl);
             if (!res.ok) throw new Error(`Failed to fetch image from URL ${imagePath}: ${res.statusText}`);
             const arrayBuffer = await res.arrayBuffer();
             imageBuffer = Buffer.from(arrayBuffer);
@@ -134,7 +178,8 @@ async function verifyVisitorDocument(
 
         let imageBuffer;
         if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-            const res = await fetch(imagePath);
+            const signedUrl = signUrlIfCloudinary(imagePath);
+            const res = await fetch(signedUrl);
             if (!res.ok) throw new Error(`Failed to fetch image from URL ${imagePath}: ${res.statusText}`);
             const arrayBuffer = await res.arrayBuffer();
             imageBuffer = Buffer.from(arrayBuffer);

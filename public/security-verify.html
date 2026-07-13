@@ -376,7 +376,7 @@
                 document.getElementById('matchedEmployeeName').textContent = visitor.employee_name || 'Not Matched Yet';
 
                 // Load document preview
-                loadDocumentPreview(visitor.document_path);
+                loadDocumentPreview(`/visitor/secure-file/document/${visitorId}`);
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';

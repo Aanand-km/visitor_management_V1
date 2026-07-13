@@ -27,6 +27,11 @@ router.post(
                 fs.readFileSync(
                     req.file.path
                 );
+            try {
+                fs.unlinkSync(req.file.path);
+            } catch (err) {
+                console.error("Error deleting temp OCR file:", err);
+            }
             const documentType = req.body.documentType;
             const base64Image =
                 imageBuffer.toString(

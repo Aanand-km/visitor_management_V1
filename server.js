@@ -122,10 +122,6 @@ app.get('/employee-dashboard.html', (req, res) => {
 });
 
 app.use(express.static('public'));
-app.use(
-    '/uploads',
-    express.static('uploads')
-);
 
 app.get('/', (req, res) => {
     res.send('Visitor Management API Running');
