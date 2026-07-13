@@ -286,9 +286,6 @@
             <h2>Visitor Logs</h2>
             <a href="/auth/dashboard" class="nav-link">← Back to Dashboard</a>
         </div>
-        <div class="search-section">
-            <input type="text" id="searchInput" placeholder=" Search visitor, phone or employee...">
-        </div>
         <div class="table-wrapper">
             <table>
                 <thead>
@@ -300,6 +297,25 @@
                         <th>Date</th>
                         <th>Check-In</th>
                         <th>Check-Out</th>
+                    </tr>
+                    <tr class="filter-row">
+                        <td><input type="text" id="filterName" placeholder="Filter Name..." style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 0.85rem;"></td>
+                        <td><input type="text" id="filterPhone" placeholder="Filter Phone..." style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 0.85rem;"></td>
+                        <td><input type="text" id="filterMeeting" placeholder="Filter Host..." style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 0.85rem;"></td>
+                        <td>
+                            <select id="filterStatus" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 0.85rem; background: white;">
+                                <option value="">All Status</option>
+                                <option value="pending_security">Pending Security</option>
+                                <option value="pending_employee">Pending Employee</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="checked_in">Checked In</option>
+                                <option value="checked_out">Checked Out</option>
+                            </select>
+                        </td>
+                        <td><input type="text" id="filterDate" placeholder="Filter Date..." style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 0.85rem;"></td>
+                        <td><input type="text" id="filterCheckIn" placeholder="Filter Check-In..." style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 0.85rem;"></td>
+                        <td><input type="text" id="filterCheckOut" placeholder="Filter Check-Out..." style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 0.85rem;"></td>
                     </tr>
                 </thead>
                 <tbody id="visitorBody"></tbody>
@@ -372,34 +388,67 @@
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
         }
-        function setupSearch() {
+        function applyFilters() {
+            const nameVal = document.getElementById('filterName').value.toLowerCase();
+            const phoneVal = document.getElementById('filterPhone').value.toLowerCase();
+            const meetingVal = document.getElementById('filterMeeting').value.toLowerCase();
+            const statusVal = document.getElementById('filterStatus').value.toLowerCase();
+            const dateVal = document.getElementById('filterDate').value.toLowerCase();
+            const checkInVal = document.getElementById('filterCheckIn').value.toLowerCase();
+            const checkOutVal = document.getElementById('filterCheckOut').value.toLowerCase();
 
-            const searchInput =
-                document.getElementById('searchInput');
+            const rows = document.querySelectorAll('.visitor-row');
+            let visibleCount = 0;
 
-            searchInput.addEventListener('input', () => {
+            rows.forEach(row => {
+                const cells = row.getElementsByTagName('td');
+                if (cells.length < 7) return;
 
-                const value =
-                    searchInput.value.toLowerCase();
+                const nameText = cells[0].innerText.toLowerCase();
+                const phoneText = cells[1].innerText.toLowerCase();
+                const meetingText = cells[2].innerText.toLowerCase();
+                const statusText = cells[3].innerText.toLowerCase();
+                const dateText = cells[4].innerText.toLowerCase();
+                const checkInText = cells[5].innerText.toLowerCase();
+                const checkOutText = cells[6].innerText.toLowerCase();
 
-                const rows =
-                    document.querySelectorAll('.visitor-row');
+                const matchesName = nameText.includes(nameVal);
+                const matchesPhone = phoneText.includes(phoneVal);
+                const matchesMeeting = meetingText.includes(meetingVal);
+                const matchesStatus = statusVal === "" || statusText.includes(statusVal) || (statusVal === 'pending_security' && statusText.includes('security')) || (statusVal === 'pending_employee' && statusText.includes('employee'));
+                const matchesDate = dateText.includes(dateVal);
+                const matchesCheckIn = checkInText.includes(checkInVal);
+                const matchesCheckOut = checkOutText.includes(checkOutVal);
 
-                rows.forEach(row => {
+                if (matchesName && matchesPhone && matchesMeeting && matchesStatus && matchesDate && matchesCheckIn && matchesCheckOut) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
 
-                    const text =
-                        row.innerText.toLowerCase();
+            const emptyState = document.getElementById('emptyState');
+            if (visibleCount === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+            }
+        }
 
-                    row.style.display =
-                        text.includes(value)
-                            ? ''
-                            : 'none';
-                });
+        function setupFilters() {
+            const filterIds = ['filterName', 'filterPhone', 'filterMeeting', 'filterStatus', 'filterDate', 'filterCheckIn', 'filterCheckOut'];
+            filterIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const eventName = el.tagName === 'SELECT' ? 'change' : 'input';
+                    el.addEventListener(eventName, applyFilters);
+                }
             });
         }
 
         loadVisitorLogs();
-        setupSearch();
+        setupFilters();
     </script>
 </body>
 
