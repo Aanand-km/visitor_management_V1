@@ -188,6 +188,132 @@ async function logoutSecurity() {
 
 }
 
+function playChime(type) {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        if (type === 'success_in') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.05);
+            osc.start();
+            
+            osc.frequency.setValueAtTime(880.00, ctx.currentTime + 0.12); // A5
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+            osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'success_out') {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(783.99, ctx.currentTime); // G5
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.05);
+            osc.start();
+            
+            osc.frequency.setValueAtTime(523.25, ctx.currentTime + 0.12); // C5
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+            osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'warning') {
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc1.type = 'triangle';
+            osc2.type = 'triangle';
+            
+            osc1.frequency.setValueAtTime(220, ctx.currentTime); // A3
+            osc2.frequency.setValueAtTime(233.08, ctx.currentTime); // A#3 (tritone dissonance)
+            
+            gain.gain.setValueAtTime(0.15, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+            
+            osc1.start();
+            osc2.start();
+            
+            osc1.stop(ctx.currentTime + 0.4);
+            osc2.stop(ctx.currentTime + 0.4);
+        } else {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(120, ctx.currentTime);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+            
+            osc.start();
+            osc.stop(ctx.currentTime + 0.35);
+        }
+    } catch (err) {
+        console.warn("Web Audio API not allowed or supported by browser context:", err);
+    }
+}
+
+function renderScanResult(type, title, name, timeInfo, isWarning = false) {
+    let cardClass = 'success-check-in';
+    let iconSvg = '';
+    
+    if (type === 'check_in') {
+        cardClass = 'success-check-in';
+        iconSvg = `
+          <svg fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+          </svg>
+        `;
+    } else if (type === 'check_out') {
+        cardClass = 'success-check-out';
+        iconSvg = `
+          <svg fill="none" stroke="#3b82f6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+        `;
+    } else if (isWarning) {
+        cardClass = 'warning-error';
+        iconSvg = `
+          <svg fill="none" stroke="#f59e0b" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+        `;
+    } else {
+        cardClass = 'error-danger';
+        iconSvg = `
+          <svg fill="none" stroke="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        `;
+    }
+
+    const timestampHtml = timeInfo ? `<div class="scan-meta">🕒 Time: ${timeInfo}</div>` : '';
+    
+    return `
+      <div class="scan-result-card ${cardClass}">
+        <div class="scan-icon-container">
+          ${iconSvg}
+        </div>
+        <div class="scan-title">${escapeHtml(title)}</div>
+        <div class="scan-visitor-name">${escapeHtml(name)}</div>
+        ${timestampHtml}
+      </div>
+    `;
+}
+
 function onScanSuccess(decodedText) {
     if (scanner) {
         scanner.clear();
@@ -213,10 +339,11 @@ function onScanSuccess(decodedText) {
     }
 
     if (!visitorId || !token) {
-        document.getElementById('result').innerHTML = `<div class="error" style="color: #ef4444; font-weight: bold;">❌ Invalid QR Code Format</div>`;
+        playChime('error');
+        document.getElementById('result').innerHTML = renderScanResult('error', 'Invalid Scan', 'Invalid QR Code Format', null);
         setTimeout(() => {
             startScanner();
-        }, 3000);
+        }, 4000);
         return;
     }
 
@@ -225,28 +352,52 @@ function onScanSuccess(decodedText) {
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
-            
         },
         body: JSON.stringify({ id: visitorId, token: token })
     })
         .then(res => {
-            if (!res.ok) {
-                throw new Error('Verification failed or unauthorized scan');
-            }
-            return res.text();
+            return res.json().then(data => {
+                if (!res.ok) {
+                    throw new Error(data.message || 'Verification failed');
+                }
+                return data;
+            });
         })
         .then(data => {
-            document.getElementById('result').innerHTML = data;
+            if (data.success) {
+                if (data.action === 'check_in') {
+                    playChime('success_in');
+                    const timeString = new Date(data.time).toLocaleTimeString();
+                    document.getElementById('result').innerHTML = renderScanResult('check_in', 'Check-In Successful', data.name, timeString);
+                } else if (data.action === 'check_out') {
+                    playChime('success_out');
+                    const timeString = new Date(data.time).toLocaleTimeString();
+                    document.getElementById('result').innerHTML = renderScanResult('check_out', 'Check-Out Successful', data.name, timeString);
+                }
+            } else {
+                if (data.action === 'already_completed') {
+                    playChime('warning');
+                    document.getElementById('result').innerHTML = renderScanResult('warning', 'Visit Already Completed', data.name, null, true);
+                } else {
+                    playChime('error');
+                    document.getElementById('result').innerHTML = renderScanResult('error', 'Error', data.message || 'Failed to update', null);
+                }
+            }
+            
+            // Reload stats and pending list to update counts
+            loadPendingVisitors();
+            
             setTimeout(() => {
                 startScanner();
-            }, 3000);
+            }, 4000);
         })
         .catch(error => {
             console.error('QR Scan Error:', error);
-            document.getElementById('result').innerHTML = `<div class="error" style="color: #ef4444; font-weight: bold;">❌ Error: ${error.message}</div>`;
+            playChime('error');
+            document.getElementById('result').innerHTML = renderScanResult('error', 'Verification Failed', error.message, null);
             setTimeout(() => {
                 startScanner();
-            }, 3000);
+            }, 4000);
         });
 }
 

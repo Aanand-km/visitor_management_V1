@@ -74,3 +74,96 @@
 [LOG] 2026-07-11T11:00:54.066Z - ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
 [LOG] 2026-07-11T11:00:54.726Z - MySQL Connection Pool Initialized
 [LOG] 2026-07-11T11:00:55.984Z - ✅ Security routes loaded
+[LOG] 2026-07-12T04:27:09.377Z - ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+[LOG] 2026-07-12T04:27:09.924Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-12T04:27:11.107Z - ✅ Security routes loaded
+[LOG] 2026-07-12T04:27:13.782Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-12T04:27:14.015Z - visitorRoutes: function Function
+[LOG] 2026-07-12T04:27:14.016Z - securityRoutes: function Function
+[LOG] 2026-07-12T04:27:14.017Z - ocrRoutes: function Function
+[LOG] 2026-07-12T04:27:14.020Z - employeeRoutes: function Function
+[LOG] 2026-07-12T04:27:14.021Z - authRoutes: function Function
+[LOG] 2026-07-12T04:27:14.034Z - Server running on port 3000
+[LOG] 2026-07-12T04:43:32.524Z - ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+[LOG] 2026-07-12T04:43:32.835Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-12T04:43:34.057Z - ✅ Security routes loaded
+[LOG] 2026-07-12T04:43:36.643Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-12T04:43:37.067Z - visitorRoutes: function Function
+[LOG] 2026-07-12T04:43:37.072Z - securityRoutes: function Function
+[LOG] 2026-07-12T04:43:37.077Z - ocrRoutes: function Function
+[LOG] 2026-07-12T04:43:37.081Z - employeeRoutes: function Function
+[LOG] 2026-07-12T04:43:37.083Z - authRoutes: function Function
+[LOG] 2026-07-12T04:43:37.095Z - Server running on port 3000
+[LOG] 2026-07-12T04:47:00.135Z - ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+[LOG] 2026-07-12T04:47:00.406Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-12T04:47:00.995Z - ✅ Security routes loaded
+[LOG] 2026-07-12T04:47:02.525Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-12T04:47:02.646Z - visitorRoutes: function Function
+[LOG] 2026-07-12T04:47:02.648Z - securityRoutes: function Function
+[LOG] 2026-07-12T04:47:02.650Z - ocrRoutes: function Function
+[LOG] 2026-07-12T04:47:02.651Z - employeeRoutes: function Function
+[LOG] 2026-07-12T04:47:02.652Z - authRoutes: function Function
+[LOG] 2026-07-12T04:47:02.661Z - Server running on port 3000
+[LOG] 2026-07-12T06:02:08.693Z - ◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+[LOG] 2026-07-12T06:02:09.039Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-12T06:02:09.784Z - ✅ Security routes loaded
+[LOG] 2026-07-12T06:02:11.503Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-12T06:02:11.654Z - visitorRoutes: function Function
+[LOG] 2026-07-12T06:02:11.655Z - securityRoutes: function Function
+[LOG] 2026-07-12T06:02:11.655Z - ocrRoutes: function Function
+[LOG] 2026-07-12T06:02:11.657Z - employeeRoutes: function Function
+[LOG] 2026-07-12T06:02:11.658Z - authRoutes: function Function
+[LOG] 2026-07-12T06:02:11.673Z - Server running on port 3000
+[LOG] 2026-07-14T05:34:04.151Z - ◇ injected env (0) from .env [2m// tip: ⌘ override existing { override: true }[0m
+[LOG] 2026-07-14T05:34:04.565Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-14T05:34:06.577Z - ✅ Security routes loaded
+[LOG] 2026-07-14T05:34:07.509Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-14T05:34:08.686Z - visitorRoutes: function Function
+[LOG] 2026-07-14T05:34:08.708Z - securityRoutes: function Function
+[LOG] 2026-07-14T05:34:08.751Z - ocrRoutes: function Function
+[LOG] 2026-07-14T05:34:08.767Z - employeeRoutes: function Function
+[LOG] 2026-07-14T05:34:08.771Z - authRoutes: function Function
+[LOG] 2026-07-14T05:34:08.794Z - [RETENTION] Running auto-purge check for records older than 30 days...
+[LOG] 2026-07-14T05:34:08.818Z - Server running on port 3000
+[ERROR] 2026-07-14T05:34:18.147Z - Error checking column pass_token: connect ETIMEDOUT
+Error: connect ETIMEDOUT
+    at PoolConnection._handleTimeoutError (C:\Users\anand\OneDrive\Desktop\visitor-management\node_modules\mysql2\lib\base\connection.js:244:17)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[ERROR] 2026-07-14T05:34:18.164Z - Error checking column employee_name_input: connect ETIMEDOUT
+Error: connect ETIMEDOUT
+    at PoolConnection._handleTimeoutError (C:\Users\anand\OneDrive\Desktop\visitor-management\node_modules\mysql2\lib\base\connection.js:244:17)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[ERROR] 2026-07-14T05:34:18.173Z - Error checking column department_input: connect ETIMEDOUT
+Error: connect ETIMEDOUT
+    at PoolConnection._handleTimeoutError (C:\Users\anand\OneDrive\Desktop\visitor-management\node_modules\mysql2\lib\base\connection.js:244:17)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[ERROR] 2026-07-14T05:34:18.178Z - Error checking column rejection_reason: connect ETIMEDOUT
+Error: connect ETIMEDOUT
+    at PoolConnection._handleTimeoutError (C:\Users\anand\OneDrive\Desktop\visitor-management\node_modules\mysql2\lib\base\connection.js:244:17)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[ERROR] 2026-07-14T05:34:18.186Z - Error checking column rejected_at: connect ETIMEDOUT
+Error: connect ETIMEDOUT
+    at PoolConnection._handleTimeoutError (C:\Users\anand\OneDrive\Desktop\visitor-management\node_modules\mysql2\lib\base\connection.js:244:17)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[ERROR] 2026-07-14T05:34:18.852Z - [RETENTION] Error finding old visitor records: connect ETIMEDOUT
+Error: connect ETIMEDOUT
+    at PoolConnection._handleTimeoutError (C:\Users\anand\OneDrive\Desktop\visitor-management\node_modules\mysql2\lib\base\connection.js:244:17)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[LOG] 2026-07-14T05:54:11.899Z - ◇ injected env (0) from .env [2m// tip: ◈ encrypted .env [www.dotenvx.com][0m
+[LOG] 2026-07-14T05:54:12.432Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-14T05:54:16.080Z - ✅ Security routes loaded
+[LOG] 2026-07-14T05:54:18.139Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-14T05:54:18.453Z - visitorRoutes: function Function
+[LOG] 2026-07-14T05:54:18.465Z - securityRoutes: function Function
+[LOG] 2026-07-14T05:54:18.489Z - ocrRoutes: function Function
+[LOG] 2026-07-14T05:54:18.633Z - employeeRoutes: function Function
+[LOG] 2026-07-14T05:54:18.875Z - authRoutes: function Function
+[LOG] 2026-07-14T05:54:19.112Z - [RETENTION] Running auto-purge check for records older than 30 days...
+[LOG] 2026-07-14T05:54:19.322Z - Server running on port 3000
+[LOG] 2026-07-14T05:54:20.807Z - [RETENTION] No old records to purge.

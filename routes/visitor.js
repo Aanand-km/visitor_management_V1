@@ -792,7 +792,7 @@ router.post('/check-in-out', verifyEmployeeOrSecurityToken, (req, res) => {
     const { id, token } = req.body;
 
     if (!id || !token) {
-        return res.status(400).send('<h1>Missing parameters</h1>');
+        return res.status(400).json({ success: false, message: 'Missing parameters' });
     }
 
     db.query(
@@ -806,8 +806,13 @@ router.post('/check-in-out', verifyEmployeeOrSecurityToken, (req, res) => {
         [id, token],
         (err, result) => {
 
-            if (err || result.length === 0) {
-                return res.status(404).send('<h1>Visitor not found or invalid pass</h1>');
+            if (err) {
+                console.error("Database error during check-in-out query:", err);
+                return res.status(500).json({ success: false, message: 'Database Error' });
+            }
+
+            if (result.length === 0) {
+                return res.status(404).json({ success: false, message: 'Visitor not found or invalid pass' });
             }
 
             const visitor = result[0];
@@ -825,12 +830,16 @@ router.post('/check-in-out', verifyEmployeeOrSecurityToken, (req, res) => {
                     [id],
                     (updateErr) => {
                         if (updateErr) {
-                            return res.status(500).send('<h1>Database Error</h1>');
+                            console.error("Database update error (check-in):", updateErr);
+                            return res.status(500).json({ success: false, message: 'Database Error' });
                         }
-                        return res.send(`
-                            <h1 style="color: #16a34a; font-size: 2rem;">✅ Check-In Successful</h1>
-                            <h2 style="font-size: 1.5rem; margin-top: 10px; color: #1f2937;">${visitor.name}</h2>
-                        `);
+                        return res.json({
+                            success: true,
+                            action: 'check_in',
+                            name: visitor.name,
+                            status: 'checked_in',
+                            time: new Date().toISOString()
+                        });
                     }
                 );
             } else if (visitor.status === 'checked_in') {
@@ -846,23 +855,31 @@ router.post('/check-in-out', verifyEmployeeOrSecurityToken, (req, res) => {
                     [id],
                     (updateErr) => {
                         if (updateErr) {
-                            return res.status(500).send('<h1>Database Error</h1>');
+                            console.error("Database update error (check-out):", updateErr);
+                            return res.status(500).json({ success: false, message: 'Database Error' });
                         }
-                        return res.send(`
-                            <h1 style="color: #2563eb; font-size: 2rem;">✅ Check-Out Successful</h1>
-                            <h2 style="font-size: 1.5rem; margin-top: 10px; color: #1f2937;">${visitor.name}</h2>
-                        `);
+                        return res.json({
+                            success: true,
+                            action: 'check_out',
+                            name: visitor.name,
+                            status: 'checked_out',
+                            time: new Date().toISOString()
+                        });
                     }
                 );
             } else {
-                return res.send(`
-                    <h1 style="color: #ef4444; font-size: 2rem;">Visit Already Completed</h1>
-                    <h2 style="font-size: 1.5rem; margin-top: 10px; color: #1f2937;">${visitor.name}</h2>
-                `);
+                return res.json({
+                    success: false,
+                    action: 'already_completed',
+                    name: visitor.name,
+                    status: visitor.status,
+                    message: 'Visit Already Completed'
+                });
             }
         }
     );
 });
+
 
 
 
