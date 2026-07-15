@@ -265,6 +265,23 @@ VALUES
             }
             const visitorId = result.insertId;
 
+            // Emit Socket.io event for new visitor registration
+            const io = req.app.get('socketio');
+            if (io) {
+                io.emit('newVisitor', {
+                    id: visitorId,
+                    name,
+                    phone,
+                    email,
+                    purpose,
+                    employee_name_input,
+                    department_input,
+                    document_type,
+                    document_number,
+                    created_at: new Date().toISOString()
+                });
+            }
+
             // Notify security team
             const securityEmail = process.env.SECURITY_EMAIL;
             if (securityEmail) {
@@ -833,6 +850,16 @@ router.post('/check-in-out', verifyEmployeeOrSecurityToken, (req, res) => {
                             console.error("Database update error (check-in):", updateErr);
                             return res.status(500).json({ success: false, message: 'Database Error' });
                         }
+                        const io = req.app.get('socketio');
+                        if (io) {
+                            io.emit('visitorStatusChanged', {
+                                id: id,
+                                action: 'check_in',
+                                name: visitor.name,
+                                status: 'checked_in',
+                                time: new Date().toISOString()
+                            });
+                        }
                         return res.json({
                             success: true,
                             action: 'check_in',
@@ -857,6 +884,16 @@ router.post('/check-in-out', verifyEmployeeOrSecurityToken, (req, res) => {
                         if (updateErr) {
                             console.error("Database update error (check-out):", updateErr);
                             return res.status(500).json({ success: false, message: 'Database Error' });
+                        }
+                        const io = req.app.get('socketio');
+                        if (io) {
+                            io.emit('visitorStatusChanged', {
+                                id: id,
+                                action: 'check_out',
+                                name: visitor.name,
+                                status: 'checked_out',
+                                time: new Date().toISOString()
+                            });
                         }
                         return res.json({
                             success: true,

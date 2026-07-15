@@ -35,13 +35,106 @@ async function logoutSecurity() {
 
 let allVisitors = [];
 
-async function loadPendingVisitors() {
+function playNotificationChime() {
     try {
-        document.getElementById('visitorList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading visitors...</p></div>';
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        const notes = [1046.50, 1318.51, 1567.98];
+        notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12);
+            
+            gain.gain.setValueAtTime(0, ctx.currentTime + idx * 0.12);
+            gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + idx * 0.12 + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + 0.35);
+            
+            osc.start(ctx.currentTime + idx * 0.12);
+            osc.stop(ctx.currentTime + idx * 0.12 + 0.38);
+        });
+    } catch (e) {
+        console.warn("Audio Context blocked:", e);
+    }
+}
+
+function showToast(title, message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `
+        <div style="font-size: 20px; line-height: 1;">🔔</div>
+        <div class="toast-content">
+            <div class="toast-title">${escapeHtml(title)}</div>
+            <div class="toast-message">${escapeHtml(message)}</div>
+        </div>
+        <button class="toast-close">&times;</button>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 50);
+
+    const autoRemove = setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 6000);
+
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+        clearTimeout(autoRemove);
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    });
+}
+
+function requestNotificationPermission() {
+    if ("Notification" in window) {
+        if (Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+    }
+}
+
+function showSystemNotification(title, body) {
+    if ("Notification" in window && Notification.permission === "granted") {
+        try {
+            new Notification(title, {
+                body: body,
+                icon: '/favicon.png'
+            });
+        } catch (e) {
+            console.warn("Notification construct error:", e);
+        }
+    }
+}
+
+function triggerNewVisitorNotification(visitor) {
+    playNotificationChime();
+    
+    const hostName = visitor.employee_name || visitor.employee_name_input || 'Employee';
+    const title = 'New Visitor Registered';
+    const message = `${visitor.name} has registered to meet ${hostName} (Purpose: ${visitor.purpose})`;
+    
+    showToast(title, message);
+    showSystemNotification(title, message);
+}
+
+async function loadPendingVisitors(initial = true) {
+    try {
+        if (initial) {
+            document.getElementById('visitorList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading visitors...</p></div>';
+        }
 
         const response = await fetch("/security/pending", {
             credentials: 'include',
-            
         });
 
         if (!response.ok) {
@@ -52,8 +145,18 @@ async function loadPendingVisitors() {
         }
 
         const data = await response.json();
-
+        const oldVisitors = allVisitors;
         allVisitors = data.visitors || [];
+
+        // Check if there are new visitors (only on background reloads)
+        if (!initial && oldVisitors.length > 0) {
+            const oldIds = new Set(oldVisitors.map(v => v.id));
+            allVisitors.forEach(v => {
+                if (!oldIds.has(v.id)) {
+                    triggerNewVisitorNotification(v);
+                }
+            });
+        }
 
         // Load stats
         loadStats();
@@ -63,7 +166,9 @@ async function loadPendingVisitors() {
 
     } catch (error) {
         console.error('Error loading visitors:', error);
-        showError('Failed to load pending visitors: ' + error.message);
+        if (initial) {
+            showError('Failed to load pending visitors: ' + error.message);
+        }
     }
 }
 
@@ -444,6 +549,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startScannerBtn) {
         startScannerBtn.addEventListener('click', startScanner);
     }
+
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => loadPendingVisitors(true));
+    }
+
+    // Request desktop notification permission on page load
+    requestNotificationPermission();
 });
 
 function showError(message) {
@@ -463,5 +576,31 @@ function showError(message) {
     }, 5000);
 }
 
-loadPendingVisitors();
-setInterval(loadPendingVisitors, 30000);
+// Socket.io initialization
+let socket;
+try {
+    socket = io();
+
+    socket.on('connect', () => {
+        console.log('Connected to real-time VMS server. Socket ID:', socket.id);
+    });
+
+    socket.on('newVisitor', (visitor) => {
+        console.log('Real-time notice: New visitor registered:', visitor);
+        loadPendingVisitors(false);
+    });
+
+    socket.on('visitorStatusChanged', (data) => {
+        console.log('Real-time notice: Visitor status changed:', data);
+        loadPendingVisitors(false);
+    });
+
+} catch (err) {
+    console.warn('Real-time socket.io could not initialize:', err);
+}
+
+// Initial load
+loadPendingVisitors(true);
+
+// Background backup poll every 20 seconds (reduced from 30)
+setInterval(() => loadPendingVisitors(false), 20000);

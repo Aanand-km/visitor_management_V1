@@ -3,6 +3,8 @@ const cors = require('cors');
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const originalConsoleError = console.error;
 const originalConsoleLog = console.log;
@@ -61,6 +63,22 @@ function runMigrations() {
 runMigrations();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+app.set('socketio', io);
+
+io.on('connection', (socket) => {
+    console.log('Client connected to real-time socket:', socket.id);
+    socket.on('disconnect', () => {
+        console.log('Client disconnected from socket:', socket.id);
+    });
+});
+
 app.set('trust proxy', 1); // Trust first proxy (needed for express-rate-limit behind Render/Nginx)
 const ocrRoutes =
     require('./routes/ocr');
@@ -145,6 +163,6 @@ setInterval(purgeOldVisitorRecords, 24 * 60 * 60 * 1000); // 24-hour cycle
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
