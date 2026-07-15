@@ -5,111 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security Login - Visitor Management</title>
     <link rel="icon" type="image/png" href="/favicon.png">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f172a;
-            color: #f8fafc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .login-card {
-            background: #1e293b;
-            border-radius: 16px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border-top: 4px solid #ff6b00;
-            box-sizing: border-box;
-        }
-
-        h2 {
-            margin: 0 0 10px;
-            font-size: 24px;
-            color: #ffffff;
-            text-align: center;
-        }
-
-        p.subtitle {
-            margin: 0 0 30px;
-            color: #94a3b8;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #cbd5e1;
-            font-weight: 500;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            color: #ffffff;
-            font-size: 15px;
-            outline: none;
-            transition: 0.3s;
-            box-sizing: border-box;
-        }
-
-        input:focus {
-            border-color: #ff6b00;
-            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 12px;
-            background: #ff6b00;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 10px;
-        }
-
-        .btn-login:hover {
-            background: #e45f00;
-            transform: translateY(-1px);
-        }
-
-        .error-msg {
-            background: rgba(239, 68, 68, 0.1);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
-    <div class="login-card">
-        <h2>Security Terminal</h2>
-        <p class="subtitle">Please log in to access the Security Dashboard</p>
+
+    <header>
+        <h1>Security Terminal</h1>
+    </header>
+
+    <div class="auth-container">
+        <h2>Security Login</h2>
         
-        <div id="error" class="error-msg"></div>
+        <div id="error" class="message" style="color: #c62828; display: none; margin-bottom: 15px;"></div>
 
         <form id="loginForm">
             <div class="form-group">
@@ -120,7 +27,7 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" required placeholder="Enter password" autocomplete="current-password">
             </div>
-            <button type="submit" class="btn-login">Verify Credentials</button>
+            <button type="submit" class="auth-btn">Verify Credentials</button>
         </form>
     </div>
 
