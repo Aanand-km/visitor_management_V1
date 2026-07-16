@@ -167,3 +167,27 @@ Error: connect ETIMEDOUT
 [LOG] 2026-07-14T05:54:19.112Z - [RETENTION] Running auto-purge check for records older than 30 days...
 [LOG] 2026-07-14T05:54:19.322Z - Server running on port 3000
 [LOG] 2026-07-14T05:54:20.807Z - [RETENTION] No old records to purge.
+[LOG] 2026-07-15T05:06:39.413Z - ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+[LOG] 2026-07-15T05:06:39.807Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-15T05:06:41.391Z - ✅ Security routes loaded
+[LOG] 2026-07-15T05:06:42.254Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-15T05:06:42.703Z - visitorRoutes: function Function
+[LOG] 2026-07-15T05:06:42.706Z - securityRoutes: function Function
+[LOG] 2026-07-15T05:06:42.716Z - ocrRoutes: function Function
+[LOG] 2026-07-15T05:06:42.725Z - employeeRoutes: function Function
+[LOG] 2026-07-15T05:06:42.727Z - authRoutes: function Function
+[LOG] 2026-07-15T05:06:42.732Z - [RETENTION] Running auto-purge check for records older than 30 days...
+[LOG] 2026-07-15T05:06:42.744Z - Server running on port 3000
+[LOG] 2026-07-15T05:06:44.375Z - [RETENTION] No old records to purge.
+[LOG] 2026-07-16T05:39:29.921Z - ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+[LOG] 2026-07-16T05:39:30.486Z - MySQL Connection Pool Initialized
+[LOG] 2026-07-16T05:39:32.697Z - ✅ Security routes loaded
+[LOG] 2026-07-16T05:39:34.496Z - Visitor routes loaded with Cloudinary storage
+[LOG] 2026-07-16T05:39:34.733Z - visitorRoutes: function Function
+[LOG] 2026-07-16T05:39:34.734Z - securityRoutes: function Function
+[LOG] 2026-07-16T05:39:34.734Z - ocrRoutes: function Function
+[LOG] 2026-07-16T05:39:34.735Z - employeeRoutes: function Function
+[LOG] 2026-07-16T05:39:34.739Z - authRoutes: function Function
+[LOG] 2026-07-16T05:39:34.742Z - [RETENTION] Running auto-purge check for records older than 30 days...
+[LOG] 2026-07-16T05:39:34.752Z - Server running on port 3000
+[LOG] 2026-07-16T05:39:35.550Z - [RETENTION] No old records to purge.
