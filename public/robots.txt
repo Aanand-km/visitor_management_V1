@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /visitor-form.html
+Allow: /visitor-form-qr.png
+Allow: /css/
+Allow: /favicon.png
+
+# Disallow private dashboards and scan APIs from search engine indexing
+Disallow: /security/
+Disallow: /employees/
+Disallow: /auth/
+Disallow: /security-dashboard.html
+Disallow: /employee-dashboard.html
+Disallow: /security-login.html
+Disallow: /employee-login.html
+Disallow: /employee-signup.html
+
+Sitemap: https://visitor-management-jp03.onrender.com/sitemap.xml
