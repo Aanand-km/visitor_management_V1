@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
+const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 
@@ -143,7 +144,7 @@ app.get('/employee-dashboard.html', (req, res) => {
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-    res.send('Visitor Management API Running');
+    res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 app.use((err, req, res, next) => {

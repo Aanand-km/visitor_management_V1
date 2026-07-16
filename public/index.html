@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Management System - Home</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <style>
+        :root {
+            --primary: #ff6b00;
+            --accent: #ff6b00;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #ffffff, #ff6b00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+            border-top: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(255, 107, 0, 0.15);
+        }
+
+        .icon-container {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 107, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .icon-container svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--accent);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .card p.description {
+            font-size: 0.95rem;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 107, 0, 0.2);
+            margin-top: auto;
+        }
+
+        .btn:hover {
+            background: #e45f00;
+            box-shadow: 0 6px 15px rgba(255, 107, 0, 0.35);
+        }
+
+        .qr-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qr-section span {
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .qr-image {
+            width: 150px;
+            height: 150px;
+            background: white;
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Visitor Management System</h1>
+        <p>Select a portal below to proceed</p>
+    </div>
+
+    <div class="grid">
+        <!-- Card 1: Employee Portal -->
+        <div class="card">
+            <div class="icon-container">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+            </div>
+            <h2>Employee Portal</h2>
+            <p class="description">Access the employee console to review pending visitor logs, manage scheduled appointments, and approve entry passes.</p>
+            <a href="/employee-login.html" class="btn">Login as Employee</a>
+        </div>
+
+        <!-- Card 2: Security Terminal -->
+        <div class="card">
+            <div class="icon-container">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.952 11.952 0 01-7.618 3.016L3 20l9 1 9-1-1.382-14.016z"></path>
+                </svg>
+            </div>
+            <h2>Security Terminal</h2>
+            <p class="description">Access the terminal scanner dashboard to verify guest identity documents, run quick OCR scans, and register entries/exits.</p>
+            <a href="/security-login.html" class="btn">Login to Terminal</a>
+        </div>
+
+        <!-- Card 3: Visitor Check-In -->
+        <div class="card">
+            <div class="icon-container">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                </svg>
+            </div>
+            <h2>Visitor Registration</h2>
+            <p class="description">Submit a new registration form directly on this computer or scan the QR code to fill it out on your smartphone.</p>
+            <a href="/visitor-form.html" class="btn" style="margin-bottom: 20px;">Open Register Form</a>
+            <div class="qr-section">
+                <span>OR SCAN WITH PHONE</span>
+                <img class="qr-image" src="/visitor-form-qr.png" alt="Visitor Form QR Code">
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
