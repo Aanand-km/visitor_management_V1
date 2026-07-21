@@ -23,9 +23,34 @@ body {
 
 /* Main Container */
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 40px auto;
   padding: 0 20px;
+}
+
+/* 2-Column Dashboard Layout */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 25px;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.scanner-card {
+  position: sticky;
+  top: 25px;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.main-content-card {
+  margin-bottom: 0;
 }
 
 /* Cards */

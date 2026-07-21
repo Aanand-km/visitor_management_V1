@@ -29,9 +29,34 @@
     /* Main Container */
 
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 40px auto;
       padding: 0 20px;
+    }
+
+    /* 2-Column Dashboard Layout */
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 25px;
+      align-items: start;
+    }
+
+    @media (max-width: 992px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .scanner-card {
+      position: sticky;
+      top: 25px;
+      margin-bottom: 0;
+      text-align: center;
+    }
+
+    .main-content-card {
+      margin-bottom: 0;
     }
 
     /* Cards */
@@ -353,31 +378,37 @@
 
     </div>
 
-    <div class="card">
+    <!-- 2-Column Dashboard Layout: Left = Scanner, Right = Main Content -->
+    <div class="dashboard-layout">
 
-      <h2>Pending Visitors</h2>
+      <!-- Left Column: Scanner Card -->
+      <div class="card scanner-card">
+        <h2>QR Check-In / Check-Out</h2>
 
-      <button id="refreshBtn" class="refresh-btn">🔄 Refresh</button>
+        <button id="startScanner">
+          Start Scanner
+        </button>
 
-      <input id="search" type="text" placeholder="Search visitor...">
+        <div id="reader"></div>
 
-      <div id="visitorList">
-
+        <div id="result">
+          Scan a visitor QR
+        </div>
       </div>
 
-    </div>
-    <div class="card">
-      <h2>QR Check-In / Check-Out</h2>
+      <!-- Right Column: Pending Visitors (Main Content) -->
+      <div class="card main-content-card">
+        <h2>Pending Visitors</h2>
 
-      <button id="startScanner">
-        Start Scanner
-      </button>
+        <button id="refreshBtn" class="refresh-btn">🔄 Refresh</button>
 
-      <div id="reader"></div>
+        <input id="search" type="text" placeholder="Search visitor...">
 
-      <div id="result">
-        Scan a visitor QR
+        <div id="visitorList">
+
+        </div>
       </div>
+
     </div>
 
   </div>
