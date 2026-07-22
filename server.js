@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
+const jwt = require('jsonwebtoken');
 const { Server } = require('socket.io');
 
 const originalConsoleError = console.error;
@@ -139,6 +140,38 @@ app.get('/security-dashboard.html', (req, res) => {
 
 app.get('/employee-dashboard.html', (req, res) => {
     res.redirect('/auth/dashboard');
+});
+
+app.get('/visitor-logs.html', (req, res) => {
+    const employeeToken = req.cookies.employeeToken;
+    const securityToken = req.cookies.securityToken;
+
+    if (!employeeToken && !securityToken) {
+        return res.redirect('/employee-login.html');
+    }
+
+    let isAuthorized = false;
+
+    if (employeeToken) {
+        try {
+            jwt.verify(employeeToken, process.env.JWT_SECRET);
+            isAuthorized = true;
+        } catch (e) {}
+    }
+
+    if (!isAuthorized && securityToken) {
+        try {
+            jwt.verify(securityToken, process.env.JWT_SECRET);
+            isAuthorized = true;
+        } catch (e) {}
+    }
+
+    if (!isAuthorized) {
+        return res.redirect('/employee-login.html');
+    }
+
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile(path.join(__dirname, 'views/visitor-logs.html'));
 });
 
 app.use(express.static('public'));
