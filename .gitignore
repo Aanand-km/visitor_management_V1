@@ -5,3 +5,10 @@ logs.txt
 console-output.txt
 testaiven.js
 env.txt
+# Presentations & Documents
+*.pdf
+*.pptx
+*.ppt
+*.docx
+presentation_assets/
+server-logs.txt
